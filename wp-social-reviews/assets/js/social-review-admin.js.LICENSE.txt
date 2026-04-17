@@ -1,0 +1,87 @@
+/*!
+ * clipboard.js v2.0.11
+ * https://clipboardjs.com/
+ *
+ * Licensed MIT © Zeno Rocha
+ */
+
+/*!
+ * qrcode.vue v3.6.0
+ * A Vue.js component to generate QRCode. Both support Vue 2 and Vue 3
+ * © 2017-PRESENT @scopewu(https://github.com/scopewu)
+ * MIT License.
+ */
+
+/*!
+ * vue-router v4.6.4
+ * (c) 2025 Eduardo San Martin Morote
+ * @license MIT
+ */
+
+/*! Element Plus Icons Vue v2.3.2 */
+
+/*! Moment Duration Format v2.2.2
+ *  https://github.com/jsmreese/moment-duration-format
+ *  Date: 2018-02-16
+ *
+ *  Duration format plugin function for the Moment.js library
+ *  http://momentjs.com/
+ *
+ *  Copyright 2018 John Madhavan-Reese
+ *  Released under the MIT license
+ */
+
+/**
+ * Checks if an event is supported in the current execution environment.
+ *
+ * NOTE: This will not work correctly for non-generic events such as `change`,
+ * `reset`, `load`, `error`, and `select`.
+ *
+ * Borrows from Modernizr.
+ *
+ * @param {string} eventNameSuffix Event name, e.g. "click".
+ * @param {?boolean} capture Check if the capture phase is supported.
+ * @return {boolean} True if the event is supported.
+ * @internal
+ * @license Modernizr 3.0.0pre (Custom Build) | MIT
+ */
+
+/**
+* @vue/compiler-core v3.5.26
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+/**
+* @vue/compiler-dom v3.5.26
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+/**
+* @vue/reactivity v3.5.26
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+/**
+* @vue/runtime-core v3.5.26
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+/**
+* @vue/runtime-dom v3.5.26
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+/**
+* @vue/shared v3.5.26
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+//! moment.js
+
+//! moment.js locale configuration

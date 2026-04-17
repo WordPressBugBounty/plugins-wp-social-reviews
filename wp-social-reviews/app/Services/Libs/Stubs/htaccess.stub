@@ -1,0 +1,37 @@
+# BEGIN WP Social Ninja
+# Block execution of potentially dangerous files
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi|rb|exe|com|bat|cmd|scr|vbs|jar|class)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Explicitly allow image files
+<FilesMatch "\.(jpg|jpeg|png|webp|svg)$">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+  </IfModule>
+</FilesMatch>
+
+# Disable PHP execution entirely
+<IfModule mod_php5.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+# Remove handlers to prevent execution
+RemoveHandler .php .phtml .php3 .php4 .php5 .pl .py .cgi .sh
+# END WP Social Ninja
