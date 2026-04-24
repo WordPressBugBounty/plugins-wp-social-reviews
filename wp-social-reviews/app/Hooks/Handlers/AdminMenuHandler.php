@@ -3,6 +3,7 @@
 namespace WPSocialReviews\App\Hooks\Handlers;
 
 use WPSocialReviews\App\App;
+use WPSocialReviews\App\Services\DashboardNotices;
 use WPSocialReviews\App\Services\Helper;
 use WPSocialReviews\App\Services\Onboarding\OnboardingService;
 use WPSocialReviews\App\Services\PermissionManager;
@@ -129,10 +130,18 @@ class AdminMenuHandler
         }
 
         if (!defined('WPSOCIALREVIEWS_PRO')) {
+            $upgradeButtonConfig = (new DashboardNotices())->getUpgradeButtonConfig();
+            $upgradeButtonText = Arr::get($upgradeButtonConfig, 'text', __('Upgrade To Pro', 'wp-social-reviews'));
+            $upgradeButtonUrl = Arr::get(
+                $upgradeButtonConfig,
+                'pro_purchase_url',
+                'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=upgrade'
+            );
+
             $submenu['wpsocialninja.php']['upgrade_to_pro'] = array(
-                '<span style="color: #f9e112;">Upgrade To Pro</span>',
+                '<span style="color: #f9e112;">' . esc_html($upgradeButtonText) . '</span>',
                 $dashboardPermission,
-                'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=upgrade',
+                esc_url_raw($upgradeButtonUrl),
             );
         }
 
@@ -294,6 +303,7 @@ class AdminMenuHandler
             $wpsocialreviewsAdminVars = apply_filters('wpsocialreviews/admin_app_vars', array(
                 'i18n'                    => TranslationString::getStrings(),
                 'wpsr_admin_nonce'        => wp_create_nonce('wpsr_admin_nonce'),
+                'wpsr_import_export_nonce' => wp_create_nonce('wpsr_import_export_data'),
                 'assets_url'              => WPSOCIALREVIEWS_URL . 'assets',
                 'has_pro'                 => defined('WPSOCIALREVIEWS_PRO') && WPSOCIALREVIEWS_PRO,
                 'is_custom_feed_for_tiktok_activated'   => defined('CUSTOM_FEED_FOR_TIKTOK') && CUSTOM_FEED_FOR_TIKTOK,

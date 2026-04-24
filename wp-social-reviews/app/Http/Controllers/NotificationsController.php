@@ -47,7 +47,7 @@ class NotificationsController extends Controller
         return [
             'message'                       => 'success',
             'items'                         => $notifications,
-            'total_items'                   => $post->count(),
+            'total_items'                   => $notifications->total(),
             'all_valid_platforms'           => $this->validReviewsPlatforms(),
         ];
     }

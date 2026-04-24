@@ -101,7 +101,7 @@ abstract class BaseReview
             }
 
             $exist = false;
-            if (in_array($this->platform, $remoteSyncReviewerNames) || $this->platform === 'yelp' || $this->platform === 'airbnb' || $this->platform === 'google' || $this->platform === 'tripadvisor' || $this->platform === 'woocommerce' || $this->platform === 'aliexpress') {
+            if (in_array($this->platform, $remoteSyncReviewerNames) || $this->platform === 'yelp' || $this->platform === 'airbnb' || $this->platform === 'google' || $this->platform === 'tripadvisor' || $this->platform === 'woocommerce' || $this->platform === 'fluent-cart' || $this->platform === 'aliexpress') {
                 $fieldName = 'review_id';
             } else {
                 $fieldName = 'reviewer_url';
@@ -114,8 +114,10 @@ abstract class BaseReview
                 $value = Arr::get($review, 'evaluationIdStr');
             } elseif ($this->platform === 'booking.com') {
                 $value = Arr::get($review, 'source_id').'-'. Arr::get($review, 'reviewer_name');
-            } elseif ($this->platform === 'tripadvisor' || $this->platform === 'airbnb' || $this->platform === 'yelp') {
+            } elseif ($this->platform === 'tripadvisor' || $this->platform === 'yelp') {
                 $value = Arr::get($review, 'id');
+            } elseif ($this->platform === 'airbnb') {
+                $value = $this->getReviewId($review);
             } elseif ($this->platform === 'google') {
                 $value = Arr::get($review, 'reviewId');
             } elseif ($this->platform === 'facebook') {
@@ -124,7 +126,7 @@ abstract class BaseReview
                 $value = Arr::get($review, 'reviewer_name');
             } elseif (in_array($this->platform, $remoteSyncConsumerDisplayNames)) {
                 $value = Arr::get($review, 'id');
-            } elseif ($this->platform === 'woocommerce') {
+            } elseif ($this->platform === 'woocommerce' || $this->platform === 'fluent-cart') {
                 $value = Arr::get($review, 'review_id');
             }
 

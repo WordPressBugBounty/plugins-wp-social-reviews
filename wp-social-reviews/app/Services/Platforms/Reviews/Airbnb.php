@@ -125,7 +125,7 @@ class Airbnb extends BaseReview
     public function handleCredentialSave($credentials = [])
     {
         $downloadUrl = Arr::get($credentials, 'url_value');
-        $downloadUrl = strtok($downloadUrl, '?');
+        $downloadUrl = strtok($downloadUrl, '?#');
         $credData = [
             'url' => $downloadUrl,
         ];
@@ -174,12 +174,13 @@ class Airbnb extends BaseReview
 	        );
         }
 
-        if (!filter_var($downloadUrl, FILTER_VALIDATE_URL)) {
+        $downloadUrl = $this->validateAirbnbBusinessUrl($downloadUrl);
+        if (empty($downloadUrl)) {
             throw new \Exception(
                 esc_html__('Please enter a valid url!', 'wp-social-reviews')
             );
         }
-        $this->curUrl = strtok($downloadUrl, '?');
+        $this->curUrl = $downloadUrl;
         //start: find api key and place id
         $businessUrl = $this->curUrl;
 
@@ -196,7 +197,10 @@ class Airbnb extends BaseReview
 
     private function tryExistingProcess($businessUrl)
     {
-        $response             = wp_remote_get($businessUrl);
+        $response     = $this->safeAirbnbRemoteGet($businessUrl, [
+            'redirection' => 0,
+            'timeout'     => 30
+        ]);
         $html_content = '';
         if (is_array($response)) {
             $html_content = $response['body'];
@@ -251,7 +255,7 @@ class Airbnb extends BaseReview
 
         $limit        = apply_filters('wpsocialreviews/airbnb_reviews_limit_end_point', 5);
         $offset       = 0;
-        $experiences  = strpos($downloadUrl, '/experiences/') !== false;
+        $experiences  = strpos($businessUrl, '/experiences/') !== false;
         $fetchUrl     = '';
         if ($experiences) {
             $fetchUrl = add_query_arg([
@@ -272,7 +276,7 @@ class Airbnb extends BaseReview
             ], $this->remoteBaseUrl . '/reviews');
         }
 
-        $response = wp_remote_get($fetchUrl);
+        $response = $this->safeAirbnbRemoteGet($fetchUrl);
 
         //end: find airbnb reviews
         if (is_wp_error($response)) {
@@ -596,7 +600,7 @@ class Airbnb extends BaseReview
         return [
             'platform_name' => $this->platform,
             'source_id'     => $this->placeId,
-            'review_id'     => $reviewData['review_id'],
+            'review_id'     => $this->getReviewIdFromData($reviewData),
             'reviewer_name' => $reviewData['reviewer_name'],
             'review_title'  => '',
             'reviewer_url'  => 'https://www.airbnb.com'. $reviewData['reviewer_profile_path'],
@@ -608,6 +612,27 @@ class Airbnb extends BaseReview
             'updated_at'    => gmdate('Y-m-d H:i:s'),
             'created_at'    => gmdate('Y-m-d H:i:s')
         ];
+    }
+
+    public function getReviewId($review)
+    {
+        return $this->getReviewIdFromData($this->extractReviewData($review));
+    }
+
+    private function getReviewIdFromData($reviewData)
+    {
+        $reviewId = Arr::get($reviewData, 'review_id');
+
+        if (!empty($reviewId)) {
+            return $reviewId;
+        }
+
+        return 'airbnb_' . md5(implode('|', [
+            $this->placeId,
+            Arr::get($reviewData, 'reviewer_name', ''),
+            Arr::get($reviewData, 'review_date', ''),
+            Arr::get($reviewData, 'review_text', '')
+        ]));
     }
 
     private function extractReviewData($review)
@@ -838,14 +863,21 @@ class Airbnb extends BaseReview
 
     private function makeGraphQLRequest($url, $payload, $headers)
     {
+        if (!$this->validateAirbnbRequestUrl($url)) {
+            throw new \Exception(
+                esc_html__('Invalid Airbnb URL.', 'wp-social-reviews')
+            );
+        }
+
         $args = [
             'body' => wp_json_encode($payload),
             'headers' => $this->formatHeadersForWpRemote($headers),
             'timeout' => 30,
-            'method' => 'POST'
+            'method' => 'POST',
+            'reject_unsafe_urls' => true
         ];
 
-        $response = wp_remote_post($url, $args);
+        $response = wp_safe_remote_post($url, $args);
 
         if (is_wp_error($response)) {
             throw new \Exception('Request failed: ' . esc_html($response->get_error_message()));
@@ -867,7 +899,7 @@ class Airbnb extends BaseReview
             'method' => 'GET'
         ];
 
-        $response = wp_remote_get($url, $args);
+        $response = $this->safeAirbnbRemoteGet($url, $args);
 
         if (is_wp_error($response)) {
             throw new \Exception('Request failed: ' . esc_html($response->get_error_message()));
@@ -879,6 +911,148 @@ class Airbnb extends BaseReview
         }
 
         return json_decode(wp_remote_retrieve_body($response), true);
+    }
+
+    private function validateAirbnbBusinessUrl($url)
+    {
+        $url = trim((string) $url);
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return '';
+        }
+
+        $parts  = wp_parse_url($url);
+        $scheme = strtolower(Arr::get($parts, 'scheme', ''));
+        $host   = strtolower(Arr::get($parts, 'host', ''));
+        $path   = Arr::get($parts, 'path', '');
+        $port   = Arr::get($parts, 'port');
+
+        if (
+            $scheme !== 'https' ||
+            !$this->isAllowedAirbnbHost($host) ||
+            !$this->isAllowedAirbnbPort($port) ||
+            !$this->isAllowedAirbnbBusinessPath($path)
+        ) {
+            return '';
+        }
+
+        if (!$this->hostResolvesToPublicIps($host)) {
+            return '';
+        }
+
+        return 'https://www.airbnb.com' . untrailingslashit($path);
+    }
+
+    private function safeAirbnbRemoteGet($url, $args = [])
+    {
+        if (!$this->validateAirbnbRequestUrl($url)) {
+            throw new \Exception(
+                esc_html__('Invalid Airbnb URL.', 'wp-social-reviews')
+            );
+        }
+
+        $args = wp_parse_args($args, [
+            'timeout'            => 30,
+            'reject_unsafe_urls' => true
+        ]);
+
+        return wp_safe_remote_get($url, $args);
+    }
+
+    private function validateAirbnbRequestUrl($url)
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $parts  = wp_parse_url($url);
+        $scheme = strtolower(Arr::get($parts, 'scheme', ''));
+        $host   = strtolower(Arr::get($parts, 'host', ''));
+        $path   = Arr::get($parts, 'path', '');
+        $port   = Arr::get($parts, 'port');
+
+        if (
+            $scheme !== 'https' ||
+            !$this->isAllowedAirbnbHost($host) ||
+            !$this->isAllowedAirbnbPort($port)
+        ) {
+            return false;
+        }
+
+        if (!$this->isAllowedAirbnbBusinessPath($path) && !$this->isAllowedAirbnbApiPath($path)) {
+            return false;
+        }
+
+        return $this->hostResolvesToPublicIps($host);
+    }
+
+    private function isAllowedAirbnbHost($host)
+    {
+        return (bool) preg_match('/(^|\.)airbnb\.com(\.[a-z]{2})?$/i', $host);
+    }
+
+    private function isAllowedAirbnbPort($port)
+    {
+        return empty($port) || (int) $port === 443;
+    }
+
+    private function isAllowedAirbnbBusinessPath($path)
+    {
+        return (bool) preg_match('#^/(rooms|experiences|services)/[0-9]+/?$#', $path);
+    }
+
+    private function isAllowedAirbnbApiPath($path)
+    {
+        return (bool) preg_match('#^/api/v[23](?:/|$)#', $path);
+    }
+
+    private function hostResolvesToPublicIps($host)
+    {
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return $this->isPublicIp($host);
+        }
+
+        $ips = [];
+        if (function_exists('dns_get_record')) {
+            $records = dns_get_record($host, DNS_A + DNS_AAAA);
+            if (is_array($records)) {
+                foreach ($records as $record) {
+                    if (!empty($record['ip'])) {
+                        $ips[] = $record['ip'];
+                    }
+                    if (!empty($record['ipv6'])) {
+                        $ips[] = $record['ipv6'];
+                    }
+                }
+            }
+        }
+
+        if (empty($ips)) {
+            $resolved = gethostbynamel($host);
+            if (is_array($resolved)) {
+                $ips = array_merge($ips, $resolved);
+            }
+        }
+
+        if (empty($ips)) {
+            return false;
+        }
+
+        foreach (array_unique($ips) as $ip) {
+            if (!$this->isPublicIp($ip)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function isPublicIp($ip)
+    {
+        return (bool) filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        );
     }
 
     private function formatHeadersForWpRemote($headers)

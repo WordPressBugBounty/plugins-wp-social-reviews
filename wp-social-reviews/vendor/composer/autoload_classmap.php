@@ -9,6 +9,7 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'WPSocialReviews\\App\\App' => $baseDir . '/app/App.php',
     'WPSocialReviews\\App\\ComposerScript' => $baseDir . '/app/ComposerScript.php',
+    'WPSocialReviews\\App\\Hooks\\CLI\\Commands' => $baseDir . '/app/Hooks/CLI/Commands.php',
     'WPSocialReviews\\App\\Hooks\\Handlers\\ActivateCronEvent' => $baseDir . '/app/Hooks/Handlers/ActivateCronEvent.php',
     'WPSocialReviews\\App\\Hooks\\Handlers\\ActivationHandler' => $baseDir . '/app/Hooks/Handlers/ActivationHandler.php',
     'WPSocialReviews\\App\\Hooks\\Handlers\\AdminMenuHandler' => $baseDir . '/app/Hooks/Handlers/AdminMenuHandler.php',

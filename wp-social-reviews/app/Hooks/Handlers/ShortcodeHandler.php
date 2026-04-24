@@ -996,11 +996,7 @@ class ShortcodeHandler
 
         wp_register_script('wp-social-review', WPSOCIALREVIEWS_URL . 'assets/js/wp-social-review.js',
             array('jquery'), WPSOCIALREVIEWS_VERSION, true);
-
-        // Attach localization inline to the script handle so it's always output
-        // when the script is enqueued — even by third-party caches (e.g. Elementor element cache)
-        // that replay enqueued handles without re-running shortcode callbacks.
-        wp_add_inline_script('wp-social-review', $this->buildLocalizeJs(), 'before');
+        wp_add_inline_script('wp-social-review', $this->buildLocalizeJs(true), 'before');
 
         wp_register_script('social-ninja-modal', WPSOCIALREVIEWS_URL . 'assets/js/social-ninja-modal.js',
             array('jquery'), WPSOCIALREVIEWS_VERSION, true);
@@ -1122,6 +1118,14 @@ class ShortcodeHandler
         $upload_url = trailingslashit($upload['baseurl']) . WPSOCIALREVIEWS_UPLOAD_DIR_NAME;
         $translations = GlobalSettings::getTranslations();
         $platform = $this->platform ?: '';
+        $image_settings = !empty($this->imageSettings) ? $this->imageSettings : Helper::getImageSettings($platform ?: 'reviews');
+        $image_settings = is_array($image_settings) ? $image_settings : [];
+        $image_settings = wp_parse_args($image_settings, [
+            'optimized_images' => 'false',
+            'has_gdpr'         => 'false',
+            'image_format'     => GlobalHelper::getOptimizeImageFormat(),
+        ]);
+        $image_settings['image_format'] = in_array($image_settings['image_format'], ['jpg', 'webp'], true) ? $image_settings['image_format'] : 'jpg';
 
         return apply_filters('wpsocialreviews/frontend_vars', array(
             'ajax_url'   => admin_url('admin-ajax.php'),
@@ -1141,7 +1145,7 @@ class ShortcodeHandler
             'went'       => Arr::get($translations, 'went') ?: __( 'went', 'wp-social-reviews' ),
             'ai_generated_summary' => Arr::get($translations, 'ai_generated_summary') ?: __( 'AI-Generated Summary', 'wp-social-reviews' ),
             'plugin_url' => WPSOCIALREVIEWS_URL,
-            'image_settings'   => Helper::getImageSettings($platform),
+            'image_settings'   => $image_settings,
             'upload_url' => $upload_url,
             'user_role' => current_user_can('administrator'),
             'a11y'       => [
@@ -1158,12 +1162,19 @@ class ShortcodeHandler
     /**
      * Build the inline JS string that defines window.wpsr_ajax_params.
      *
+     * @param bool $fallback Only define the params if another render path has not already set them.
      * @return string
      */
-    private function buildLocalizeJs()
+    private function buildLocalizeJs($fallback = false)
     {
         $params = $this->buildLocalizeParams();
-        return 'window.wpsr_ajax_params = ' . wp_json_encode($params) . ';';
+        $json = wp_json_encode($params);
+
+        if ($fallback) {
+            return 'window.wpsr_ajax_params = window.wpsr_ajax_params || ' . $json . ';';
+        }
+
+        return 'window.wpsr_ajax_params = ' . $json . ';';
     }
 
     /**
@@ -1181,7 +1192,7 @@ class ShortcodeHandler
         $params = $this->buildLocalizeParams();
         ?>
         <script type="text/javascript" id="wpsr-localize-script">
-            window.wpsr_ajax_params = <?php echo json_encode($params); ?>;
+            window.wpsr_ajax_params = <?php echo wp_json_encode($params); ?>;
         </script>
         <?php
         $jsLoaded = true;
@@ -1190,6 +1201,8 @@ class ShortcodeHandler
     public function enqueueScripts()
     {
         static $jsLoaded;
+
+        wp_add_inline_script('wp-social-review', $this->buildLocalizeJs(), 'before');
 
         if ($jsLoaded) {
             return;
@@ -1235,7 +1248,12 @@ class ShortcodeHandler
 
     public function handleLoadMoreAjax()
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading AJAX parameters for pagination, not processing sensitive form data
+        if (!check_ajax_referer('wpsr-ajax-nonce', 'security', false)) {
+            wp_send_json_error([
+                'message' => __('Invalid nonce.', 'wp-social-reviews')
+            ], 403);
+        }
+
         $templateId = absint(Arr::get($_REQUEST, 'template_id'));
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading AJAX parameters for pagination, not processing sensitive form data
         $platform = sanitize_text_field(Arr::get($_REQUEST, 'platform'));

@@ -38,6 +38,7 @@ class ComposerStaticInit0fd2dd2c383b895d4bb22d509da50f97
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'WPSocialReviews\\App\\App' => __DIR__ . '/../..' . '/app/App.php',
         'WPSocialReviews\\App\\ComposerScript' => __DIR__ . '/../..' . '/app/ComposerScript.php',
+        'WPSocialReviews\\App\\Hooks\\CLI\\Commands' => __DIR__ . '/../..' . '/app/Hooks/CLI/Commands.php',
         'WPSocialReviews\\App\\Hooks\\Handlers\\ActivateCronEvent' => __DIR__ . '/../..' . '/app/Hooks/Handlers/ActivateCronEvent.php',
         'WPSocialReviews\\App\\Hooks\\Handlers\\ActivationHandler' => __DIR__ . '/../..' . '/app/Hooks/Handlers/ActivationHandler.php',
         'WPSocialReviews\\App\\Hooks\\Handlers\\AdminMenuHandler' => __DIR__ . '/../..' . '/app/Hooks/Handlers/AdminMenuHandler.php',

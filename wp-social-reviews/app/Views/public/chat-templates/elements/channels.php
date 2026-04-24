@@ -17,13 +17,19 @@ $wpsr_prefilled_placeholder_text = Arr::get($settings, 'chat_button.prefilled_pl
 <div class="wpsr-fm-chat-btn-wrapper">
     <div class="wpsr-fm-btn-icon">
             <?php if ( $settings['channels'] && sizeof($settings['channels']) === 1){
-                $wpsr_is_url = chatHelper::isUrl($settings['channels'][0]['credential']);
-                $wpsr_credential = $wpsr_is_url ? $settings['channels'][0]['credential'] : $settings['channels'][0]['webUrl'] . $settings['channels'][0]['credential'];
-                if(strpos($wpsr_credential, 'mailto') !== false || strpos($wpsr_credential, 'tel') !== false){
+                $wpsr_channel_name = Arr::get($settings, 'channels.0.name');
+                $wpsr_credential = '';
+                if ($wpsr_channel_name === 'fluent_forms') {
+                    $wpsr_credential = chatHelper::getFluentFormsShortcode(Arr::get($settings, 'channels.0.credential', ''));
+                } else {
+                    $wpsr_is_url = chatHelper::isUrl($settings['channels'][0]['credential']);
+                    $wpsr_credential = $wpsr_is_url ? $settings['channels'][0]['credential'] : $settings['channels'][0]['webUrl'] . $settings['channels'][0]['credential'];
+                    $wpsr_credential = chatHelper::sanitizeChannelUrl($wpsr_credential, $wpsr_channel_name);
+                }
+                if($wpsr_credential && (strpos($wpsr_credential, 'mailto') !== false || strpos($wpsr_credential, 'tel') !== false)){
                     $wpsr_credential = chatHelper::encodeCredentials($wpsr_credential);
                 }
                 $wpsr_credential = str_replace('=+', '=', $wpsr_credential);
-                $wpsr_channel_name = Arr::get($settings, 'channels.0.name');
                 $wpsr_has_prefilled_message = isset($settings['chat_button']['prefilled_message']) && $settings['chat_button']['prefilled_message'] === 'true';
                 ?>
                 
@@ -37,10 +43,10 @@ $wpsr_prefilled_placeholder_text = Arr::get($settings, 'chat_button.prefilled_pl
                             <span><?php echo esc_html($settings['chat_button']['button_text']); ?></span>
                             <?php
                             if ($settings['chat_button']['display_icon'] === 'true') {
-                                if (strpos($wpsr_credential, 'fluentform_modal')) {
+                                if (chatHelper::isFluentFormsModalShortcode($wpsr_credential)) {
                                     echo do_shortcode($wpsr_credential);
                                 }
-                                if (!strpos($wpsr_credential, 'fluentform_modal')) {
+                                if (!chatHelper::isFluentFormsModalShortcode($wpsr_credential)) {
                                 ?>
                                 <img src="<?php echo esc_url($wpsr_image_url); ?>" alt="<?php echo esc_attr($settings['channels'][0]['name']); ?>" width="32" height="32">
                                 <?php } ?>

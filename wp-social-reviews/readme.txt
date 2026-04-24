@@ -4,7 +4,7 @@ Tags: Customer Reviews, Google Reviews, Social Reviews, Social Feeds,  Instagram
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 4.2.0
+Stable tag: 4.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -334,6 +334,15 @@ If you like this plugin, please give us [5 stars](https://wordpress.org/plugins/
 8. Make templates your own way, and all will look perfect on any screen
 
 == Changelog ==
+
+4.2.1 ( Date: 24 April 2026 )
+- Fix custom review images with optimization enabled
+- Fix optimized image localization fallback
+- Fix review keyword filter matching
+- Fix YouTube GDPR error message shape
+- Add WP Social Ninja WP-CLI commands
+- Unify Airbnb review ID dedupe
+- Optimized database queries and improved security
 
 4.2.0 ( Date: 17 April 2026 )
 - Added native review form builder for FluentCart, WooCommerce, and Custom Sources, removing the need for additional plugins for basic review collection. (Pro)

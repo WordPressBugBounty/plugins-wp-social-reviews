@@ -3,6 +3,7 @@ defined('ABSPATH') or die;
 
 use WPSocialReviews\Framework\Foundation\App;
 use WPSocialReviews\Framework\Support\Arr;
+use WPSocialReviews\App\Services\Platforms\Chats\Helper as chatHelper;
 
 $wpsr_app   = App::getInstance();
 
@@ -19,7 +20,7 @@ $wpsr_classes['btn-position']            = $settings['settings']['chat_bubble_po
 $wpsr_classes['template']                = $settings['template'] ? 'wpsr-fm-chat-' . $settings['template'] : '';
 $wpsr_classes['layout']                  = $settings['layout_type'] === 'icons' ? 'wpsr-chat-icons-layout' : '';
 $wpsr_classes['fuent_forms']             = in_array('fluent_forms', $wpsr_channel_name) ? 'wpsr-has-fluent-forms-widget' : '';
-$wpsr_classes['ff_modal']                = sizeof($settings['channels']) === 1 && strpos($settings['channels'][0]['credential'], 'fluentform_modal') ? 'wpsr_has_ff_modal' : '';
+$wpsr_classes['ff_modal']                = sizeof($settings['channels']) === 1 && chatHelper::isFluentFormsModalShortcode(Arr::get($settings, 'channels.0.credential', '')) ? 'wpsr_has_ff_modal' : '';
 
 if (isset($settings['settings']['day_time_schedule']) && $settings['settings']['day_time_schedule'] === 'true') {
     $wpsr_data_params = apply_filters('wpsocialreviews/display_user_online_status', $settings['settings']);
@@ -66,4 +67,3 @@ $wpsr_chats_params_data   = !empty($wpsr_data_params) && is_array($wpsr_data_par
         }
     ?>
 </div>
-

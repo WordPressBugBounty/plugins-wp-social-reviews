@@ -70,7 +70,7 @@ class ReviewsTemplateHandler
 
         $image_settings = Helper::getImageSettings('reviews');
         $optimized_image = Arr::get($image_settings, 'optimized_images', 'false');
-        $animation_class = ($platform_name != 'amazon' &&  $platform_name != 'testimonial' && $optimized_image == 'true' && !empty($reviewer_img) && empty($media_url)) 
+        $animation_class = ($platform_name != 'amazon' &&  $platform_name != 'testimonial' && !Helper::isCustomReviewPlatform($platform_name) && $optimized_image == 'true' && !empty($reviewer_img) && empty($media_url))
             ? 'wpsr-reviewer-image-animation' 
             : '';
 
@@ -81,7 +81,7 @@ class ReviewsTemplateHandler
             'href'   => $enableExternalLink === 'true' && !empty($reviewer_url) ? 'href="'.esc_url($reviewer_url).'"' : '',
         ];
         $tag = $enableExternalLink === 'true' && !empty($reviewer_url) ? 'a' : 'span';
-        if($platform_name === 'ai'){
+        if($platform_name === 'ai' || Helper::isCustomReviewPlatform($platform_name)){
             $image = $reviewer_img;
         } else{
             $image = $optimized_image == 'true' ? $media_url : $reviewer_img;

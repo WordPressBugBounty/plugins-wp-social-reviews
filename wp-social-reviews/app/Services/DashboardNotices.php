@@ -308,7 +308,7 @@ class DashboardNotices
         $activeOffer = $this->getActiveOffer();
 
         if ($activeOffer) {
-            return [
+            $upgradeButtonConfig = [
                 'text' => Arr::get($activeOffer, 'button_text', __('Upgrade to Pro', 'wp-social-reviews')),
                 'pro_purchase_url' => Arr::get($activeOffer, 'pro_purchase_url'),
                 'discount_percentage' => Arr::get($activeOffer, 'discount_percentage', 0),
@@ -317,9 +317,11 @@ class DashboardNotices
                 'offer_id' => Arr::get($activeOffer, 'id'),
                 'offer_name' => Arr::get($activeOffer, 'name')
             ];
+
+            return (array) apply_filters('wpsocialreviews/upgrade_to_pro_cta', $upgradeButtonConfig, $activeOffer);
         }
 
-        return [
+        $upgradeButtonConfig = [
             'text' => __('Upgrade to Pro', 'wp-social-reviews'),
             'pro_purchase_url' => $this->pro_purchase_url,
             'discount_percentage' => 0,
@@ -328,6 +330,8 @@ class DashboardNotices
             'offer_id' => null,
             'offer_name' => null
         ];
+
+        return (array) apply_filters('wpsocialreviews/upgrade_to_pro_cta', $upgradeButtonConfig, null);
     }
 
     /**

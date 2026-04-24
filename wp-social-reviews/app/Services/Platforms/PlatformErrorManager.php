@@ -82,7 +82,7 @@ class PlatformErrorManager
                 }
                 $this->errors[$this->platform]['accounts'][$userId][$type] = $errors;
                 $connection_details['error_message'] = $this->generateErrorMessage($errors, $accountDetails);
-                $log_item                              .= $connection_details['error_message']['admin_only'];
+                $log_item                              .= Arr::get($connection_details, 'error_message.admin_only', '');
                 $this->errors[$this->platform]['connection'][$userId] = $connection_details;
             }
 
@@ -104,7 +104,7 @@ class PlatformErrorManager
                     }
                 }
                 $hashtag_details['error_message'] = $this->generateErrorMessage($errors, $accountDetails);
-                $log_item                        .= $hashtag_details['error_message']['admin_only'];
+                $log_item                        .= Arr::get($hashtag_details, 'error_message.admin_only', '');
 
                 $found_hashtag = false;
                 $response_hashtag_error_code = Arr::get($errors, 'error.code');
@@ -325,8 +325,8 @@ class PlatformErrorManager
                     }
                     if ( empty( $hashtag_error_code_24_message ) ) {
                         $hashtag_error_code_24_message['hashtag']  = $hashtag_error['hashtag'];
-                        $hashtag_error_code_24_message['admin_only']  = $hashtag_error['error_message']['admin_only'];
-                        $hashtag_error_code_24_message['error_message']  = $hashtag_error['error_message']['error_message'];
+                        $hashtag_error_code_24_message['admin_only']  = Arr::get($hashtag_error, 'error_message.admin_only', '');
+                        $hashtag_error_code_24_message['error_message']  = Arr::get($hashtag_error, 'error_message.error_message', '');
                     }
                 } else {
                     $error_messages[] = $hashtag_error['error_message'];
@@ -426,8 +426,8 @@ class PlatformErrorManager
                                     }
                                 } else {
                                     $connection_error_message = $errors['connection'][$index]['error_message'];
-                                    $error_message[$index]['error_message'] = $connection_error_message['error_message'];
-                                    $error_message[$index]['direction_url_text'] = $connection_error_message['admin_only'];
+                                    $error_message[$index]['error_message'] = Arr::get($connection_error_message, 'error_message', '');
+                                    $error_message[$index]['direction_url_text'] = Arr::get($connection_error_message, 'admin_only', '');
                                     $error_message[$index]['direction_url'] = '';
 //                                if ( !empty($accounts_revoked_string) ) {
 //                                    $error_message[$index]['error_message'] = $accounts_revoked_string;

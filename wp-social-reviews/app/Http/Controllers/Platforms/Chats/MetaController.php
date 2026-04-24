@@ -3,6 +3,7 @@
 namespace WPSocialReviews\App\Http\Controllers\Platforms\Chats;
 
 use WPSocialReviews\App\Http\Controllers\Controller;
+use WPSocialReviews\App\Services\Platforms\Chats\Helper as ChatHelper;
 use WPSocialReviews\Framework\Request\Request;
 
 class MetaController extends Controller
@@ -156,8 +157,8 @@ class MetaController extends Controller
                 'displayName'   => isset($channel['displayName']) ? sanitize_text_field($channel['displayName']) : '',
                 'label'         => isset($channel['label']) ? sanitize_text_field($channel['label']) : '',
                 'title'         => isset($channel['title']) ? sanitize_text_field($channel['title']) : '',
-                'credential'    => isset($channel['credential']) ? sanitize_text_field($channel['credential']) : '',
-                'webUrl'        => isset($channel['webUrl']) ? $this->sanitizeWebUrl($channel['webUrl']) : '',
+                'credential'    => isset($channel['credential']) ? $this->sanitizeChannelCredential($channel['credential'], $channel['name'] ?? '') : '',
+                'webUrl'        => isset($channel['webUrl']) ? $this->sanitizeWebUrl($channel['webUrl'], $channel['name'] ?? '') : '',
                 'placeholder'   => isset($channel['placeholder']) ? sanitize_text_field($channel['placeholder']) : '',
                 'description'   => isset($channel['description']) ? sanitize_text_field($channel['description']) : '',
                 'icon'          => isset($channel['icon']) ? sanitize_url($channel['icon']) : '',
@@ -169,20 +170,36 @@ class MetaController extends Controller
     }
 
     /**
-     * Sanitize webUrl to preserve custom protocol URLs
+     * Sanitize webUrl using channel-specific allowed URI schemes.
      *
      * @param string $url
+     * @param string $channelName
      * @return string
      */
-    private function sanitizeWebUrl($url)
+    private function sanitizeWebUrl($url, $channelName = '')
     {
-        // Check if URL starts with a custom protocol (like viber://, tel://, etc.)
-        if (preg_match('/^[a-z0-9]+:\/\/.*/i', $url)) {
-            // Preserve custom protocol URLs as-is
-            return $url;
+        return ChatHelper::sanitizeChannelSettingUrl($url, $channelName);
+    }
+
+    /**
+     * Sanitize channel credential values.
+     *
+     * @param string $credential
+     * @param string $channelName
+     * @return string
+     */
+    private function sanitizeChannelCredential($credential, $channelName = '')
+    {
+        if ($channelName === 'fluent_forms') {
+            return ChatHelper::getFluentFormsShortcode(wp_unslash($credential));
         }
-        
-        // For regular URLs, use WordPress sanitize_url
-        return sanitize_url($url);
+
+        $credential = sanitize_text_field($credential);
+
+        if (ChatHelper::getUriScheme($credential)) {
+            return ChatHelper::sanitizeChannelSettingUrl($credential, $channelName);
+        }
+
+        return $credential;
     }
 }

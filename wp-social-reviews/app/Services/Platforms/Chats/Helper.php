@@ -164,6 +164,98 @@ class Helper
         return $credential;
     }
 
+    public static function isSafeChannelUrl($url, $channelName = '')
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return false;
+        }
+
+        $scheme = static::getUriScheme($url);
+
+        if (!$scheme) {
+            return false;
+        }
+
+        return in_array(strtolower($scheme), static::getAllowedChannelSchemes($channelName), true);
+    }
+
+    public static function sanitizeChannelUrl($url, $channelName = '')
+    {
+        if (!static::isSafeChannelUrl($url, $channelName)) {
+            return '';
+        }
+
+        return esc_url_raw($url, static::getAllowedChannelSchemes($channelName));
+    }
+
+    public static function sanitizeChannelSettingUrl($url, $channelName = '')
+    {
+        $url = trim(wp_unslash($url));
+
+        if ($url === '') {
+            return '';
+        }
+
+        if (!static::getUriScheme($url)) {
+            return sanitize_text_field($url);
+        }
+
+        return static::sanitizeChannelUrl($url, $channelName);
+    }
+
+    public static function getFluentFormsShortcode($credential)
+    {
+        $credential = trim((string) $credential);
+
+        if (is_numeric($credential)) {
+            $formId = absint($credential);
+            return $formId ? '[fluentform id="' . $formId . '"]' : '';
+        }
+
+        if (preg_match('/^\[fluentform\s+id=(["\']?)(\d+)\1\s*\]$/i', $credential, $matches)) {
+            return '[fluentform id="' . absint($matches[2]) . '"]';
+        }
+
+        if (preg_match('/^\[fluentform_modal\s+form_id=(["\']?)(\d+)\1\s*\]$/i', $credential, $matches)) {
+            return '[fluentform_modal form_id="' . absint($matches[2]) . '"]';
+        }
+
+        return '';
+    }
+
+    public static function isFluentFormsModalShortcode($credential)
+    {
+        $shortcode = static::getFluentFormsShortcode($credential);
+
+        return $shortcode && strpos($shortcode, '[fluentform_modal ') === 0;
+    }
+
+    public static function getAllowedChannelSchemes($channelName = '')
+    {
+        $schemes = [
+            'microsoft-teams' => ['https', 'msteams'],
+            'phone'           => ['tel'],
+            'sms'             => ['sms'],
+            'email'           => ['mailto'],
+            'wechat'          => ['weixin'],
+            'viber'           => ['viber'],
+            'fluent_forms'    => [],
+        ];
+
+        return $schemes[$channelName] ?? ['http', 'https'];
+    }
+
+    public static function getUriScheme($value)
+    {
+        if (preg_match('/^([a-z][a-z0-9+.-]*):/i', (string) $value, $matches)) {
+            return strtolower($matches[1]);
+        }
+
+        return '';
+    }
+
     public static function getImageUrl ($settings)
     {
         $channels = Arr::get($settings, 'channels', []);

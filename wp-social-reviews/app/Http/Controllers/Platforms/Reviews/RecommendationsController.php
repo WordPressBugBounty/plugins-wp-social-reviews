@@ -17,7 +17,7 @@ class RecommendationsController extends Controller
         $customValidPlatforms = get_option('wpsr_available_valid_platforms', []);
 
         $type = sanitize_text_field(wp_unslash((string) $request->get('type', '')));
-        $sourceId = intval($request->get('source_id'));
+        $sourceId = sanitize_text_field(wp_unslash((string) $request->get('source_id', '')));
 
         $search  = sanitize_text_field(wp_unslash((string) $request->get('search', '')));
         $filterRaw = wp_unslash((string) $request->get('filter', ''));
@@ -82,7 +82,7 @@ class RecommendationsController extends Controller
                 ->whereNotIn('platform_name', array_keys($customValidPlatforms))
                 ->where('platform_name', '!=', 'testimonial');
         } elseif ($type === 'custom_review') {
-            if($sourceId){
+            if($sourceId !== ''){
                 $reviews = $reviews->where('source_id', $sourceId);
             }
             // Include only $customValidPlatforms, exclude $valid_platforms
@@ -139,13 +139,7 @@ class RecommendationsController extends Controller
 
         $reviews = $reviews->paginate();
 
-        // Use count() instead of get()->count() or all()->count() for better performance
-        if ($type === 'testimonial') {
-            $totalReviews = Review::where('platform_name', $filter)->count();
-        } else {
-            // For non-testimonial, count all reviews efficiently
-            $totalReviews = Review::count();
-        }
+        $totalReviews = $reviews->total();
 
         return [
             'all_valid_platforms'   => $valid_platforms,
@@ -158,6 +152,11 @@ class RecommendationsController extends Controller
 	{
         $review_fields = $request->get('review');
 		$review_fields = wp_unslash($review_fields);
+        $wpsr_errors = $this->validateReviewTypedFields($review_fields);
+        if (!empty($wpsr_errors)) {
+            return $this->sendError($wpsr_errors, 422);
+        }
+
         $review = $this->sanitize($review_fields);
 
 		$review['recommendation_type'] = 'positive';
@@ -227,7 +226,25 @@ class RecommendationsController extends Controller
 	{
         $updateData = $request->get('review');
 		$updateData = wp_unslash($updateData);
+        $wpsr_errors = $this->validateReviewTypedFields($updateData);
+
+        if (!empty($wpsr_errors)) {
+            return $this->sendError($wpsr_errors, 422);
+        }
+
         $updateData = $this->sanitize($updateData);
+        $updateData = Arr::only($updateData, [
+            'fields',
+            'review_title',
+            'reviewer_name',
+            'reviewer_text',
+            'review_time',
+            'rating',
+            'reviewer_url',
+            'reviewer_img',
+            'review_approved',
+            'category'
+        ]);
 
         $review = Review::findOrFail($reviewId);
 
@@ -385,8 +402,12 @@ class RecommendationsController extends Controller
 
         $raw = (array) apply_filters('wpsocialreviews/native_form_custom_source_ids', []);
 
-        // Normalize: cast to int, remove zeros/duplicates, re-index.
-        $cache = array_values(array_unique(array_filter(array_map('intval', $raw))));
+        // Normalize as text to match the varchar source_id column.
+        $cache = array_values(array_unique(array_filter(array_map(function ($sourceId) {
+            return sanitize_text_field(wp_unslash((string) $sourceId));
+        }, $raw), function ($sourceId) {
+            return $sourceId !== '';
+        })));
 
         return $cache;
     }
@@ -396,6 +417,7 @@ class RecommendationsController extends Controller
         // Define the sanitization rules. The dot notation is for nested keys.
         $sanitizeRules = [
             'reviewer_name' => 'sanitize_text_field',
+            'reviewer_email' => 'sanitize_email',
             'reviewer_url'  => 'sanitize_url',
             'review_title'  => 'sanitize_text_field',
             'reviewer_text' => 'wp_kses_post',
@@ -428,16 +450,63 @@ class RecommendationsController extends Controller
                     $sanitizeFunc = Arr::get($sanitizeRules, $dotKey, 'sanitize_text_field');
 
                     // Apply the function and store it in the new array
-                    $sanitizedReview[$key][$subKey] = $sanitizeFunc($subValue);
+                    $sanitizedReview[$key][$subKey] = $this->sanitizeFieldValue($sanitizeFunc, $subValue);
                 }
             } else {
                 // For simple, non-nested values
                 $sanitizeFunc = Arr::get($sanitizeRules, $key, 'sanitize_text_field');
-                $sanitizedReview[$key] = $sanitizeFunc($value);
+                $sanitizedReview[$key] = $this->sanitizeFieldValue($sanitizeFunc, $value);
             }
         }
 
         return $sanitizedReview;
     }
-}
 
+    private function sanitizeFieldValue($sanitizeFunc, $value)
+    {
+        if ($sanitizeFunc === 'intval') {
+            return intval($value);
+        }
+
+        if ($value === null || is_array($value) || is_object($value)) {
+            $value = '';
+        }
+
+        return $sanitizeFunc((string) $value);
+    }
+
+    private function validateReviewTypedFields($fields)
+    {
+        $wpsr_errors = [];
+        $fields = is_array($fields) ? $fields : [];
+
+        $wpsr_review_time = Arr::get($fields, 'review_time');
+        if (!$this->isValidReviewTime($wpsr_review_time)) {
+            $wpsr_errors['review.review_time']['date_format'] = 'The date field must be in YYYY-MM-DD HH:MM:SS format.';
+        }
+
+        $wpsr_reviewer_email = Arr::get($fields, 'reviewer_email');
+        if ($wpsr_reviewer_email !== null && trim((string) $wpsr_reviewer_email) !== '') {
+            $wpsr_reviewer_email = (string) $wpsr_reviewer_email;
+            if (!is_email($wpsr_reviewer_email)) {
+                $wpsr_errors['review.reviewer_email']['email'] = 'The email field must be a valid email address.';
+            } elseif (strlen($wpsr_reviewer_email) > 255) {
+                $wpsr_errors['review.reviewer_email']['max'] = 'The email field may not be greater than 255 characters.';
+            }
+        }
+
+        return $wpsr_errors;
+    }
+
+    private function isValidReviewTime($wpsr_review_time)
+    {
+        $wpsr_review_time = (string) $wpsr_review_time;
+        $wpsr_date = \DateTime::createFromFormat('!Y-m-d H:i:s', $wpsr_review_time);
+        $wpsr_errors = \DateTime::getLastErrors();
+        $wpsr_has_errors = is_array($wpsr_errors) && (
+            !empty($wpsr_errors['warning_count']) || !empty($wpsr_errors['error_count'])
+        );
+
+        return $wpsr_date && !$wpsr_has_errors && $wpsr_date->format('Y-m-d H:i:s') === $wpsr_review_time;
+    }
+}

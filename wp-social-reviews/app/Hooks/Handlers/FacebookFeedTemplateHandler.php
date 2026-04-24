@@ -144,7 +144,11 @@ class FacebookFeedTemplateHandler
     public function getPaginatedFeedHtml($templateId = null, $page = null , $feed_id = null , $feed_type = '')
     {
         if ($feed_type === 'album_feed') {
-            return apply_filters('wpsocialreviews/facebook_feed_album_paginated_feed_html', $templateId, $page, $feed_id, $feed_type);
+            if (has_filter('wpsocialreviews/facebook_feed_album_paginated_feed_html')) {
+                return apply_filters('wpsocialreviews/facebook_feed_album_paginated_feed_html', $templateId, $page, $feed_id, $feed_type);
+            }
+
+            return '';
         } else {
             $app = App::getInstance();
             $facebook_feed = new FacebookFeed();

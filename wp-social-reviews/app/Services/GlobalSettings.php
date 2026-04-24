@@ -90,7 +90,7 @@ class GlobalSettings
     {
         $settings = get_option('wpsr_global_settings', []);
         $formattedSettings = $this->formatGlobalSettings($settings);
-        $settings = Arr::set($formattedSettings, 'global_settings.'.$key, $value);
+        Arr::set($formattedSettings, 'global_settings.'.$key, $value);
         return update_option('wpsr_global_settings', $formattedSettings);
     }
 

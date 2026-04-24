@@ -67,7 +67,7 @@ class TemplatesController extends Controller
             'connected_platform_sections' => $validShortcodeType,
             'all_valid_platforms'         => $platforms,
             'items'                       => $templates,
-            'total_items'                 => $post->count()
+            'total_items'                 => $templates->total()
         ];
     }
 
@@ -291,4 +291,3 @@ class TemplatesController extends Controller
         }
     }
 }
-

@@ -322,3 +322,8 @@ if(defined('LSCWP_V')){
         }
     });
 }
+
+// require the CLI
+if (defined('WP_CLI') && WP_CLI) {
+    \WP_CLI::add_command('wpsocialninja', '\WPSocialReviews\App\Hooks\CLI\Commands');
+}

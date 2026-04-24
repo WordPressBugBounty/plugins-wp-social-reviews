@@ -16,9 +16,14 @@ $wpsr_image_url = chatHelper::getImageUrl($settings);
 $wpsr_prefilled_platforms = chatHelper::getPrefilledPlatform();
 ?>
 <?php foreach ($wpsr_channels as $wpsr_key => $wpsr_channel) {
-    $wpsr_is_url = chatHelper::isUrl($wpsr_channel['credential']);
-    
-    $wpsr_credential = $wpsr_is_url ? $wpsr_channel['credential'] : $wpsr_channel['webUrl'] . $wpsr_channel['credential'];
+    $wpsr_channel_name = Arr::get($wpsr_channel, 'name', '');
+    if ($wpsr_channel_name === 'fluent_forms') {
+        $wpsr_credential = chatHelper::getFluentFormsShortcode(Arr::get($wpsr_channel, 'credential', ''));
+    } else {
+        $wpsr_is_url = chatHelper::isUrl($wpsr_channel['credential']);
+        $wpsr_credential = $wpsr_is_url ? $wpsr_channel['credential'] : $wpsr_channel['webUrl'] . $wpsr_channel['credential'];
+        $wpsr_credential = chatHelper::sanitizeChannelUrl($wpsr_credential, $wpsr_channel_name);
+    }
     $wpsr_image_url = count($settings['channels']) > 1 ? WPSOCIALREVIEWS_URL . 'assets/images/svg/' . $wpsr_channel['name'] . '.svg' : $wpsr_image_url;
     $wpsr_is_prefilled_supported = in_array($wpsr_channel['name'], $wpsr_prefilled_platforms);
     $wpsr_has_prefilled = ($wpsr_is_prefilled_supported && isset($settings['chat_button']['prefilled_message']) && $settings['chat_button']['prefilled_message'] === 'true') ? true : false;
@@ -36,10 +41,10 @@ $wpsr_prefilled_platforms = chatHelper::getPrefilledPlatform();
         <?php } ?>
 
         <?php
-            if(strpos($wpsr_credential, 'fluentform_modal')){
+            if(chatHelper::isFluentFormsModalShortcode($wpsr_credential)){
                 echo do_shortcode($wpsr_credential);
             }
-            if(!strpos($wpsr_credential, 'fluentform_modal')){
+            if(!chatHelper::isFluentFormsModalShortcode($wpsr_credential)){
                 if(strpos($wpsr_credential, 'mailto') !== false || strpos($wpsr_credential, 'tel') !== false || strpos($wpsr_credential, '?users=') !== false){
                     $wpsr_credential = chatHelper::encodeCredentials($wpsr_credential);
                 }

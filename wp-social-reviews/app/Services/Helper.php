@@ -579,7 +579,9 @@ class Helper
     public static function getOptimizeImageFormat()
     {
         $image_format = get_option('wpsr_global_settings', []);
-        return Arr::get($image_format, 'global_settings.advance_settings.optimize_image_format', 'jpg');
+        $image_format = Arr::get($image_format, 'global_settings.advance_settings.optimize_image_format', 'jpg');
+
+        return in_array($image_format, ['jpg', 'webp'], true) ? $image_format : 'jpg';
     }
 
     public static function getEncryptionErrorData()

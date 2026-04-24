@@ -727,7 +727,7 @@ class Helper
     {
         $mediaManager = new MediaManager($resizedImages, $advanceSettings, $imageSize, $platformName);
         foreach ($filteredReviews as $index => $item) {
-            if ($isOptimizedImage == 'true' && $item->platform_name != 'custom' && $item->platform_name != 'testimonial') {
+            if ($isOptimizedImage == 'true' && !static::isCustomReviewPlatform($item->platform_name) && $item->platform_name != 'testimonial') {
                 $item['media_url'] = $mediaManager->getMediaUri($item);
             } else {
                 $item['media_url'] = Arr::get($item, 'reviewer_img');
@@ -735,6 +735,24 @@ class Helper
         }
 
         return $filteredReviews;
+    }
+
+    public static function isCustomReviewPlatform($platformName)
+    {
+        if (empty($platformName)) {
+            return false;
+        }
+
+        if ($platformName === 'custom') {
+            return true;
+        }
+
+        static $customValidPlatforms = null;
+        if ($customValidPlatforms === null) {
+            $customValidPlatforms = (array) get_option('wpsr_available_valid_platforms', []);
+        }
+
+        return !empty($customValidPlatforms) && array_key_exists($platformName, $customValidPlatforms);
     }
 
     public static function handleReviewerName($reviews, $templateMeta)

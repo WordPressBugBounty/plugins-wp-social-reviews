@@ -157,7 +157,15 @@ add_filter('plugin_row_meta', function ($meta, $plugin_file){
         );
 
         if(!defined('WPSOCIALREVIEWS_PRO')) {
-            $row_meta['pro'] = '<a rel="noopener" href="https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=upgrade" style="color: #5525d9;font-weight: bold;" aria-label="' . esc_attr(esc_html__('Upgrade to Pro', 'wp-social-reviews')) . '" target="_blank">' . esc_html__('Upgrade to Pro', 'wp-social-reviews') . '</a>';
+            $upgradeButtonConfig = (new \WPSocialReviews\App\Services\DashboardNotices())->getUpgradeButtonConfig();
+            $upgradeButtonText = \WPSocialReviews\Framework\Support\Arr::get($upgradeButtonConfig, 'text', __('Upgrade to Pro', 'wp-social-reviews'));
+            $upgradeButtonUrl = \WPSocialReviews\Framework\Support\Arr::get(
+                $upgradeButtonConfig,
+                'pro_purchase_url',
+                'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=upgrade'
+            );
+
+            $row_meta['pro'] = '<a rel="noopener" href="' . esc_url($upgradeButtonUrl) . '" style="color: #5525d9;font-weight: bold;" aria-label="' . esc_attr($upgradeButtonText) . '" target="_blank">' . esc_html($upgradeButtonText) . '</a>';
         }
         return array_merge($meta, $row_meta);
     }

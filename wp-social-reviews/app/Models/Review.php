@@ -160,18 +160,37 @@ class Review extends Model
 			$platforms = array_diff($platforms, $platformsWithCategories);
 		}
 
-        $reviews = self::whereIn('platform_name', $platforms);
+        $allFilteredPlatforms = array_merge($platforms, $platformsWithCategories);
+        $reviews = empty($allFilteredPlatforms) ? self::whereIn('platform_name', []) : self::query();
+
+        if (!empty($allFilteredPlatforms)) {
+            $reviews = $reviews->where(function ($query) use ($platforms, $platformsWithCategories, $categories) {
+                $hasPlatformBranch = false;
+
+                if (count($platforms)) {
+                    $query->whereIn('platform_name', $platforms);
+                    $hasPlatformBranch = true;
+                }
+
+                if (count($platformsWithCategories)) {
+                    $categoryBranch = function ($categoryQuery) use ($platformsWithCategories, $categories) {
+                        $categoryQuery->whereIn('platform_name', $platformsWithCategories)
+                                      ->whereIn('category', $categories);
+                    };
+
+                    if ($hasPlatformBranch) {
+                        $query->orWhere($categoryBranch);
+                    } else {
+                        $query->where($categoryBranch);
+                    }
+                }
+            });
+        }
 
         $has_column = Helper::hasReviewApproved();
         if($has_column) {
             $reviews = $reviews->where('review_approved', '1');
         }
-
-	    if (count($platformsWithCategories)) {
-		    $reviews->orWhere(function ($query) use ($platformsWithCategories, $categories) {
-			    $query->whereIn('platform_name', $platformsWithCategories)->whereIn('category', $categories);
-		    });
-	    }
 
         if ($order === 'random' ) {
             if($filters['pagination_type'] === 'none') {
@@ -334,12 +353,12 @@ class Review extends Model
         //filter by words
         $includesWords = $excludesWords = [];
         if (!empty($filters['includes_inputs'])) {
-            $includesWords = array_map('trim', explode(",", $filters['includes_inputs']));
+            $includesWords = static::parseReviewFilterWords($filters['includes_inputs']);
         }
 
         //only have excludes inputs
         if (!empty($filters['excludes_inputs'])) {
-            $excludesWords = array_map('trim', explode(",", $filters['excludes_inputs']));
+            $excludesWords = static::parseReviewFilterWords($filters['excludes_inputs']);
         }
 
         $existsInBoth = array_intersect($includesWords, $excludesWords);
@@ -356,7 +375,11 @@ class Review extends Model
         if (!empty($includesWords)) {
             $reviews->where(function ($query) use ($includesWords) {
                 foreach($includesWords as $word) {
-                    $query->orWhere('reviewer_text', 'like', '%'.$word.'%');
+                    $likeWord = static::prepareReviewFilterLikeWord($word);
+                    $query->orWhereRaw(
+                        '(LOWER(COALESCE(`reviewer_text`, \'\')) LIKE ? OR LOWER(COALESCE(`review_title`, \'\')) LIKE ?)',
+                        [$likeWord, $likeWord]
+                    );
                 }
             });
         }
@@ -365,11 +388,43 @@ class Review extends Model
         if (!empty($excludesWords)) {
             $reviews->where(function ($query) use ($excludesWords) {
                 foreach($excludesWords as $word) {
-                    $query->where('reviewer_text', 'not like', '%'.$word.'%');
+                    $likeWord = static::prepareReviewFilterLikeWord($word);
+                    $query->whereRaw(
+                        '(LOWER(COALESCE(`reviewer_text`, \'\')) NOT LIKE ? AND LOWER(COALESCE(`review_title`, \'\')) NOT LIKE ?)',
+                        [$likeWord, $likeWord]
+                    );
                 }
             });
         }
         return $reviews;
+    }
+
+    private static function parseReviewFilterWords($words)
+    {
+        $words = array_map('trim', explode(',', (string) $words));
+        $words = array_map(function ($word) {
+            return function_exists('mb_strtolower')
+                ? mb_strtolower($word, 'UTF-8')
+                : strtolower($word);
+        }, $words);
+        $words = array_filter($words, function ($word) {
+            return $word !== '';
+        });
+
+        return array_values(array_unique($words));
+    }
+
+    private static function prepareReviewFilterLikeWord($word)
+    {
+        $word = function_exists('mb_strtolower')
+            ? mb_strtolower($word, 'UTF-8')
+            : strtolower($word);
+
+        if (function_exists('esc_like')) {
+            return '%' . esc_like($word) . '%';
+        }
+
+        return '%' . addcslashes($word, '_%\\') . '%';
     }
 
     public static function paginatedReviews($platforms, $filters = array(), $page = 1)

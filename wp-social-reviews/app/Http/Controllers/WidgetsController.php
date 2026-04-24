@@ -42,7 +42,7 @@ class WidgetsController extends Controller
         return [
             'message'            => 'success',
             'items'            => $widgets,
-            'total_items' => $widget->count()
+            'total_items' => $widgets->total()
         ];
     }
 

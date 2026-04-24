@@ -247,7 +247,9 @@ class YoutubeFeed extends BaseFeed
         if ($has_gdpr === "true" && $optimized_images == "false") {
             $settings['dynamic']['items'] = [];
             $settings['dynamic']['header'] = [];
-            $settings['dynamic']['error_message']['error_message'] = __('YouTube feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'wp-social-reviews');
+            $settings['dynamic']['error_message'] = [
+                'error_message' => __('YouTube feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'wp-social-reviews')
+            ];
         }
 
         if (Arr::get($settings, 'feed_settings.created_from_onboarding')) {
