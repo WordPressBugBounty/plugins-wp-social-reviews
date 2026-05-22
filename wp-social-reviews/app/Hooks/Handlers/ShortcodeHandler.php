@@ -1225,7 +1225,8 @@ class ShortcodeHandler
             return;
         }
         $params = array(
-            'ajax_url' => admin_url('admin-ajax.php'),
+            'ajax_url'   => admin_url('admin-ajax.php'),
+            'wpsr_nonce' => wp_create_nonce('wpsr-ajax-nonce'),
         );
         ?>
         <script type="text/javascript" id="wpsr-localize-popup-script">

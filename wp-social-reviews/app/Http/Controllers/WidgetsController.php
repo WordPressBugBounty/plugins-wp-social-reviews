@@ -114,12 +114,12 @@ class WidgetsController extends Controller
         foreach ( $ids as $id) {
             $widget = Widget::find($id);
 
-            $widget['post_title'] = '(Duplicate) ' . $widget['post_title'];
-            $widget = $this->app->applyCustomFilters('chat_template_duplicate', $widget);
-
             if (!$widget) {
                 continue;
             }
+
+            $widget['post_title'] = '(Duplicate) ' . $widget['post_title'];
+            $widget = $this->app->applyCustomFilters('chat_template_duplicate', $widget);
 
             $widgetId = $post->createPost(
                 [
@@ -188,7 +188,9 @@ class WidgetsController extends Controller
                     'ID' => intval($id),
                     'post_status' => $status,
                 ];
-                $post->updatePost($args);
+                if ($post->updatePost($args, $this->postType) === false) {
+                    continue;
+                }
                 $updatedCount++;
             }
 
@@ -232,7 +234,9 @@ class WidgetsController extends Controller
 
         $deletedCount = 0;
         foreach ($ids as $id) {
-            $post->deletePost($id);
+            if (!$post->deletePost($id, $this->postType)) {
+                continue;
+            }
             $deletedCount++;
             do_action('wpsocialreviews/widget_deleted', $id);
         }

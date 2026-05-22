@@ -203,6 +203,12 @@ class MetaController extends Controller
         $templateMeta = json_decode($templateMeta, true);
         $templateMeta = $this->sanitizeTemplateMeta($templateMeta);
 
+        if ($this->hasBlankCustomWriteReviewUrl($templateMeta)) {
+            return $this->sendError([
+                'message' => __('Please enter a custom URL for the Write a Review button.', 'wp-social-reviews')
+            ], 422);
+        }
+
         if(
             defined('WPSOCIALREVIEWS_PRO') &&
             class_exists('\WPSocialReviewsPro\App\Services\TemplateCssHandler')){
@@ -270,6 +276,13 @@ class MetaController extends Controller
             'template_id'   => $templateId,
             'template_meta' => $decodedMeta,
         ];
+    }
+
+    private function hasBlankCustomWriteReviewUrl($templateMeta)
+    {
+        return Arr::get($templateMeta, 'add_custom_war_btn_url') === 'true'
+            && Arr::get($templateMeta, 'war_btn_source') === 'custom_url'
+            && trim((string) Arr::get($templateMeta, 'war_btn_source_custom_url', '')) === '';
     }
 
     public function edit(Request $request, $templateId)
@@ -396,6 +409,12 @@ class MetaController extends Controller
 
     public function loadMore(Request $request, $templateId)
     {
+        $templateId = absint($templateId);
+        $templateDetails = get_post($templateId);
+        if (!$templateDetails || !in_array($templateDetails->post_type, ['wp_social_reviews', 'wpsr_reviews_notify'], true)) {
+            return $this->sendError(['message' => __('Template not found.', 'wp-social-reviews')], 404);
+        }
+
         $page = (int) $request->get('page', 1);
         $templateMeta = wp_unslash($request->get('template_meta'));
         $templateMeta = json_decode($templateMeta, true);

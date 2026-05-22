@@ -120,12 +120,13 @@ class NotificationsController extends Controller
         foreach ( $ids as $id) {
             $id = intval($id);
             $template = $post->findPost($this->postType, $id);
+
+            if (!$template) {
+                continue;
+            }
+
             $template['post_title'] = '(Duplicate) ' . $template['post_title'];
             $template = $this->app->applyCustomFilters('notification_template_duplicate', $template);
-    
-            if (!$template) {
-               continue;
-            }
     
             $templateId = $post->createPost(
                 [
@@ -195,7 +196,9 @@ class NotificationsController extends Controller
                     'post_status' => $status,
                 ];
 
-                $post->updatePost($args);
+                if ($post->updatePost($args, $this->postType) === false) {
+                    continue;
+                }
                 $updatedCount++;
             }
 
@@ -242,7 +245,9 @@ class NotificationsController extends Controller
         
         $deletedCount = 0;
         foreach ($ids as $id) {
-            $post->deletePost(intval($id));
+            if (!$post->deletePost(intval($id), $this->postType)) {
+                continue;
+            }
             $deletedCount++;
             do_action('wpsocialreviews/notification_deleted', $id);
         }

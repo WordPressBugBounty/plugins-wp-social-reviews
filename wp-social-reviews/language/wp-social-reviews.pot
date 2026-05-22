@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WP Social Reviews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-24 13:04+0000\n"
+"POT-Creation-Date: 2026-05-22 10:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -44,12 +44,12 @@ msgstr ""
 msgid " Reviews"
 msgstr ""
 
-#: app/Models/Post.php:186 app/Http/Controllers/TemplatesController.php:91
+#: app/Models/Post.php:200 app/Http/Controllers/TemplatesController.php:91
 msgid " Template"
 msgstr ""
 
 #. %1$d is the number of notifications, %2$s is the status (published/draft/etc.)
-#: app/Http/Controllers/NotificationsController.php:204
+#: app/Http/Controllers/NotificationsController.php:207
 #, php-format
 msgid "%1$d notification has been successfully %2$s"
 msgid_plural "%1$d notifications have been successfully %2$s"
@@ -81,47 +81,47 @@ msgid "%1$sLog in and disable these emails%2$s"
 msgstr ""
 
 #. %d is the number of notification that were deleted
-#: app/Http/Controllers/NotificationsController.php:252
+#: app/Http/Controllers/NotificationsController.php:257
 msgid "%d notification has been successfully deleted"
 msgid_plural "%d notifications have been successfully deleted"
 msgstr[0] ""
 msgstr[1] ""
 
 #. %d is the number of notification that were duplicated
-#: app/Http/Controllers/NotificationsController.php:159
+#: app/Http/Controllers/NotificationsController.php:160
 msgid "%d notification has been successfully duplicated"
 msgid_plural "%d notifications have been successfully duplicated"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:354
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:357
 msgid "%d review has been marked as spam"
 msgid_plural "%d reviews have been marked as spam"
 msgstr[0] ""
 msgstr[1] ""
 
 #. %d is the number of reviews that were deleted
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:284
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:287
 msgid "%d review has been successfully deleted"
 msgid_plural "%d reviews have been successfully deleted"
 msgstr[0] ""
 msgstr[1] ""
 
 #. %d is the number of reviews that were duplicated
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:213
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:216
 msgid "%d review has been successfully duplicated"
 msgid_plural "%d reviews have been successfully duplicated"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:369
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:372
 msgid "%d review has been unmarked as spam"
 msgid_plural "%d reviews have been unmarked as spam"
 msgstr[0] ""
 msgstr[1] ""
 
 #. %d is the number of template that were deleted
-#: app/Http/Controllers/TemplatesController.php:245
+#: app/Http/Controllers/TemplatesController.php:247
 msgid "%d template has been successfully deleted"
 msgid_plural "%d templates have been successfully deleted"
 msgstr[0] ""
@@ -135,7 +135,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. %d is the number of widgets that were deleted
-#: app/Http/Controllers/WidgetsController.php:242
+#: app/Http/Controllers/WidgetsController.php:246
 msgid "%d widget has been successfully deleted"
 msgid_plural "%d widgets have been successfully deleted"
 msgstr[0] ""
@@ -149,7 +149,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. %d is the number of widgets that were updated
-#: app/Http/Controllers/WidgetsController.php:198
+#: app/Http/Controllers/WidgetsController.php:200
 msgid "%d widget status has been successfully updated"
 msgid_plural "%d widgets have been successfully updated"
 msgstr[0] ""
@@ -178,29 +178,123 @@ msgstr ""
 msgid "(%1$s account data will delete in %2$s)"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:31
+msgid "(Pro)"
+msgstr ""
+
 #: app/Hooks/actions.php:184
 msgid "-- Select a template --"
 msgstr ""
 
-#: app/Hooks/filters.php:59
+#: app/Services/TranslationStrings.php:32
+msgid "1 Column"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:33
+msgid "1 Day"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:34
+msgid "1 Hour"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:35 app/Hooks/filters.php:59
 msgid "1 Month"
 msgstr ""
 
-#: app/Hooks/filters.php:66
+#: app/Services/TranslationStrings.php:36
+msgid "1 Week"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:37 app/Hooks/filters.php:66
 msgid "1 Year"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:38
+msgid "10 Column"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:39
+msgid "1:1(Classic)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:40
+msgid "2 Column"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:41
+msgid "2 Days"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:42
+msgid "2 Weeks"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:43
+msgid "3 Column"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:44
+msgid "3 Days"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:45
+msgid "3:4(Portrait)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:46
+msgid "4 Column"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:728
 msgid "4 Different Layout variation"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:47
+msgid "4:5(Tall)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:48
+msgid "5 Column"
+msgstr ""
+
 #: app/Hooks/filters.php:24
 msgid "5 min"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:49
+msgid "5 Minutes"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:50
+msgid "6 Column"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:51
+msgid "6 Hour"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:731
 #: app/Hooks/Handlers/AdminMenuHandler.php:679
 msgid "9+ templates"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:53
+msgid ""
+"A Access Token is needed, if you want to use credentials from your own X "
+"(Twitter) App."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:52
+msgid ""
+"A Access Token Secret is needed, if you want to use credentials from your "
+"own X (Twitter) App."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:54
+msgid ""
+"A Bearer Token is needed, if you want to use credentials from your own X "
+"(Twitter) App."
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:410
@@ -213,6 +307,30 @@ msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:287
 msgid "A clean and simple template for reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:55
+msgid ""
+"A Consumer Key is needed, if you want to use credentials from your own X "
+"(Twitter) App"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:56
+msgid ""
+"A Consumer Key is needed, if you want to use credentials from your own X "
+"(Twitter) App."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:57
+msgid ""
+"A Consumer Secret is needed, if you want to use credentials from your own X "
+"(Twitter) App"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:58
+msgid ""
+"A Consumer Secret is needed, if you want to use credentials from your own X "
+"(Twitter) App."
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:420
@@ -238,6 +356,26 @@ msgstr ""
 msgid "A more detailed template with additional information"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:60
+msgid "A name for the QR code."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:61
+msgid ""
+"A secret key is already saved. Leave this field empty to keep the existing "
+"key."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:59
+msgid ""
+"A Username is needed, if you want to use credentials from your own X "
+"(Twitter) App."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:68
+msgid "Access Code"
+msgstr ""
+
 #: app/Services/Platforms/Reviews/GoogleMyBusiness.php:439
 msgid "Access code should not be empty!"
 msgstr ""
@@ -246,8 +384,32 @@ msgstr ""
 msgid "Access to all future Pro modules"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:69
+msgid "Access Token"
+msgstr ""
+
 #: app/Services/Platforms/Reviews/GoogleMyBusiness.php:660
 msgid "Access token is invalid! Please reauthorize your account."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:70
+msgid "Access Token Secret)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:71
+msgid "Access Token Secret:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:72
+msgid "Access Token)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:73
+msgid "Access Token:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:74
+msgid "Account to Display"
 msgstr ""
 
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
@@ -262,6 +424,10 @@ msgstr ""
 #: app/Services/Platforms/PlatformErrorManager.php:243
 #, php-format
 msgid "Account(%1$s): There has been a problem with your account(%1$s) %2$s."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:75
+msgid "Accounts"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:520
@@ -286,14 +452,56 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:76
+msgid "Activate"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:77
+msgid "Activate Fluent Forms Plugin"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:78
+msgid ""
+"Activate your license to enable auto-updates, premium support & full "
+"functionality."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:79
+msgid "Add \"Write a Review\" URL?"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:545
 msgid ""
 "Add a chat widget in minutes—no coding needed! Let visitors reach you "
 "through Messenger, WhatsApp, and more to boost trust, support, and sales."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:102
+msgid "Add a description of the"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:99
+msgid "Add a Manager"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:100
+msgid "Add a QR Code"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:101
+msgid "Add a Testimonial"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:103
+msgid "Add a title of the"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:548
 msgid "Add an eye-catching chat widget in minutes"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:80
+msgid "Add Business"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:72
@@ -302,6 +510,72 @@ msgstr ""
 
 #: app/Services/DashboardNotices.php:396
 msgid "Add custom call-to-action buttons (Buy Now, View Product, etc.)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:81
+msgid "Add Custom Review"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:82
+msgid "Add Custom Source"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:83
+msgid "Add Custom Sources"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:104
+msgid ""
+"Add keywords that should trigger spam detection. Reviews containing any of "
+"these words will be marked as spam automatically."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:84
+msgid "Add More Business"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:85
+msgid "Add More Page"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:86
+msgid "Add More Product"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:87
+msgid "Add New Channel"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:88
+msgid "Add New Manager"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:89
+msgid "Add New Popup"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:90
+msgid "Add New QR code"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:91
+msgid "Add New Template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:92
+msgid "Add New Widget"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:93
+msgid "Add Platform"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:94
+msgid "Add Testimonial"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:105
+msgid "Add to Wall"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:644
@@ -314,6 +588,30 @@ msgstr ""
 msgid ""
 "Add Tripadvisor reviews any where on your website to improve your brand’s "
 "social media marketing."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:95
+msgid "Add Your API Key Here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:106
+msgid "Add your first shoppable hashtag"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:96
+msgid "Add Your Place ID Here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:97
+msgid "Add Your Product ID Here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:98
+msgid "Add Your Product Name Here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:107
+msgid "Admins get full access and assign custom permissions to other managers."
 msgstr ""
 
 #: app/Services/DashboardNotices.php:471
@@ -332,8 +630,28 @@ msgstr ""
 msgid "Advanced Review Filters Made Easy"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:108
+msgid "Advanced Settings"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1023
 msgid "Afghanistan"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:109
+msgid "Aggregate Rating"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:62
+msgid "AI Platform"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:63
+msgid "AI Review Summarizer API settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:64
+msgid "AI Summarizer"
 msgstr ""
 
 #: app/Http/Controllers/Platforms/Reviews/MetaController.php:187
@@ -347,7 +665,7 @@ msgid "AI summary enabled."
 msgstr ""
 
 #: app/Services/TranslationString.php:44
-#: app/Hooks/Handlers/ShortcodeHandler.php:1145
+#: app/Hooks/Handlers/ShortcodeHandler.php:1146
 msgid "AI-Generated Summary"
 msgstr ""
 
@@ -391,12 +709,20 @@ msgstr ""
 msgid "Album Feed"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:110
+msgid "Album ID/ URL"
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Facebook/Config.php:319
 msgid "Album Meta"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Facebook/Config.php:208
 msgid "Album Title"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:111
+msgid "Albums"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1030
@@ -422,22 +748,72 @@ msgstr ""
 msgid "Alignment"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:112
+msgid "All"
+msgstr ""
+
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
 #: app/Services/Platforms/PlatformData.php:567
 #, php-format
 msgid "All %s Data has been Removed"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:113
+msgid "All Channels"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:114
+msgid "All Chat Widgets"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:115
+msgid "All Custom Sources"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:116
 #: app/Services/TranslationString.php:53
 msgid "All Enabled"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:117
+msgid "All Notification Popups"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:118
 #: app/Services/TranslationString.php:45
 msgid "All Platforms"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:119
+msgid "All Posts"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:470
 msgid "All premium templates"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:120
+msgid "All Reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:121
+msgid "All Templates"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:122
+msgid "All Testimonials"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:124
+msgid "All the configuration associate with this account will be deleted."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:123
+msgid "All Videos"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:125
+msgid "All-in-One Chat Widget"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:784
@@ -507,6 +883,10 @@ msgstr ""
 msgid "An unknown error has occurred."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1041
+msgid "and only the first image will display for"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1035
 msgid "Andorra"
 msgstr ""
@@ -536,8 +916,50 @@ msgstr ""
 msgid "API error %s:"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:65
+msgid "API Key"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:66
+msgid "API key"
+msgstr ""
+
 #: app/Services/Platforms/Reviews/Airbnb.php:341
 msgid "API Key or Secret Key are missing."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:67
+msgid "API key provided by your selected platform."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:126
+msgid "Appearance"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:127
+msgid "Apply"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:128
+msgid "Approve"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:129
+msgid "Approved"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:130
+msgid "Are you sure you want to delete all the locations?"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:131
+msgid "Are you sure you want to delete all the pages?"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:132
+msgid ""
+"Are you sure you want to skip the setup? You can always complete it later "
+"from the settings."
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1043
@@ -548,12 +970,24 @@ msgstr ""
 msgid "Armenia"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:133
+msgid "Arrows"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:134
+msgid "Arrows and Dots"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1045
 msgid "Aruba"
 msgstr ""
 
 #: app/Services/Platforms/PlatformErrorManager.php:192
 msgid "As a result, your feed won't be able to update at the moment."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:135
+msgid "Ascending"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1046
@@ -564,10 +998,19 @@ msgstr ""
 msgid "Austria"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:136
 #: app/Services/Widgets/FacebookFeedWidget.php:285
 #: app/Services/Widgets/Oxygen/FacebookWidget.php:200
 #: app/Services/Platforms/Feeds/Facebook/Config.php:116
 msgid "Author"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:137
+msgid "Author website URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:138
+msgid "Auto-Generated Activity Stories"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:479
@@ -582,13 +1025,39 @@ msgstr ""
 msgid "Automatic syncing with your latest videos"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:139
+msgid ""
+"Automatically convert your Instagram posts into shoppable content. Add other "
+"managers giving specific permissions."
+msgstr ""
+
 #: app/Services/DashboardNotices.php:741
 #: app/Hooks/Handlers/AdminMenuHandler.php:688
 msgid "Automatically syncing reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:140
+msgid "Autoplay"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:141
+msgid "Autoplay :"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:142
+msgid "Autoplay Speed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:143
+msgid "Autoplay Speed :"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1048
 msgid "Azerbaijan"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:144
+msgid "Back to Default"
 msgstr ""
 
 #: app/Services/Widgets/YoutubeWidget.php:656
@@ -671,6 +1140,14 @@ msgstr ""
 msgid "Background Hover Color:"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:145
+msgid "Badge"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:146
+msgid "Badge Position"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1049
 msgid "Bahamas"
 msgstr ""
@@ -688,12 +1165,26 @@ msgid "Barbados"
 msgstr ""
 
 #. {total_reviews} is a placeholder for the total number of reviews
+#: app/Services/TranslationStrings.php:147
 #: app/Services/Platforms/Reviews/Helper.php:199
 msgid "Based on {total_reviews} Reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:148
+msgid "Be the first to write a review."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:149
+msgid "Bearer Token"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:439
 msgid "Beautiful Facebook Album Feeds"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:150
+msgid ""
+"Before creating your template you need to configure your social platform."
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1053
@@ -722,6 +1213,18 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1059
 msgid "Bhutan"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:151
+msgid "Blocked/Spam Words"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:152
+msgid "Blur"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:153
+msgid "Bold"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1060
@@ -840,12 +1343,28 @@ msgstr ""
 msgid "Border Radius"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:154
+msgid "Border Type"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1068
 msgid "Bosnia and Herzegovina"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:155
+msgid "Both"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1070
 msgid "Botswana"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:156
+msgid "Bottom Left"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:157
+msgid "Bottom Right"
 msgstr ""
 
 #: app/Services/Widgets/YoutubeWidget.php:126
@@ -906,6 +1425,10 @@ msgstr ""
 msgid "Box Background Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:158
+msgid "Box Shadow"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1075
 msgid "Brazil"
 msgstr ""
@@ -922,12 +1445,34 @@ msgstr ""
 msgid "Brunei"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:159
+msgid "Bubble Button Background Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:160
+msgid "Bubble Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:161
+msgid ""
+"Build chat widgets for your whole site or specific pages. Add as many as you "
+"need."
+msgstr ""
+
 #: app/Services/DashboardNotices.php:531
 msgid "Build trust instantly with live review popups"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1085
 msgid "Bulgaria"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:162
+msgid "Bulk Action"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:163
+msgid "Bulk Actions"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1088
@@ -938,13 +1483,34 @@ msgstr ""
 msgid "Burundi"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:164
+msgid "Business Description"
+msgstr ""
+
 #: app/Services/Widgets/Oxygen/ReviewsWidget.php:46
 msgid "Business Info/Header"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:165
+msgid "Business Logo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:166
+msgid "Business Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:167
+msgid "Business Phone Number"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:168
 #: app/Services/TranslationString.php:47
 #: app/Services/Onboarding/OnboardingService.php:65
 msgid "Business Reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:169
+msgid "Business Type"
 msgstr ""
 
 #: app/Services/Widgets/YoutubeWidget.php:246
@@ -955,11 +1521,23 @@ msgstr ""
 msgid "Button Background Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:170
+msgid "Button Source Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:171
+msgid "Button Text"
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Twitter/TwitterFeed.php:559
 #: app/Services/Platforms/Feeds/Instagram/InstagramFeed.php:958
 #: app/Services/Platforms/Feeds/Youtube/YoutubeFeed.php:1089
 #: app/Services/Platforms/Feeds/Facebook/FacebookFeed.php:1147
 msgid "Cache cleared successfully!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1042
+msgid "cached feeds data and retrieve new feeds."
 msgstr ""
 
 #: app/Services/DashboardNotices.php:736
@@ -989,14 +1567,39 @@ msgstr ""
 msgid "Canada"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:174
+msgid "Cancel"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1094
 msgid "Cape Verde"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:175
+msgid "Capitalize"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:172
+msgid "CAPTCHA"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:176
+msgid "Captcha settings could not be saved."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:177
+msgid "Caption"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:178
+msgid "Caption Text When Offline"
 msgstr ""
 
 #: app/Http/Controllers/SettingsController.php:79
 msgid "Card Data Deleted Successfully!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:179
 #: app/Services/Onboarding/OnboardingService.php:409
 #: app/Services/Onboarding/OnboardingService.php:463
 msgid "Carousel"
@@ -1008,6 +1611,14 @@ msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:464
 msgid "Carousel layout for X (Twitter) feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1043
+msgid "carousel posts."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:180
+msgid "Category of the"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1097
@@ -1031,8 +1642,28 @@ msgstr ""
 msgid "Chad"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:181
+msgid "Change Form Title"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:182
+msgid "Channel"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:183
+msgid "Channel Buttons"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:225
 msgid "Channel Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:185
+msgid "Channel Icon Background Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:184
+msgid "Channel ID, Handle or Username"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Youtube/YoutubeFeed.php:761
@@ -1041,6 +1672,11 @@ msgid ""
 "Username, or Handle"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:186
+msgid "Channel Logo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:187
 #: app/Services/Widgets/YoutubeWidget.php:97
 #: app/Services/Widgets/Oxygen/YouTubeWidget.php:52
 #: app/Services/Platforms/Feeds/Youtube/Config.php:31
@@ -1051,13 +1687,66 @@ msgstr ""
 msgid "Channel Name Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:188
+msgid "Channels"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1044
+msgid "characters"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:189
+msgid "Chat Box"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:190
+msgid "Chat Bubble Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:191
+msgid "Chat Bubble Position"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:192
+msgid "Chat Bubble Scroll Position(px)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:193
+msgid "Chat Button Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:194
+msgid "Chat Header"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:195
+msgid "Chat Language"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:196
+msgid "Chat Open in Popup Window"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:197
+msgid "Chat Popup Delay"
+msgstr ""
+
 #: app/Http/Controllers/WidgetsController.php:67
 msgid "Chat Widget"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:198
 #: app/Services/Onboarding/OnboardingService.php:71
 #: app/Hooks/Handlers/AdminMenuHandler.php:119
 msgid "Chat Widgets"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:199
+msgid "Chat with"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:200
+msgid "Check New Feeds Every"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1104
@@ -1068,16 +1757,61 @@ msgstr ""
 msgid "China"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:205
+msgid "Choose a channel"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:189
 msgid "Choose a template style"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:201
+msgid "Choose Channel"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:555
 msgid "Choose exactly where the chat appears on your site"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:206
+msgid "Choose files..."
+msgstr ""
+
 #: app/Services/DashboardNotices.php:432
 msgid "Choose from multiple event layouts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:207
+msgid "Choose how and when reviews are published on your site."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:208
+msgid "Choose how the Turnstile widget should appear on native forms."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:202
+msgid "Choose Page this Album belongs to"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:204
+msgid "Choose Page this album belongs to"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:203
+msgid "Choose Page this Playlist belongs to"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:209
+msgid "Choose the template for displaying reviews."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:210
+msgid "Choose the visual style of the review drawer."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:211
+msgid ""
+"Choose what happens when the star rating is clicked on a single product page."
 msgstr ""
 
 #: app/Services/DashboardNotices.php:537
@@ -1092,6 +1826,10 @@ msgstr ""
 msgid "Christmas Island"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:212
+msgid "City"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:432
 msgid "Classic Facebook feed template"
 msgstr ""
@@ -1100,8 +1838,48 @@ msgstr ""
 msgid "Clean X (Twitter) feed template"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:213
+msgid "Clear Cache"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1045
+msgid "clear cache after that length of time and retrieve new feeds again."
+msgstr ""
+
 #: app/Http/Controllers/Platforms/Reviews/ConfigsController.php:156
 msgid "Clear Configurations"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:214
+msgid "Clear Feeds Cache"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:215
+msgid "Clear X (Twitter) Cards"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:218
+msgid "Click a review platform below to connect your account and get started."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:216
+msgid "Click Here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:217
+msgid "Click Here Create a Notification Popup"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:219
+msgid "Click to copy shortcode"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1046
+msgid "clicking this button will clear all"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:220
+msgid "Close Button Color"
 msgstr ""
 
 #: app/Views/public/reviews-templates/header.php:51
@@ -1112,10 +1890,15 @@ msgstr ""
 msgid "Cocos (Keeling) Islands"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:221
+msgid "Collect Reviews Directly on Your Website"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1114
 msgid "Colombia"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:222
 #: app/Services/Widgets/YoutubeWidget.php:370
 #: app/Services/Widgets/YoutubeWidget.php:460
 #: app/Services/Widgets/YoutubeWidget.php:570
@@ -1168,6 +1951,10 @@ msgstr ""
 msgid "Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:223
+msgid "Columns Gap"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:382
 msgid "Combine multiple hashtags in one feed"
 msgstr ""
@@ -1177,13 +1964,56 @@ msgstr ""
 msgid "Combine multiple platform"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:224
 #: app/Services/TranslationString.php:34
 #: app/Hooks/Handlers/ShortcodeHandler.php:620
 msgid "Comments"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:225
+msgid ""
+"Comments is not available for oAuth2.0 credentials type due to restrictions "
+"set by YouTube"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:226
+msgid "Comments:"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1115
 msgid "Comoros"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:227
+msgid "Company Details"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:228
+msgid "Company of the person who is the author of the"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:230
+msgid "Complete the preview challenge before saving to validate your keys."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:229
+msgid "Complete the Turnstile challenge to validate these keys."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:231
+msgid "Completed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:232
+msgid "Completing your setup..."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:233
+msgid "Conditional Publishing Rules"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:234
+msgid "Configuration"
 msgstr ""
 
 #: app/Services/Platforms/PlatformData.php:537
@@ -1191,9 +2021,71 @@ msgstr ""
 msgid "Configuration Modal"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:237
+msgid "Configure and validate CAPTCHA keys once for all native review forms."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:235
+msgid "Configure Connection"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:236
+msgid "Configure Shoppable by Hashtags"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:238
+msgid "Configure the settings for your"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:239
+msgid "Configure the settings for your reviews image optimization."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:240
+msgid ""
+"Configure your feed platform first. Click on the card below to start the "
+"process."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:241
+msgid "Configured"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:242
+msgid "Confirm"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:243
+msgid "Connect"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:244
+msgid "Connect Accounts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:245
+msgid "Connect All Products"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:246
+msgid "Connect More Account"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:247
+msgid "Connect More Accounts"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:734
 #: app/Hooks/Handlers/AdminMenuHandler.php:680
 msgid "Connect multiple businesses"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:250
+msgid "Connect new account"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:248
+msgid "Connect Pages"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:166
@@ -1202,14 +2094,61 @@ msgid ""
 "websites."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:251
+msgid "Connect this Account"
+msgstr ""
+
 #. %s is the name of the platform
 #: app/Services/Onboarding/OnboardingService.php:825
 #, php-format
 msgid "Connect with %s"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:252
+msgid "Connect with your visitors through multiple chat widgets."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:253
+msgid ""
+"Connect your account to start displaying feeds and unlock all the features."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:249
+msgid ""
+"Connect Your Account-> Create Your Template-> Customize Your Template-> Save "
+"Template-> Copy shortcode-> Embed it on your website."
+msgstr ""
+
 #: app/Services/Platforms/Chats/SocialChat.php:137
 msgid "Connect Your WhatsApp Number:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:254
+msgid "Connected on"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:255
+msgid "Connecting..."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:256
+msgid "Connection"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:257
+msgid "Consumer Key(API Key)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:258
+msgid "Consumer Key(API Key):"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:259
+msgid "Consumer Secret(API Secret Key)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:260
+msgid "Consumer Secret(API Secret Key):"
 msgstr ""
 
 #: app/Services/Platforms/Chats/Config.php:82
@@ -1230,8 +2169,24 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:261
+msgid "Content Language"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:262
+msgid "Content Type"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:198
 msgid "Continue"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:263
+msgid "Continue with Instagram"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:264
+msgid "Continue with TikTok"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:384
@@ -1246,28 +2201,93 @@ msgstr ""
 msgid "Cook Islands"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:265
+msgid "Copied to Clipboard!"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1128
 msgid "Costa Rica"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:266
+msgid "Could not load Turnstile widget."
 msgstr ""
 
 #: app/Services/Widgets/Beaver/Instagram/InstagramWidget.php:193
 msgid "Count Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:267
+msgid "Country"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:268
+msgid "Create"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:273
+msgid "Create a Chat Widget"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:274
+msgid "Create a QR code that makes it easy for customers to leave reviews!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:275
+msgid ""
+"Create a review form to start collecting reviews directly on your website."
+msgstr ""
+
 #: app/Services/Widgets/Helper.php:30
 msgid "Create a template first"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:276
+msgid ""
+"Create and configure your notification popups that will be shown site-wide "
+"or on specific pages. You can create as many notification popups as you want."
 msgstr ""
 
 #: app/Services/DashboardNotices.php:420
 msgid "Create and manage video playlists easily"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:269
+msgid "Create Chat Widget"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:270
+msgid "Create Date"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:271
+msgid "Create Form"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:78
 msgid "Create notification popups for reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:277
+msgid ""
+"Create review forms, collect submissions, and moderate reviews — all from "
+"your site."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:272
+msgid "Create Template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:278
+msgid "Created"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1129
 msgid "Croatia"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:173
+msgid "CSV Header Structure"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1130
@@ -1278,11 +2298,26 @@ msgstr ""
 msgid "Cura&ccedil;ao"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:279
+msgid ""
+"Currently there is no custom reviews, You can add custom reviews from the "
+"below button."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:280
 #: app/Hooks/Handlers/AdminMenuHandler.php:650
 #: app/Services/Platforms/Reviews/ReviewsTrait.php:18
 #: app/Services/Platforms/Reviews/Helper.php:310
 #: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:50
 msgid "Custom"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:281
+msgid "Custom Bio Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:282
+msgid "Custom Button Text"
 msgstr ""
 
 #: app/Http/Controllers/Platforms/AddonController.php:58
@@ -1293,8 +2328,20 @@ msgstr ""
 msgid "Custom Feed for TikTok Plugin activated successfully"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:283
+msgid "Custom Notification Title"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:284
+msgid "Custom Number of Reviews Text"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:421
 msgid "Custom playlist layout styles"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:285
+msgid "Custom Profile Photo"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:477
@@ -1308,6 +2355,26 @@ msgstr ""
 
 #: app/Hooks/Handlers/AdminMenuHandler.php:126
 msgid "Custom Sources"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:286
+msgid "Custom Text/Translate"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:287
+msgid "Custom Title"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:288
+msgid "Custom Title Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:289
+msgid "Custom URL"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:290
+msgid "Custom Url"
 msgstr ""
 
 #: app/Http/Controllers/SettingsController.php:371
@@ -1330,8 +2397,16 @@ msgstr ""
 msgid "Customize chat widget style to match your brand"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:291
+msgid "Customize FluentCart Reviews Layout"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:534
 msgid "Customize popup style to match your brand"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:292
+msgid "Customize WooCommerce Reviews Layout"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1135
@@ -1346,12 +2421,28 @@ msgstr ""
 msgid "Dany Williams"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:293
+msgid "Dashed"
+msgstr ""
+
 #: app/Services/Widgets/Oxygen/FacebookWidget.php:234
 msgid "Date"
 msgstr ""
 
 #: app/Services/Widgets/FacebookFeedWidget.php:322
 msgid "Date Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:294
+msgid "Date Range Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:295
+msgid "Date:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:296
+msgid "Deactivate"
 msgstr ""
 
 #: app/Hooks/CLI/Commands.php:171
@@ -1362,8 +2453,48 @@ msgstr ""
 msgid "Decide the type of content you want to display."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:297
+msgid "Decoration"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:298
+msgid "Default"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:299
+msgid "Define the rating associated with the"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:301
+msgid "Delay before first notification. (Time should be in Millisecond.)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:300
+msgid "Delay Between"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:302
+msgid "Delay between each notification. (Time should be in Millisecond.)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:303
+msgid "Delete"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:305
+msgid "Delete all Platform Data?"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:304
+msgid "Delete QR Code"
+msgstr ""
+
 #: app/Http/Controllers/ShoppablesController.php:100
 msgid "Deleted Successfully."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:306
+msgid "Deliver Reports Every"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1122
@@ -1378,6 +2509,11 @@ msgstr ""
 msgid "Denmark"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:307
+msgid "Descending"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:308
 #: app/Services/Widgets/YoutubeWidget.php:194
 #: app/Services/Widgets/YoutubeWidget.php:536
 #: app/Services/Widgets/InstagramWidget.php:224
@@ -1426,12 +2562,41 @@ msgstr ""
 msgid "Description Line Height"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:309
+msgid "Description More Button:"
+msgstr ""
+
 #: app/Services/Widgets/Beaver/Facebook/FacebookWidget.php:123
 msgid "Description Typography"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:310
 #: app/Services/TranslationString.php:52
 msgid "Disabled"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:311
+msgid "Disapprove"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:312
+msgid "Disconnect"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:313
+msgid "Dislikes Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:316
+msgid "Display Account Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:314
+msgid "Display AI Summary"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:315
+msgid "Display AI Summary Icon"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:810
@@ -1453,8 +2618,105 @@ msgstr ""
 msgid "Display AliExpress product reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:317
+msgid "Display Author Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:318
+msgid "Display Author Photo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:319
+msgid "Display Avatar Image"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:320
+msgid "Display Banner"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:321
+msgid "Display Banner Image"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:322
+msgid "Display Bio Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:323
+msgid "Display Call to Action Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:324
+msgid "Display Caption"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:325
+msgid "Display Channel Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:326
+msgid "Display Chat Icon"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:327
+msgid "Display Close Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:328
+msgid "Display Comments"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:329
+msgid "Display Comments Count"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:330
+msgid "Display Comments Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:331
+msgid "Display Comments User Photo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:332
+msgid "Display Cover Photo"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:66
 msgid "Display customer reviews from various platforms"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:333
+msgid "Display Date"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:334
+msgid "Display Description"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:335
+msgid "Display Duration"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:394
+msgid ""
+"Display each notification for * seconds. (Time should be in Millisecond.)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:336
+msgid "Display Event Location"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:337
+msgid "Display Event Meta"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:338
+msgid "Display Event Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:339
+msgid "Display Event Photo"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:198
@@ -1469,20 +2731,164 @@ msgstr ""
 msgid "Display feeds from Facebook, Instagram, YouTube, TikTok & more"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:340
+msgid "Display Follow Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:341
+msgid "Display Follow Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:342
+msgid "Display Follower Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:343
+msgid "Display Followers"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:344
+msgid "Display Followers Count"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:345
+msgid "Display Followers Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:346
+msgid "Display Following"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:347
+msgid "Display For"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:348
+msgid "Display Full Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:349
+msgid "Display Gifs on Tweet"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:808
 msgid "Display Google Business Profile reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:350
+msgid "Display Header"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:351
+msgid "Display Images on Tweet"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:381
 msgid "Display Instagram posts by hashtags"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:352
+msgid "Display Like Action"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:353
+msgid "Display Like Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:354
+msgid "Display Like Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:355
+msgid "Display Likes Count"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:356
+msgid "Display Likes Counter"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:250
 msgid "Display live streams from a specific YouTube channel"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:357
+msgid "Display Location"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:358
+msgid "Display Logo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:359
+msgid "Display Media in Timeline Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:360
+msgid "Display Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:361
+msgid "Display Next Prev Arrows"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:362
+msgid "Display Page Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:363
+msgid "Display Photos & Videos in Popup:"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:210
 msgid "Display photos from a specific Facebook album"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:364
+msgid "Display Platform Icon"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:365
+msgid "Display Play Icon"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:366
+msgid "Display Play Icon:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:367
+msgid "Display Posts Count"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:395
+msgid "Display posts with"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:368
+msgid "Display Profile Photo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:369
+msgid "Display Quoted Tweet:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:370
+msgid "Display Rating"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:371
+msgid "Display Read More"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:372
+msgid "Display Reply Action"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:373
+msgid "Display Retweet Action"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:374
+msgid "Display Retweeted Tweet"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:472
@@ -1493,16 +2899,68 @@ msgstr ""
 msgid "Display reviews from unlimited sources"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:375
+msgid "Display Reviews in"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:376
+msgid "Display Share Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:377
+msgid "Display Shoppable Icon"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:378
+msgid "Display Sidebar"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:238
 msgid "Display specific videos from a YouTube channel"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:379
+msgid "Display Subscribe Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:380
+msgid "Display Subscriber Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:381
+msgid "Display Title"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:812
 msgid "Display TripAdvisor reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:382
+msgid "Display Tweet Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:383
+msgid "Display Tweets"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:384
+msgid "Display Username"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:385
+msgid "Display Verified Badge"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:386
+msgid "Display Video"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:244
 msgid "Display videos based on a specific search term"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:387
+msgid "Display Videos Counter"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:180
@@ -1517,8 +2975,32 @@ msgstr ""
 msgid "Display videos from a specific YouTube playlist"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:388
+msgid "Display Videos on Tweet"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:389
+msgid "Display Views Count"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:390
+msgid "Display Views Counter"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:816
 msgid "Display WooCommerce product reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:391
+msgid "Display X (Twitter) Card"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:392
+msgid "Display X (Twitter) Logo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:393
+msgid "Display X (Twitter) Player Card"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:634
@@ -1598,8 +3080,56 @@ msgstr ""
 msgid "Dominican Republic"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:396
+msgid "Dots"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:397
+msgid "Dotted"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:398
+msgid "Double"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:399
+msgid "Download Sample CSV"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:400
+msgid "Download the QR code and distribute as needed."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:401
+msgid "Drawer Style"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:402
+msgid "Duplicate"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:403
+msgid "Duplicate Message"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1147
 msgid "Ecuador"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:404
+msgid "Edit"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:405
+msgid "Edit Manager"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:406
+msgid "Edit QR code"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:407
+msgid "Edit Template"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1148
@@ -1637,16 +3167,140 @@ msgstr ""
 msgid "Embed videos from any YouTube channel directly"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:408
+msgid "Emoji"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:552
 msgid "Enable a smooth popup chat experience"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:409
+msgid "Enable AI Review Summarizer"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:410
+msgid "Enable Email Reports"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:411
+msgid "Enable External Links"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:412
+msgid "Enable Schema.org Markup"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:413
+msgid "Enable Shoppable Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:414
+msgid ""
+"Enable this option to generate and optimized images in multiple sizes using "
+"your WordPress local storage for improved performance"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:415
+msgid ""
+"Enable this option to generate and optimized images in multiple sizes using "
+"your WordPress local storage for improved performance."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:416
+msgid ""
+"Enable this option to use AI-powered review summarization feature. When "
+"disabled, the AI settings will be hidden but your configuration will be "
+"preserved."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:417
 #: app/Services/TranslationString.php:51
 msgid "Enabled"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:418
+msgid "Encryption Error"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:419
+msgid "End Time"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:405
 msgid "Engaging Facebook Video Feeds"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:426
+msgid "Enter a valid URL starting with http:// or https://"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:420
+msgid "Enter Album ID/ URL"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:428
+msgid "Enter any hashtag to display posts from a hashtag."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:427
+msgid ""
+"Enter any Playlist ID to display YouTube videos from a Playlist. You can "
+"find the ID of your YouTube Playlist from the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:429
+msgid "Enter any search term or phrase. Separate multiple terms with commas."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:430
+msgid ""
+"Enter any video ID to display specific TikTok videos. Separate multiple "
+"video IDs with commas."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:431
+msgid ""
+"Enter any video ID to display specific YouTube videos. Separate multiple "
+"video IDs with commas. You can find the ID from the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:421
+msgid ""
+"Enter Channel ID, Handle or Username. For example: @yourchannel or "
+"UCibcXdeKy8e04hYWf0Gz7ow"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:422
+msgid "Enter Custom URL"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:423
+msgid "Enter Custom Url"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:432
+msgid "Enter hashtags using comma separator"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:433
+msgid "Enter keywords separated by commas (e.g. scam, fake, spam)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:424
+msgid "Enter QR code name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:436
+msgid "Enter your business URL to get your reviews:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:434
+msgid "Enter your Cloudflare Turnstile secret key. It will be stored securely."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:435
+msgid "Enter your Cloudflare Turnstile site key."
 msgstr ""
 
 #: app/Services/Platforms/Chats/SocialChat.php:141
@@ -1695,6 +3349,14 @@ msgstr ""
 msgid "Enter Your Phone Number:"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:437
+msgid "Enter your playlist id"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:438
+msgid "Enter your search term"
+msgstr ""
+
 #: app/Services/Platforms/Chats/SocialChat.php:197
 msgid "Enter Your Slack Username or Link:"
 msgstr ""
@@ -1715,8 +3377,20 @@ msgstr ""
 msgid "Enter Your Viber Mobile Number:"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:439
+msgid "Enter your video id using comma separator"
+msgstr ""
+
 #: app/Services/Platforms/Chats/SocialChat.php:260
 msgid "Enter Your WeChat UserID:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:425
+msgid "Enter Your WP Social Ninja Pro License Key to Get Started"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:440
+msgid "Equal Height"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1155
@@ -1725,6 +3399,10 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1157
 msgid "Eritrea"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:441
+msgid "Error"
 msgstr ""
 
 #: app/Services/Platforms/Reviews/Airbnb.php:223
@@ -1755,6 +3433,7 @@ msgstr ""
 msgid "Error in API key settings,Please check your API key is valid or not."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:442
 #: app/Services/TranslationString.php:56
 msgid "Error Logs"
 msgstr ""
@@ -1810,6 +3489,18 @@ msgstr ""
 msgid "Event Title"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:443
+msgid "Event Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:444
+msgid "Events"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:445
+msgid "Events Access Token"
+msgstr ""
+
 #: app/Hooks/filters.php:45
 msgid "Every 1 Week"
 msgstr ""
@@ -1826,13 +3517,37 @@ msgstr ""
 msgid "Every 3 Day"
 msgstr ""
 
-#: app/Services/Helper.php:275 app/Services/Helper.php:303
-#: app/Services/Helper.php:351
+#: app/Services/TranslationStrings.php:446 app/Services/Helper.php:275
+#: app/Services/Helper.php:303 app/Services/Helper.php:351
 msgid "Everywhere"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1047
+msgid "ex: -15 days"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:447
+msgid "Ex: 1"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1048
+msgid "ex: now"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:448
+msgid "Exclude Pages to Hide Chat"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:449
+msgid "Exclude Pages to Hide Notification"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:508
 msgid "Exclude reviews without text for cleaner display"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:450
+msgid "Experiences"
 msgstr ""
 
 #: app/Hooks/CLI/Commands.php:105
@@ -1841,6 +3556,10 @@ msgstr ""
 
 #: app/Hooks/CLI/Commands.php:149
 msgid "Expires: "
+msgstr ""
+
+#: app/Services/TranslationStrings.php:451
+msgid "Export"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:483
@@ -1856,12 +3575,20 @@ msgstr ""
 msgid "Facebook"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:452
+msgid "Facebook Access Token"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:453
+msgid "Facebook Event Default"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:790
 #: app/Services/Platforms/Feeds/Facebook/FacebookFeed.php:56
 msgid "Facebook Feed"
 msgstr ""
 
-#: app/Models/Post.php:180 app/Http/Controllers/TemplatesController.php:95
+#: app/Models/Post.php:194 app/Http/Controllers/TemplatesController.php:95
 msgid "Facebook Feed Template"
 msgstr ""
 
@@ -1877,6 +3604,10 @@ msgid ""
 "enable the optimize images option."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:454
+msgid "Facebook Page ID"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:682
 #: app/Services/Onboarding/OnboardingService.php:780
 #: app/Hooks/Handlers/AdminMenuHandler.php:576
@@ -1888,6 +3619,10 @@ msgstr ""
 msgid "Facebook Video Playlists on Your Site"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:455
+msgid "Failed to complete setup. Please try again."
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:118
 msgid "Failed to save onboarding data"
 msgstr ""
@@ -1896,20 +3631,60 @@ msgstr ""
 msgid "Failed to skip onboarding"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:456
+msgid "Failed to skip setup"
+msgstr ""
+
+#: app/Http/Controllers/TemplatesController.php:283
+msgid "Failed to update title"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1162
 msgid "Falkland Islands"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:457
+msgid "Fallback Average Rating"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:458
+msgid "Fallback Total Rating"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1166
 msgid "Faroe Islands"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:459
+msgid "Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1049
+msgid "feed automatically,"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:482
 msgid "Feed caching for faster load times"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:460
+msgid "Feed Issue Email Reports"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:461
+msgid "Feed Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:462
+msgid "Feed Type"
+msgstr ""
+
 #: app/Services/Platforms/PlatformErrorManager.php:214
 msgid "Feed will not update."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1050
+msgid "feed."
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:560
@@ -1923,6 +3698,18 @@ msgstr ""
 
 #: app/Services/Widgets/Oxygen/OxygenWidget.php:47
 msgid "Feeds"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1051
+msgid "feeds are temporarily cached by our plugin in your WordPress database."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:463
+msgid "Feeds Per Page"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:464
+msgid "Feeds Platforms"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:674
@@ -1952,6 +3739,14 @@ msgid ""
 "audiences for better brand exposure."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:465
+msgid "Fetch Feeds"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:466
+msgid "Fetch Videos"
+msgstr ""
+
 #: app/Hooks/CLI/Commands.php:132
 msgid "Fetching license details, please wait..."
 msgstr ""
@@ -1974,6 +3769,14 @@ msgstr ""
 msgid "Filter and select specific albums"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:467
+msgid "Filter by Business/Product"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:468
+msgid "Filter by Category"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:732
 #: app/Hooks/Handlers/AdminMenuHandler.php:685
 msgid "Filter by minimum rating"
@@ -1987,6 +3790,14 @@ msgstr ""
 msgid "Filter reviews by minimum rating threshold"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:469
+msgid "Filters"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:470
+msgid "Filters by Minimum Rating"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:201
 msgid "Finish"
 msgstr ""
@@ -1995,12 +3806,58 @@ msgstr ""
 msgid "Finland"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:472
+msgid "First Name and Initial of Last Name (John W.)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:471
+msgid "First Name Only (John)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:473
+msgid "Float Bottom Left"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:474
+msgid "Float Bottom Right"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:475
+msgid "Float Left Bottom"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:476
+msgid "Float Right Bottom"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:477
+msgid "Float Top Left"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:478
+msgid "Float Top Right"
+msgstr ""
+
 #: app/Hooks/Handlers/AdminMenuHandler.php:626
 msgid "Fluent Cart"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:480
+msgid ""
+"Fluent Cart is not active. Reviews will fall back to generic mode until "
+"reactivated."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:479
+msgid "Fluent Cart Product"
+msgstr ""
+
 #: app/Hooks/Handlers/AdminMenuHandler.php:640
 msgid "Fluent Cart Reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:481
+msgid "Fluent Form Shortcode ID"
 msgstr ""
 
 #: app/Services/Platforms/Chats/SocialChat.php:325
@@ -2009,6 +3866,7 @@ msgid ""
 "pages/posts not while you're in editing mode in the WordPress Editor."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:482
 #: app/Http/Controllers/Platforms/AddonController.php:69
 msgid "Fluent Forms"
 msgstr ""
@@ -2021,6 +3879,10 @@ msgstr ""
 msgid "Fluent Forms Reviews Template"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:483
+msgid "Fluent Forms will only display on your site's preview/live pages/posts."
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:788
 msgid "FluentCart"
 msgstr ""
@@ -2029,6 +3891,7 @@ msgstr ""
 msgid "Follow"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:484
 #: app/Services/Widgets/InstagramWidget.php:254
 #: app/Services/Widgets/TwitterWidget.php:382
 #: app/Services/Widgets/Oxygen/InstagramWidget.php:204
@@ -2039,6 +3902,10 @@ msgstr ""
 #: app/Services/Widgets/Beaver/Twitter/TwitterWidget.php:155
 #: app/Services/Widgets/Beaver/Instagram/InstagramWidget.php:144
 msgid "Follow Button Background Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:485
+msgid "Follow Button Position"
 msgstr ""
 
 #: app/Services/Widgets/Beaver/Twitter/TwitterWidget.php:145
@@ -2065,14 +3932,17 @@ msgstr ""
 msgid "Follow this URL format example(https://t.me/myusername or username)"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:486
 #: app/Services/TranslationString.php:21
 msgid "Followers"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1052
 #: app/Views/public/feeds-templates/facebook/header.php:95
 msgid "followers"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:487
 #: app/Services/TranslationString.php:20
 msgid "Following"
 msgstr ""
@@ -2124,8 +3994,25 @@ msgstr ""
 msgid "Font Weight"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:488
 #: app/Services/Platforms/Feeds/Youtube/Config.php:309
 msgid "Footer"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:489
+msgid "Form Display"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:490
+msgid "Form Fields"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:491
+msgid "Form Shortcode ID"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:492
+msgid "Form Title"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1170
@@ -2148,12 +4035,28 @@ msgstr ""
 msgid "Friday"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:493
+msgid "From"
+msgstr ""
+
 #: app/Services/PermissionManager.php:11
 msgid "Full Access"
 msgstr ""
 
 #: app/Services/Widgets/TwitterWidget.php:99
 msgid "Full Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:494
+msgid "Full Name (John Wick)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:495
+msgid "Full Size (150*150)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:496
+msgid "Full Size (640*640)"
 msgstr ""
 
 #: app/Services/Widgets/InstagramWidget.php:194
@@ -2183,10 +4086,15 @@ msgstr ""
 msgid "Gabon"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:497
+msgid "Gallery"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1184
 msgid "Gambia"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:498
 #: app/Services/Onboarding/OnboardingService.php:540
 #: app/Services/Widgets/Beaver/Twitter/TwitterWidget.php:53
 #: app/Services/Widgets/Beaver/Instagram/InstagramWidget.php:53
@@ -2198,6 +4106,14 @@ msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:541
 msgid "General purpose chat widget"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:499
+msgid "General Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:500
+msgid "Generate"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1185
@@ -2214,6 +4130,10 @@ msgid ""
 "level."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:501
+msgid "Get Reviews via QR Code"
+msgstr ""
+
 #: app/Hooks/filters.php:156
 msgid "Get Support"
 msgstr ""
@@ -2226,21 +4146,30 @@ msgstr ""
 msgid "Gibraltar"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:502
+msgid "Global Feed Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:503
+msgid "Global Review Settings"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:199
 msgid "Go Back"
 msgstr ""
 
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
-#: app/Hooks/Handlers/ShortcodeHandler.php:1156
+#: app/Hooks/Handlers/ShortcodeHandler.php:1157
 #, php-format
 msgid "Go to slide %s"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:504
 #: app/Services/TranslationString.php:42
 msgid "Going"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1143
+#: app/Hooks/Handlers/ShortcodeHandler.php:1144
 msgid "going"
 msgstr ""
 
@@ -2249,16 +4178,21 @@ msgstr ""
 msgid "Google"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:505
 #: app/Hooks/Handlers/AdminMenuHandler.php:410
 msgid "Google Business Profile"
 msgstr ""
 
-#: app/Models/Post.php:178 app/Http/Controllers/TemplatesController.php:93
+#: app/Models/Post.php:192 app/Http/Controllers/TemplatesController.php:93
 msgid "Google Business Profile Template"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:475
 msgid "Google Rich Snippet support for SEO"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:506
+msgid "Grab Your Pro License Here"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1189
@@ -2273,8 +4207,16 @@ msgstr ""
 msgid "Greet visitors with a personalized welcome message"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:507
+msgid "Greeting Message"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1191
 msgid "Grenada"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:508
+msgid "Grid"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:528
@@ -2288,6 +4230,10 @@ msgstr ""
 
 #: app/Hooks/Handlers/AdminMenuHandler.php:678
 msgid "Grid/Slider/Masonry/Badge layout variation"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:509
+msgid "Groove"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1192
@@ -2334,6 +4280,10 @@ msgid ""
 "to us. Take ♥ from the team!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:510
+msgid "Hashtag"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:480
 msgid "Hashtag and keyword-based feed filtering"
 msgstr ""
@@ -2351,6 +4301,15 @@ msgstr ""
 msgid "Hashtag Feed"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:511
+msgid "Hashtag Types"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:512
+msgid "Hashtags"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:513
 #: app/Services/Widgets/YoutubeWidget.php:89
 #: app/Services/Widgets/InstagramWidget.php:90
 #: app/Services/Widgets/FacebookFeedWidget.php:563
@@ -2369,6 +4328,7 @@ msgstr ""
 msgid "Header"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:514
 #: app/Services/Widgets/Beaver/Twitter/TwitterWidget.php:75
 #: app/Services/Widgets/Beaver/Instagram/InstagramWidget.php:75
 #: app/Services/Widgets/Beaver/YouTube/YouTubeWidget.php:75
@@ -2382,12 +4342,28 @@ msgstr ""
 msgid "Header Box"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:515
+msgid "Header Caption Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:516
+msgid "Header Template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:517
+msgid "Header Title Color"
+msgstr ""
+
 #: app/Services/Widgets/ReviewsWidget.php:101
 msgid "Header/Business Info"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1205
 msgid "Heard Island and McDonald Islands"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:518
+msgid "Heart"
 msgstr ""
 
 #: app/Services/Platforms/Chats/Config.php:18
@@ -2411,12 +4387,57 @@ msgid ""
 "Hi there👋 Quick question - How do you like our WP Social Ninja plugin so far?"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:519
+msgid "Hide Chat on Desktop"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:556
 msgid "Hide Chat on Desktop or Mobile"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:520
+msgid "Hide Chat on Mobile"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:521
+msgid "Hide Notification on Desktop"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:522
+msgid "Hide Notification on Mobile"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:526
+msgid "Hide posts containing these words or hashtags"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:523
+msgid "Hide Rating Count from Product Listings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:527
+msgid "Hide reviews containing these words"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:511
 msgid "Hide reviews with unwanted keywords"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:524
+msgid "Hide Specific Posts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:525
+msgid "Hide Specific Videos"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:528
+msgid ""
+"Hide the review count text next to the star rating on product listing pages."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:529
+msgid "High"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:451
@@ -2427,12 +4448,24 @@ msgstr ""
 msgid "Highlight happy customers without disrupting the user experience"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:530
+msgid "Home Timeline"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1207
 msgid "Honduras"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:531
+msgid "Honeypot"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1208
 msgid "Hong Kong"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:532
+msgid "Horizontal"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:506
@@ -2458,6 +4491,10 @@ msgstr ""
 #: app/Services/Platforms/Feeds/Facebook/Config.php:547
 #: app/Services/Platforms/Feeds/Facebook/Config.php:614
 msgid "Hover Style"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:533
+msgid "How WPSN Works:"
 msgstr ""
 
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
@@ -2514,6 +4551,20 @@ msgstr ""
 msgid "Icon Width"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:534
+msgid "ID"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:535
+msgid ""
+"If the feed is down due to a critical issue, we will notify you based on "
+"these settings."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:536
+msgid "If you are experiencing an issue with the plugin not updating your"
+msgstr ""
+
 #: app/Services/Platforms/PlatformErrorManager.php:219
 msgid ""
 "If you need to display more than 30 hashtag feeds on your site, consider "
@@ -2522,8 +4573,38 @@ msgid ""
 "the same Facebook page will not raise the limit."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:537
+msgid ""
+"If you paste the URL of the album, it will automatically extract the ID."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:538
+msgid ""
+"If you paste the URL of the playlist, it will automatically extract the ID."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:539
+msgid "Image Aspect Ratio"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:540
+msgid "Images Only"
+msgstr ""
+
 #: app/Http/Controllers/SettingsController.php:319
 msgid "Images reset successfully!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:541
+msgid "Images Resolution"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:542
+msgid "Import"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1053
+msgid "in"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:733
@@ -2531,8 +4612,24 @@ msgstr ""
 msgid "In-depth header settings"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:543
+msgid "Include Business Address"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:509
 msgid "Include or exclude specific reviews with ease"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:544
+msgid "Include Pages to Display Chat"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:545
+msgid "Include Pages to Display Notification"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:546
+msgid "Include Shoppable by Hashtags"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:474 app/Services/DashboardNotices.php:735
@@ -2546,6 +4643,34 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1212
 msgid "Indonesia"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:547
+msgid "Infinite Scroll"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1054
+msgid "information"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:548
+msgid "Inherit Site Default Date Format"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:549
+msgid "Initial Delay"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:550
+msgid "Initials Only (J. W.)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:551
+msgid "Inline"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:552
+msgid "Inset"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:789
@@ -2574,6 +4699,10 @@ msgstr ""
 msgid "Instagram Successfully Connected!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:553
+msgid "Instagram User ID"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:519
 msgid "Instantly condense long reviews into digestible highlights"
 msgstr ""
@@ -2582,15 +4711,16 @@ msgstr ""
 msgid "Interactive elements like hover effects"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:554
 #: app/Services/TranslationString.php:41
 msgid "Interested"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1142
+#: app/Hooks/Handlers/ShortcodeHandler.php:1143
 msgid "interested"
 msgstr ""
 
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:344
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:347
 msgid "Invalid action value"
 msgstr ""
 
@@ -2611,11 +4741,11 @@ msgid ""
 "Handle"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1245
+#: app/Hooks/Handlers/ShortcodeHandler.php:1254
 msgid "Invalid nonce."
 msgstr ""
 
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:307
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:310
 msgid "Invalid status value"
 msgstr ""
 
@@ -2627,6 +4757,10 @@ msgstr ""
 msgid ""
 "Invalid YouTube handle format. Handles should be 3-30 characters and contain "
 "only letters, numbers, underscores, and periods."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:555
+msgid "Invisible"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1213
@@ -2647,6 +4781,15 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1220
 msgid "Israel"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:556
+msgid ""
+"It will not display while you are in editing mode in the WordPress Editor."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:557
+msgid "Italic"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1221
@@ -2700,6 +4843,7 @@ msgid "Jordan"
 msgstr ""
 
 #. {review_rating} is a placeholder for the star rating value
+#: app/Services/TranslationStrings.php:558
 #: app/Services/Platforms/Reviews/Helper.php:245
 msgid "Just left us a {review_rating} star review"
 msgstr ""
@@ -2734,12 +4878,36 @@ msgstr ""
 msgid "Kyrgyzstan"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:559
+msgid "Label"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1236
 msgid "Laos"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1237
 msgid "Latvia"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:560
+msgid "Layout"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:561
+msgid "Layout Styling"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:562
+msgid "Layout Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:563
+msgid "Learn more"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:564
+msgid "Least Popular"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1238
@@ -2761,6 +4929,10 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1239
 msgid "Lesotho"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:565
+msgid "Letter Spacing"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1240
@@ -2797,6 +4969,14 @@ msgstr ""
 msgid "Like and Share Button"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:566
+msgid "Like Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:567
+msgid "Like Button Position"
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Config.php:517
 msgid "Like Page"
 msgstr ""
@@ -2805,13 +4985,15 @@ msgstr ""
 msgid "Like/Share Button"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:568
 #: app/Services/TranslationString.php:25 app/Services/TranslationString.php:38
 #: app/Services/Widgets/FacebookFeedWidget.php:667
 #: app/Services/Platforms/Feeds/Facebook/Config.php:71
 msgid "Likes"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1141
+#: app/Services/TranslationStrings.php:1055
+#: app/Hooks/Handlers/ShortcodeHandler.php:1142
 #: app/Views/public/feeds-templates/facebook/header.php:85
 msgid "likes"
 msgstr ""
@@ -2820,12 +5002,17 @@ msgstr ""
 msgid "Likes Count Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:569
 #: app/Services/Widgets/Oxygen/FacebookWidget.php:118
 msgid "Likes Counter"
 msgstr ""
 
 #: app/Services/Widgets/Beaver/Facebook/FacebookWidget.php:132
 msgid "Likes Counter Typography"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:570
+msgid "Likes Ratio:"
 msgstr ""
 
 #: app/Services/Widgets/Oxygen/InstagramWidget.php:71
@@ -2849,6 +5036,14 @@ msgstr ""
 msgid "Line Height"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:571
+msgid "Line Through"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:572
+msgid "Line-Height"
+msgstr ""
+
 #: app/Services/Widgets/FacebookFeedWidget.php:414
 #: app/Services/Widgets/TwitterWidget.php:217
 #: app/Services/Widgets/Oxygen/TwitterWidget.php:134
@@ -2869,6 +5064,14 @@ msgstr ""
 msgid "Link Instagram posts to WooCommerce or external products"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:574
+msgid "Link of the person who is the author of the"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:573
+msgid "Link To"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1246
 msgid "Lithuania"
 msgstr ""
@@ -2877,10 +5080,19 @@ msgstr ""
 msgid "LIVE"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:575
+msgid "Live"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:576
+msgid "Live Streams"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:249
 msgid "Live Streams Feed"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:577
 #: app/Services/Platforms/Feeds/Config.php:42
 #: app/Services/Platforms/Feeds/Config.php:252
 #: app/Services/Platforms/Feeds/Config.php:383
@@ -2897,6 +5109,14 @@ msgstr ""
 msgid "Load More Button"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:578
+msgid "Load More Button Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:579
+msgid "Loading your setup..."
+msgstr ""
+
 #: app/Services/Widgets/TwitterWidget.php:257
 #: app/Services/Widgets/Oxygen/TwitterWidget.php:167
 msgid "Location"
@@ -2904,6 +5124,14 @@ msgstr ""
 
 #: app/Services/Widgets/Beaver/Twitter/TwitterWidget.php:115
 msgid "Location Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:580
+msgid "Log in to X (Twitter) And Get My Access Token & Secret Key"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:581
+msgid "Lowercase"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1247
@@ -2920,6 +5148,10 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1253
 msgid "Madagascar"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:582
+msgid "Make WP Social Ninja Your Main Review Hub"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1254
@@ -2942,12 +5174,28 @@ msgstr ""
 msgid "Malta"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:586
+msgid "Manage all your custom sources from here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:587
+msgid "Manage and view all reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:583
+msgid "Manage Channels"
+msgstr ""
+
 #: app/Services/PermissionManager.php:53
 msgid "Manage Chat Widgets"
 msgstr ""
 
 #: app/Services/PermissionManager.php:59
 msgid "Manage Feeds Platforms Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:584
+msgid "Manage Instagram Accounts"
 msgstr ""
 
 #: app/Services/PermissionManager.php:83
@@ -2992,6 +5240,30 @@ msgstr ""
 
 #: app/Services/PermissionManager.php:77
 msgid "Manage Translation Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:585
+msgid "Manage Your Facebook Pages"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:588
+msgid "Manage your review collection forms"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:589
+msgid "Managed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:590
+msgid "Management Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:591
+msgid "Managers"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:592
+msgid "Manually enter your"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:744
@@ -3042,6 +5314,10 @@ msgstr ""
 msgid "Margin"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:593
+msgid "Mark as Spam"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1261
 msgid "Marshall Islands"
 msgstr ""
@@ -3050,6 +5326,7 @@ msgstr ""
 msgid "Martinique"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:594
 #: app/Services/Onboarding/OnboardingService.php:419
 #: app/Services/Onboarding/OnboardingService.php:473
 msgid "Masonry"
@@ -3067,8 +5344,44 @@ msgstr ""
 msgid "Mauritius"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:595
+msgid "Max Files"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:596
+msgid "Max Length"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:597
+msgid "Max Size (MB)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:598
+msgid "Max Stars"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1266
 msgid "Mayotte"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:599
+msgid "Medium (120*120)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:600
+msgid "Medium (320*320)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:601
+msgid "Mentions"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:602
+msgid "Message Background Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:603
+msgid "Message Text Color"
 msgstr ""
 
 #: app/Services/Widgets/TwitterWidget.php:534
@@ -3089,6 +5402,14 @@ msgstr ""
 msgid "Mimosa"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:604
+msgid "Minimum Rating Required"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:605
+msgid "Minimum Review Length"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:540
 msgid "Mobile-friendly and lightweight performance"
 msgstr ""
@@ -3101,6 +5422,10 @@ msgstr ""
 msgid "Mobile-optimized and responsive design"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:606
+msgid "Model"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:447
 msgid "Moderate album visibility and order"
 msgstr ""
@@ -3111,6 +5436,10 @@ msgstr ""
 
 #: app/Services/DashboardNotices.php:435
 msgid "Moderate events for clean presentation"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:607
+msgid "Modern"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1269
@@ -3146,6 +5475,22 @@ msgstr ""
 msgid "Morocco"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:608
+msgid "Most Liked"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:609
+msgid "Most Popular"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:610
+msgid "Most Recent"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:611
+msgid "Most Viewed"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1275
 msgid "Mozambique"
 msgstr ""
@@ -3162,8 +5507,16 @@ msgstr ""
 msgid "Multiple custom video layouts"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1056
+msgid "multiple images."
+msgstr ""
+
 #: app/Services/DashboardNotices.php:494
 msgid "Multiple modern layout styles"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:612
+msgid "Multiple Photos"
 msgstr ""
 
 #: app/Services/Platforms/Chats/SocialChat.php:299
@@ -3210,14 +5563,39 @@ msgstr ""
 msgid "Name Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:613
+msgid "Name of the author of the"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1277
 msgid "Namibia"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:614
+msgid "Narrow"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:615
+msgid "Native Form (Generic)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:616
+msgid "Native Form CAPTCHA Settings"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1278
 msgid "Nauru"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:617
+msgid "Navigation"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:618
+msgid "Navigation Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:619
 #: app/Services/Platforms/Chats/Config.php:123
 msgid "Need Help?"
 msgstr ""
@@ -3230,15 +5608,31 @@ msgstr ""
 msgid "Netherlands"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:620
+msgid "New"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1286
 msgid "New Caledonia"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:621
+msgid "New Manager"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:622
+msgid "New Review Form"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1290
 msgid "New Zealand"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1152
+#: app/Services/TranslationStrings.php:623
+msgid "Newest"
+msgstr ""
+
+#: app/Hooks/Handlers/ShortcodeHandler.php:1153
 msgid "Next slide"
 msgstr ""
 
@@ -3258,6 +5652,10 @@ msgstr ""
 msgid "Niue"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:624
+msgid "No"
+msgstr ""
+
 #: app/Services/Platforms/Feeds/CacheHandler.php:165
 msgid "No connected accounts found for this template."
 msgstr ""
@@ -3266,14 +5664,43 @@ msgstr ""
 msgid "No credential found. Please configure your YouTube settings correctly."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:632
+msgid "No credentials present."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:625
+msgid "No Gap"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:626
+msgid "No Manager found yet"
+msgstr ""
+
 #: app/Http/Controllers/NotificationsController.php:115
-#: app/Http/Controllers/NotificationsController.php:180
-#: app/Http/Controllers/NotificationsController.php:240
+#: app/Http/Controllers/NotificationsController.php:181
+#: app/Http/Controllers/NotificationsController.php:243
 msgid "No notifications selected"
 msgstr ""
 
 #: app/Http/Controllers/SettingsController.php:479
 msgid "No platforms found!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:627
+msgid "No QR Code Found Yet"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:628
+msgid "No Review Forms"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:633
+msgid "No review forms found"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:634
+msgid ""
+"No reviews found yet. Please connect your review platforms and fetch reviews"
 msgstr ""
 
 #: app/Services/Platforms/Reviews/Airbnb.php:317
@@ -3284,11 +5711,19 @@ msgstr ""
 msgid "No reviews found!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:629
+msgid "No Reviews in This Source"
+msgstr ""
+
 #: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:189
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:268
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:302
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:338
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:271
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:305
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:341
 msgid "No reviews selected"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:630
+msgid "No Sources"
 msgstr ""
 
 #: app/Hooks/Handlers/ShortcodeHandler.php:100
@@ -3302,6 +5737,10 @@ msgstr ""
 #: app/Http/Controllers/TemplatesController.php:158
 #: app/Http/Controllers/TemplatesController.php:232
 msgid "No templates selected"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:631
+msgid "No Testimonial Found Yet"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Youtube/YoutubeFeed.php:590
@@ -3319,16 +5758,29 @@ msgstr ""
 
 #: app/Http/Controllers/WidgetsController.php:109
 #: app/Http/Controllers/WidgetsController.php:176
-#: app/Http/Controllers/WidgetsController.php:230
+#: app/Http/Controllers/WidgetsController.php:232
 msgid "No widgets selected"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:635
+msgid "Non-interactive"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:636
+msgid "None"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:637
 #: app/Services/TranslationString.php:54
 msgid "None Enabled"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1298
 msgid "Norfolk Island"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:638
+msgid "Normal"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1306
@@ -3343,9 +5795,33 @@ msgstr ""
 msgid "Norway"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:639
+msgid "Not Configured"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:640
+msgid "Not Spam"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:641
+msgid "Note:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:642
+msgid "Notification"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:77
 #: app/Hooks/Handlers/AdminMenuHandler.php:111
 msgid "Notification Popups"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:643
+msgid "Notification Position"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:644
+msgid "Number"
 msgstr ""
 
 #: app/Services/Widgets/Oxygen/InstagramWidget.php:97
@@ -3353,8 +5829,48 @@ msgstr ""
 msgid "Number Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:645
+msgid "Number of Columns"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:646
+msgid "Number of Feeds to Display"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:647
+msgid "Number of Posts to Display"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:648
+msgid "Number of Reviews to Include"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:652
+msgid "Number of reviews:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:649
+msgid "Number of Rows :"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:650
+msgid "Number of Tweets to Display"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:651
+msgid "Number of Videos to Display"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:654
+msgid "Oblique"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:397
 msgid "Offer a seamless in-feed shopping experience"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:655
+msgid "Oldest"
 msgstr ""
 
 #: app/Services/Platforms/Chats/Config.php:131
@@ -3365,6 +5881,7 @@ msgstr ""
 msgid "Oman"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:656
 #: app/Services/TranslationString.php:30
 msgid "On"
 msgstr ""
@@ -3381,23 +5898,112 @@ msgstr ""
 msgid "Onboarding skipped successfully!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:657
+msgid "One Per Email"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:658
 #: app/Services/TranslationString.php:40
-#: app/Hooks/Handlers/ShortcodeHandler.php:1138
+#: app/Hooks/Handlers/ShortcodeHandler.php:1139
 msgid "Online Event"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:659
+msgid "Only Icons"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:661
+msgid "Only publish reviews from verified purchases automatically."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:660
+msgid "Only Text"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Twitter/TwitterApi.php:264
 msgid "Oops, Somethings wrong. "
 msgstr ""
 
+#: app/Services/TranslationStrings.php:665
+msgid "Open in a new tab"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:666
+msgid "Open in new tab"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:667
+msgid "Open in new window"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:664
+msgid "Open in Popup Box"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:668
+msgid "Open on Facebook"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:669
+msgid "Open on Instagram"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:670
+msgid "Open on TikTok"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:662
+msgid "Open Post In"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:671
+msgid "Open review drawer"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:663
+msgid "Open Tweet Actions in"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:672
+msgid "Optimize Image Format Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:673
+msgid "Optimize Images"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:445
 msgid "Optimized for all screen sizes"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:653
+msgid "OR"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:674
+msgid "Or"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:675
+msgid "Or Display by Post Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:676
+msgid "Or Upload Custom Icon"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:418
 msgid ""
 "Organize your video content into engaging playlists and deliver a Netflix-"
 "style experience right on your website."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:677
+msgid "Overall Rating"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:678
+msgid "Overline"
 msgstr ""
 
 #: app/Services/Widgets/YoutubeWidget.php:289
@@ -3462,6 +6068,10 @@ msgstr ""
 msgid "Padding"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:679
+msgid "Page"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:484
 msgid "Page builder integrations (Elementor, Beaver Builder, etc.)"
 msgstr ""
@@ -3474,6 +6084,7 @@ msgstr ""
 msgid "PageName Typography"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:680
 #: app/Services/Widgets/YoutubeWidget.php:626
 #: app/Services/Widgets/InstagramWidget.php:525
 #: app/Services/Widgets/FacebookFeedWidget.php:90
@@ -3487,6 +6098,10 @@ msgstr ""
 #: app/Services/Platforms/Feeds/Youtube/Config.php:242
 #: app/Services/Platforms/Feeds/Facebook/Config.php:579
 msgid "Pagination"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:681
+msgid "Pagination Type"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1310
@@ -3517,8 +6132,13 @@ msgstr ""
 msgid "Paste Your Fluent Form Shortcode:"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:682
+msgid "Pending"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:683
 #: app/Services/TranslationString.php:39
-#: app/Hooks/Handlers/ShortcodeHandler.php:1137
+#: app/Hooks/Handlers/ShortcodeHandler.php:1138
 msgid "People Responded"
 msgstr ""
 
@@ -3530,8 +6150,17 @@ msgstr ""
 msgid "Philippines"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:684
 #: app/Views/public/feeds-templates/facebook/elements/media.php:26
 msgid "Photo"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:685
+msgid "Photos"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:686
+msgid "Pick any day for your weekly email summary"
 msgstr ""
 
 #: app/Http/Controllers/OnboardingController.php:179
@@ -3542,6 +6171,11 @@ msgstr ""
 msgid "Pitcairn"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:687
+msgid "Placeholder"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:688
 #: app/Services/Widgets/Beaver/Reviews/ReviewsWidget.php:205
 msgid "Platform"
 msgstr ""
@@ -3550,10 +6184,18 @@ msgstr ""
 msgid "Platform Background Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:689
+msgid "Platform Configuration"
+msgstr ""
+
 #: app/Services/Widgets/InstagramWidget.php:631
 #: app/Services/Widgets/FacebookFeedWidget.php:772
 #: app/Services/Widgets/TwitterWidget.php:921
 msgid "Platform Icon Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:690
+msgid "Platform Label"
 msgstr ""
 
 #: app/Services/Widgets/ReviewsWidget.php:622
@@ -3561,6 +6203,7 @@ msgstr ""
 msgid "Platform Name"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:691
 #: app/Hooks/Handlers/AdminMenuHandler.php:71
 msgid "Platforms"
 msgstr ""
@@ -3569,8 +6212,24 @@ msgstr ""
 msgid "Platforms BusinessInfo"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:692
+msgid "Play Mode"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:693
+msgid "Playlist"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:231
 msgid "Playlist Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:694
+msgid "Playlist ID"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:695
+msgid "Playlist URL"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Twitter/TwitterApi.php:269
@@ -3588,6 +6247,10 @@ msgid ""
 "Please check, you allow all access in wp social ninja facebook app correctly."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:696
+msgid "Please complete the Turnstile challenge before saving."
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Instagram/InstagramFeed.php:208
 msgid "Please configure your business account correctly!"
 msgstr ""
@@ -3598,6 +6261,11 @@ msgstr ""
 msgid "Please enter %1$s %2$s to fetch videos!!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:697
+#: app/Http/Controllers/Platforms/Reviews/MetaController.php:208
+msgid "Please enter a custom URL for the Write a Review button."
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Facebook/FacebookFeed.php:708
 msgid "Please enter a date range."
 msgstr ""
@@ -3606,8 +6274,40 @@ msgstr ""
 msgid "Please enter a hashtag to fetch your instagram hashtags feed!!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:704
+msgid "Please enter a valid access code."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:698
+msgid "Please enter a valid Access Token."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:699
+msgid "Please enter a valid Api Key."
+msgstr ""
+
 #: app/Services/DashboardNotices.php:118
 msgid "Please enter a valid email!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:700
+msgid "Please enter a valid Facebook Event Access Token."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:701
+msgid "Please enter a valid Facebook Page ID."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:705
+msgid "Please enter a valid name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:702
+msgid "Please enter a valid URL"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:703
+msgid "Please enter a valid URL starting with http:// or https://"
 msgstr ""
 
 #: app/Services/Platforms/Reviews/Airbnb.php:180
@@ -3622,12 +6322,30 @@ msgstr ""
 msgid "Please enter Channel ID, Username or Handle to fetch videos!!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:706
+msgid "Please enter the valid Facebook Access Token."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:707
+msgid "Please enter the valid Instagram Access Token."
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Facebook/FacebookFeed.php:718
 msgid "Please enter valid date range."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:708
+msgid ""
+"Please enter your business all reviews URL. You can set only single business "
+"URL."
+msgstr ""
+
 #: app/Services/DashboardNotices.php:122
 msgid "Please enter your name!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:709
+msgid "Please filled the field correctly!!"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Instagram/InstagramFeed.php:75
@@ -3642,6 +6360,10 @@ msgstr ""
 msgid "Please provide the WP Social Ninja Pro ZIP URL or path."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:710
+msgid "Please select a bulk action"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:103
 msgid "Please select a chat platform"
 msgstr ""
@@ -3654,8 +6376,16 @@ msgstr ""
 msgid "Please select a page to get feeds"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:711
+msgid "Please select a review collection form"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:89
 msgid "Please select a review platform"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:712
+msgid "Please select items to perform bulk action"
 msgstr ""
 
 #: app/Hooks/Handlers/ShortcodeHandler.php:103
@@ -3666,8 +6396,16 @@ msgstr ""
 msgid "Please set your twitter configuration correctly!!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:713
+msgid "Please specify who will receive the email reports."
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Youtube/YoutubeFeed.php:460
 msgid "Please upgrade to pro version to use this features!! "
+msgstr ""
+
+#: app/Services/TranslationStrings.php:714
+msgid "Please wait while we configure your settings..."
 msgstr ""
 
 #: app/Hooks/Handlers/ShortcodeHandler.php:63
@@ -3682,6 +6420,10 @@ msgstr ""
 msgid "Polaris"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:715
+msgid "Policy URL"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:336
 msgid "Pollux"
 msgstr ""
@@ -3694,12 +6436,32 @@ msgstr ""
 msgid "Popular page builder widget ready"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:716
+msgid "Popup"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:717
+msgid "Popup Box"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:476
 msgid "Popup notifications for latest reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:718
+msgid "Popup Window"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1328
 msgid "Portugal"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:719
+msgid "Position of the author of the"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:720
+msgid "Post"
 msgstr ""
 
 #: app/Services/Widgets/Beaver/Facebook/FacebookWidget.php:142
@@ -3731,24 +6493,77 @@ msgstr ""
 msgid "Post Title"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:721
+msgid "Postal Code"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:722
 #: app/Services/TranslationString.php:26
 msgid "Posts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:725
+msgid "Posts are not available!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:723
+msgid "Posts Order"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:724
+msgid "Posts Per Page"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:726
+msgid "Prefilled Input Placeholder Text"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:727
+msgid "Prefilled Message"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:728
+msgid "Prefilled Send Button Background Color"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:729
+msgid "Prefilled Send Button Color"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:491
 msgid "Premium Template Designs"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:730
+msgid "Prev Next"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:539
 msgid "Preview your popup in real-time"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1151
+#: app/Hooks/Handlers/ShortcodeHandler.php:1152
 msgid "Previous slide"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:731
+msgid "Priority"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:732
+msgid "Priority :"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:485
 msgid "Priority customer support"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:733
+msgid "Priority for this widget."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:734
+msgid "Privacy Policy"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Youtube/YoutubeFeed.php:522
@@ -3765,12 +6580,28 @@ msgstr ""
 msgid "Product connected successfully!!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:735
+msgid "Product with Reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:736
+msgid "Profile Picture"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:737
+msgid "Profile/Page Name"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:428
 msgid "Promote Events with Facebook Feeds"
 msgstr ""
 
 #: app/Hooks/Handlers/ShortcodeHandler.php:69
 msgid "Provided platform name is not valid."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:738
+msgid "Provider Settings"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1331
@@ -3783,6 +6614,14 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1333
 msgid "Qatar"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:739
+msgid "QR Code"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:741
+msgid "QR code"
 msgstr ""
 
 #: app/Http/Controllers/SettingsController.php:464
@@ -3801,6 +6640,10 @@ msgstr ""
 msgid "QR code updated successfully!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:740
+msgid "QR Codes"
+msgstr ""
+
 #: app/Http/Controllers/SettingsController.php:349
 msgid "QR codes retrieved successfully!"
 msgstr ""
@@ -3813,6 +6656,10 @@ msgstr ""
 msgid "Quick template switching with live preview"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:742
+msgid "Random"
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Twitter/TwitterApi.php:267
 msgid "Rate Limit Exceeded. Please try again an hour later"
 msgstr ""
@@ -3821,8 +6668,13 @@ msgstr ""
 msgid "Rated"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:743
 #: app/Services/Platforms/Reviews/Helper.php:216
 msgid "Rating"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:744
+msgid "Rating Style"
 msgstr ""
 
 #: app/Services/Widgets/ReviewsWidget.php:109
@@ -3834,25 +6686,32 @@ msgstr ""
 msgid "Rating Text Typography"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:748
 #: app/Services/TranslationString.php:31
 #: app/Views/public/reviews-templates/footer.php:37
 msgid "Read all reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:745
+msgid "Read Documentation"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:746
 #: app/Services/TranslationString.php:33
 msgid "Read Less"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1135
+#: app/Hooks/Handlers/ShortcodeHandler.php:1136
 msgid "Read less"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:747
 #: app/Services/TranslationString.php:32
 #: app/Services/Widgets/Beaver/Reviews/ReviewsWidget.php:230
 msgid "Read More"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1134
+#: app/Hooks/Handlers/ShortcodeHandler.php:1135
 msgid "Read more"
 msgstr ""
 
@@ -3870,6 +6729,7 @@ msgid "Read More/Less"
 msgstr ""
 
 #. {reviews_count} is a placeholder for the number of reviews
+#: app/Services/TranslationStrings.php:749
 #: app/Services/Platforms/Reviews/Helper.php:218
 msgid "Read our {reviews_count} Reviews"
 msgstr ""
@@ -3890,6 +6750,15 @@ msgstr ""
 msgid "Real-time updates from your Facebook page"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:750
+msgid "Recipient Email Address"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:751
+msgid "Recipients"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:752
 #: app/Services/TranslationString.php:28
 msgid "Recommends"
 msgstr ""
@@ -3898,20 +6767,49 @@ msgstr ""
 msgid "recommends"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:753
+msgid "Redirect to YouTube"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:754
+msgid "Regenerate AI Summary"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:487
 msgid "Regular updates"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:755
+msgid "Relative"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1118
 msgid "Republic of the Congo (Brazzaville)"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:756
+msgid "Require Login"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:757
+msgid "Required"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:758
+msgid "Reset"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:759
 #: app/Services/TranslationString.php:57
 msgid "Reset Error Logs"
 msgstr ""
 
 #: app/Http/Controllers/SettingsController.php:327
 msgid "Reset Error Logs successfully!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:760
+msgid "Reset Local Images"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:422
@@ -3923,8 +6821,16 @@ msgstr ""
 msgid "Responsive query"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:761
+msgid "Retweeted"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1334
 msgid "Reunion"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:762
+msgid "Review"
 msgstr ""
 
 #: app/Services/Widgets/ReviewsWidget.php:778
@@ -3937,6 +6843,7 @@ msgstr ""
 msgid "Review Date"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:763
 #: app/Hooks/Handlers/AdminMenuHandler.php:87
 msgid "Review Forms"
 msgstr ""
@@ -3945,16 +6852,40 @@ msgstr ""
 msgid "Review has been successfully created"
 msgstr ""
 
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:257
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:260
 msgid "Review has been successfully updated"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:764
+msgid "Review Publishing Mode"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:765
+msgid "Review Publishing Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:766
+msgid "Review Target"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:767
+msgid "Review Template"
 msgstr ""
 
 #: app/Services/Widgets/Oxygen/ReviewsWidget.php:147
 msgid "Review Text"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:768
+msgid "Review the latest validation feedback before saving your configuration."
+msgstr ""
+
 #: app/Services/Widgets/Oxygen/ReviewsWidget.php:123
 msgid "Review Title"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:769
+msgid "Reviewer"
 msgstr ""
 
 #: app/Services/Widgets/ReviewsWidget.php:216
@@ -3962,6 +6893,7 @@ msgstr ""
 msgid "Reviewer Name"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:770
 #: app/Hooks/Handlers/AdminMenuHandler.php:79
 #: app/Services/Widgets/Oxygen/OxygenWidget.php:44
 msgid "Reviews"
@@ -3982,11 +6914,23 @@ msgstr ""
 msgid "Reviews fetched successfully!!"
 msgstr ""
 
-#: app/Http/Controllers/Platforms/Reviews/MetaController.php:453
+#: app/Services/TranslationStrings.php:771
+msgid "Reviews Image Optimization (Recommended)"
+msgstr ""
+
+#: app/Http/Controllers/Platforms/Reviews/MetaController.php:472
 msgid "Reviews loaded successfully"
 msgstr ""
 
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:323
+#: app/Services/TranslationStrings.php:772
+msgid "Reviews Per Page"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:773
+msgid "Reviews Platforms"
+msgstr ""
+
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:326
 msgid "Reviews status has been successfully updated"
 msgstr ""
 
@@ -3994,6 +6938,12 @@ msgstr ""
 #: app/Services/Platforms/Reviews/BaseReview.php:368
 #: app/Services/Platforms/Reviews/GoogleMyBusiness.php:648
 msgid "Reviews synced successfully!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:774
+msgid ""
+"Reviews with a rating below this value will be sent to moderation instead of "
+"being published automatically."
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:316
@@ -4013,8 +6963,16 @@ msgstr ""
 msgid "Romania"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:775
+msgid "Rooms"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:538
 msgid "Rotate multiple reviews in a single popup"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:776
+msgid "Rows"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1336
@@ -4089,25 +7047,67 @@ msgstr ""
 msgid "Saudi Arabia"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:777
+msgid "Save"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:778
+msgid "Save Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:779
+msgid "Saving"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:739
 #: app/Hooks/Handlers/AdminMenuHandler.php:693
 msgid "Schema snippet"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:780
+msgid "Schema Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:781
+msgid "Schema.org Markup"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:782
 #: app/Services/TranslationString.php:50
 msgid "Screen Options"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:783
+msgid "Scroll to review widget"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:523
 msgid "Seamless real-time updates as new reviews arrive"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:784
+msgid "Search"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:243
 msgid "Search Feed"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:785
 #: app/Services/TranslationString.php:49
 msgid "Search Platforms"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:786
+msgid "Search Term"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:787
+msgid "Secret Key"
+msgstr ""
+
+#: app/Hooks/Handlers/YoutubeTemplateHandler.php:118
+msgid "Security validation failed."
 msgstr ""
 
 #: app/Services/Platforms/ReviewImageOptimizationHandler.php:39
@@ -4115,12 +7115,41 @@ msgstr ""
 msgid "Security validation failed. Please try again"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:788
 #: app/Services/TranslationString.php:58
 msgid "See All"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:789
+msgid "See All reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:790
+msgid "See More"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:791
+msgid "Select"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:174
 msgid "Select a Category to Create Your Template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:807
+msgid "Select a date of the"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:808
+msgid "Select a form"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:809
+msgid "Select a product to fetch reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:810
+msgid "Select a redirect page"
 msgstr ""
 
 #: app/Services/Widgets/YoutubeWidget.php:73
@@ -4145,16 +7174,85 @@ msgstr ""
 msgid "Select a template"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:793
+msgid "Select Account"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:794
+msgid "Select Accounts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:792
+msgid "Select AI summary style"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:811
+msgid "Select an AI model you want to use."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:812
+msgid "Select an Option"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:813
+msgid "Select an User Account"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:795
 #: app/Services/TranslationString.php:60
 msgid "Select Bubble Icon"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:796
+msgid "Select Data Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:797
+msgid "Select Event Pages"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:798
+msgid "Select Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:799
+msgid "Select File"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:800
+msgid "Select Import Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:801
+msgid "Select Language"
 msgstr ""
 
 #: app/Http/Controllers/OnboardingController.php:190
 msgid "Select one from our pre-defined template pack."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:802
+msgid "Select Pages"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:803
+msgid "Select Platform"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:804
+msgid "Select Platforms"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:805
+msgid "Select Review Form"
+msgstr ""
+
 #: app/Services/Widgets/Oxygen/ReviewsWidget.php:34
 msgid "Select Reviews Template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:806
+msgid "Select Source"
 msgstr ""
 
 #: app/Services/Widgets/Oxygen/InstagramWidget.php:34
@@ -4164,12 +7262,44 @@ msgstr ""
 msgid "Select Template"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:814
+msgid "Select the AI platform"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:184
 msgid "Select the post type"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:815
+msgid "Select the URL you need to redirect to."
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:180
 msgid "Select which social network to connect and embed."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:817
+msgid "Select your business type:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:818
+msgid "Select your facebook feed template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:819
+msgid "Select your instagram feed template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:820
+msgid "Select your tiktok feed template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:816
+msgid "Select your X (Twitter) feed template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:821
+msgid "Select your youtube feed template"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1379
@@ -4182,6 +7312,22 @@ msgstr ""
 msgid "Sent from %s"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:822
+msgid "Separate multiple hashtags with commas. ex: #wp, #wpsocialninja"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:823
+msgid ""
+"Separate multiple words or hashtags using commas. ex: #hashtag1,word1,"
+"#hashtag2,word2"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:824
+msgid ""
+"Separate multiple words or hashtags using commas. ex: #hashtag1,word1,word2,"
+"#hashtag2"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1380
 msgid "Serbia"
 msgstr ""
@@ -4190,10 +7336,21 @@ msgstr ""
 msgid "Set smart delay to capture user attention at the right time"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:826
+msgid ""
+"Set the minimum number of characters required. Shorter reviews will be sent "
+"for moderation."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:825
+msgid "Set the Time Schedule"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:553
 msgid "Set your availability with chat scheduling"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:827
 #: app/Hooks/Handlers/AdminMenuHandler.php:149
 msgid "Settings"
 msgstr ""
@@ -4220,12 +7377,53 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:828
+msgid "Share Button"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:829
+msgid "Share Button Position"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:830
+msgid "Share:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:831
+msgid "Shared Link"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:832
+msgid "Shared Posts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:836
+msgid "Shoppable by Hashtags"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:833
 #: app/Services/Onboarding/OnboardingService.php:165
 msgid "Shoppable Feed"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:834
+msgid "Shoppable Hashtag"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:391
 msgid "Shoppable Instagram Feeds"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:835
+msgid "Shoppable Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:837
+msgid "Shortcode"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:838
+msgid "Shortcode copied to clipboard"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:743
@@ -4250,6 +7448,10 @@ msgstr ""
 msgid "Show Booking.com reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:839
+msgid "Show Chat Popup"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:809
 msgid "Show Facebook page reviews"
 msgstr ""
@@ -4258,8 +7460,32 @@ msgstr ""
 msgid "Show Instagram posts and stories"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:840
+msgid "Show Label (Works on chat box)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:841
+msgid "Show Online/Offline"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:844
+msgid "Show posts containing these words or hashtags"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:842
+msgid "Show Posts Within a Date Range"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:843
+msgid "Show Review Images"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:510
 msgid "Show reviews containing targeted keywords"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:845
+msgid "Show reviews containing these words"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:532
@@ -4325,6 +7551,14 @@ msgstr ""
 msgid "Sierra Leone"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:846
+msgid "Sign In And Get Google Access Code"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:847
+msgid "Sign in And Get Google Access Code"
+msgstr ""
+
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
 #: app/Services/Platforms/PlatformErrorManager.php:224
 #: app/Services/Platforms/PlatformErrorManager.php:232
@@ -4338,16 +7572,57 @@ msgstr ""
 msgid "Singapore"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:848
 #: app/Services/Onboarding/OnboardingService.php:209
 msgid "Single Album"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:849
+msgid "Single Photo"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:306
 msgid "Sirius"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:850
+msgid "Site Key"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:851
+msgid "Site key is required."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:852
+msgid "Size"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:200
 msgid "Skip All"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:853
+msgid "Skipping setup..."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:854
+msgid "Slider"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:855
+msgid "Slides to Scroll"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:856
+msgid "Slides to Scroll :"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:857
+msgid "Slides to Show"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:858
+msgid "Slides to Show :"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1387
@@ -4358,14 +7633,20 @@ msgstr ""
 msgid "Slovenia"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:859
+msgid "Small"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:383
 msgid "Smart filtering and visual moderation tools"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:860
 #: app/Services/TranslationString.php:48
 msgid "Social Chats"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:861
 #: app/Services/TranslationString.php:46
 #: app/Services/Onboarding/OnboardingService.php:59
 msgid "Social Feeds"
@@ -4410,12 +7691,17 @@ msgstr ""
 msgid "Social Reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:862
 #: app/Http/Controllers/Platforms/PlatformController.php:96
 msgid "Social Wall"
 msgstr ""
 
 #: app/Http/Controllers/TemplatesController.php:101
 msgid "Social Wall Template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:863
+msgid "Solid"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1391
@@ -4426,6 +7712,7 @@ msgstr ""
 msgid "Somalia"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:864
 #: app/Services/TranslationString.php:55
 msgid "Some Enabled"
 msgstr ""
@@ -4479,6 +7766,26 @@ msgstr ""
 msgid "Sort reviews ascending, descending, or randomly"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:865
+msgid "Source"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:866
+msgid "Source ID"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:867
+msgid "Source Invalid"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:868
+msgid "Source Type"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:869
+msgid "Sources"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1396
 msgid "South Africa"
 msgstr ""
@@ -4493,6 +7800,14 @@ msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1408
 msgid "South Sudan"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:870
+msgid "Space between slide"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:871
+msgid "Space between slide:"
 msgstr ""
 
 #: app/Services/Widgets/Oxygen/InstagramWidget.php:407
@@ -4532,8 +7847,28 @@ msgstr ""
 msgid "Spain"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:872
+msgid "Spam"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:873
+msgid "Spam Protection"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:874
+msgid "Specific"
+msgstr ""
+
 #: app/Services/Onboarding/OnboardingService.php:237
 msgid "Specific Video Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:875
+msgid "Specific Video Playlist"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:876
+msgid "Specific Videos"
 msgstr ""
 
 #: app/Http/Controllers/OnboardingController.php:175
@@ -4544,8 +7879,28 @@ msgstr ""
 msgid "Spica"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:877
+msgid "Spread"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1411
 msgid "Sri Lanka"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:878
+msgid "Standard"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:879
+msgid "Star"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:880
+msgid "Star Rating Click Behavior"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:882
+msgid "Start by creating a template to design your perfect layout."
 msgstr ""
 
 #: app/Services/Platforms/Chats/Config.php:43
@@ -4554,6 +7909,14 @@ msgstr ""
 
 #: app/Services/DashboardNotices.php:544
 msgid "Start Conversations with Visitors Instantly"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:881
+msgid "Start Time"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:883
+msgid "State/Region"
 msgstr ""
 
 #: app/Services/Widgets/YoutubeWidget.php:145
@@ -4593,6 +7956,10 @@ msgstr ""
 msgid "Statistics Label Color"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:884
+msgid "Status"
+msgstr ""
+
 #: app/Http/Controllers/Platforms/PlatformController.php:166
 msgid "Statuses updated successfully!"
 msgstr ""
@@ -4604,6 +7971,11 @@ msgid ""
 "wasting any time."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:885
+msgid "Street Address"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:886
 #: app/Services/Widgets/Beaver/Twitter/TwitterWidget.php:68
 #: app/Services/Widgets/Beaver/Instagram/InstagramWidget.php:68
 #: app/Services/Widgets/Beaver/YouTube/YouTubeWidget.php:68
@@ -4620,6 +7992,11 @@ msgstr ""
 msgid "SUBSCRIBE"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:887
+msgid "Subscribe"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:888
 #: app/Services/Widgets/YoutubeWidget.php:224
 #: app/Services/Widgets/Oxygen/YouTubeWidget.php:156
 #: app/Services/Platforms/Feeds/Youtube/Config.php:95
@@ -4636,6 +8013,10 @@ msgstr ""
 msgid "Subscribe Button Hover Style"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:889
+msgid "Subscribe Button Position"
+msgstr ""
+
 #: app/Services/Widgets/Beaver/YouTube/YouTubeWidget.php:115
 msgid "Subscribe Button Text Color"
 msgstr ""
@@ -4644,8 +8025,21 @@ msgstr ""
 msgid "Subscribe Button Typography"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:890
 #: app/Services/TranslationString.php:19
 msgid "Subscribers"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:891
+msgid "Subscribers Counter"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:892
+msgid "Subtitle"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:893
+msgid "Subtitle Text"
 msgstr ""
 
 #: app/Services/Platforms/Chats/SocialChat.php:41
@@ -4658,6 +8052,14 @@ msgstr ""
 
 #: app/Services/Platforms/Feeds/BaseFeed.php:61
 msgid "success"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:894
+msgid "Success Message"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:895
+msgid "Successfully Connected"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Facebook/FacebookFeed.php:287
@@ -4684,6 +8086,10 @@ msgstr ""
 #: app/Services/Widgets/Oxygen/FacebookWidget.php:302
 #: app/Services/Platforms/Feeds/Facebook/Config.php:452
 msgid "Summary Card"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:896
+msgid "Summary Style"
 msgstr ""
 
 #: app/Services/Platforms/Chats/Config.php:67
@@ -4745,6 +8151,11 @@ msgstr ""
 msgid "Tanzania"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:897
+msgid "Template"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:898
 #: app/Services/Onboarding/OnboardingService.php:389
 #: app/Services/Onboarding/OnboardingService.php:431
 #: app/Services/Onboarding/OnboardingService.php:453
@@ -4753,6 +8164,7 @@ msgstr ""
 msgid "Template 1"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:899
 #: app/Services/Onboarding/OnboardingService.php:399
 #: app/Services/Onboarding/OnboardingService.php:441
 #: app/Services/Onboarding/OnboardingService.php:495
@@ -4772,6 +8184,10 @@ msgstr ""
 msgid "Template configuration not found."
 msgstr ""
 
+#: app/Http/Controllers/Platforms/Reviews/MetaController.php:415
+msgid "Template not found."
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Twitter/TwitterFeed.php:236
 #: app/Services/Platforms/Feeds/Instagram/InstagramFeed.php:601
 #: app/Services/Platforms/Feeds/Youtube/YoutubeFeed.php:375
@@ -4780,7 +8196,7 @@ msgstr ""
 msgid "Template Saved Successfully!!"
 msgstr ""
 
-#: app/Http/Controllers/Platforms/Reviews/MetaController.php:269
+#: app/Http/Controllers/Platforms/Reviews/MetaController.php:275
 msgid "Template saved successfully!!"
 msgstr ""
 
@@ -4788,11 +8204,19 @@ msgstr ""
 msgid "Templates"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:900
+msgid "Terms & Conditions"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:901
+msgid "Testimonial"
+msgstr ""
+
 #: app/Hooks/Handlers/AdminMenuHandler.php:95
 msgid "Testimonials"
 msgstr ""
 
-#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:322
+#: app/Http/Controllers/Platforms/Reviews/RecommendationsController.php:325
 msgid "Testimonials status has been successfully updated"
 msgstr ""
 
@@ -4874,6 +8298,10 @@ msgstr ""
 msgid "Text Hover Color:"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:902
+msgid "Text Typing Animation"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1428
 msgid "Thailand"
 msgstr ""
@@ -4907,6 +8335,28 @@ msgid ""
 "through reconnecting your account and updating its permissions."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:903
+msgid ""
+"The Feeds per Page is only visible on preview and live pages/posts, not in "
+"the WordPress Editor's editing mode."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:910
+msgid "The higher the number, the higher the priority."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:904
+msgid ""
+"The Load More button will only display on your site's preview/live "
+"pages/posts."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:911
+msgid ""
+"The more priority you give, it will match for the condition and show on your "
+"appropriate pages"
+msgstr ""
+
 #. %s is the Page ID that was deleted
 #: app/Services/Platforms/Feeds/Facebook/FacebookFeed.php:617
 #, php-format
@@ -4923,6 +8373,54 @@ msgstr ""
 msgid ""
 "The page was not reconnected within the 7 day limit and all %1$s data was "
 "automatically deleted on %2$s due to %3$s data privacy rules."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:905
+msgid ""
+"The Posts per Page is only visible on preview and live pages/posts, not in "
+"the WordPress Editor's editing mode."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:906
+msgid ""
+"The Reviews per Page is only visible on preview and live pages/posts, not in "
+"the WordPress Editor’s editing mode."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:907
+msgid ""
+"The WP SOCIAL NINJA plugin requires \"read only\" access to your X (Twitter) "
+"account in order to retrieve data from the X (Twitter) API. Our plugin is "
+"only able to read your account public data and never ever edit or write to "
+"your X (Twitter) account data in any way."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:908
+msgid ""
+"The X (Twitter) cards will only display on your site's preview/live "
+"pages/posts not while you're in editing mode in the WordPress Editor."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:909
+msgid ""
+"The X (Twitter) player cards will only display on your site's preview/live "
+"pages/posts not while you're in editing mode in the WordPress Editor."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:912
+msgid "Theme"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:913
+msgid "Theme: Auto"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:914
+msgid "Theme: Dark"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:915
+msgid "Theme: Light"
 msgstr ""
 
 #: app/Services/Platforms/Feeds/Instagram/AccountFeed.php:47
@@ -4970,6 +8468,12 @@ msgstr ""
 msgid "This feed type needs a valid Facebook Playlist URL"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:916
+msgid ""
+"This input field allows you to set how many videos to retrieve from the "
+"YouTube API. Max: 200"
+msgstr ""
+
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
 #: app/Views/email/report/body.php:172
 #, php-format
@@ -4978,11 +8482,11 @@ msgid ""
 "website to alert you when there is an issue with one of your %s"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1153
+#: app/Hooks/Handlers/ShortcodeHandler.php:1154
 msgid "This is the first slide"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1154
+#: app/Hooks/Handlers/ShortcodeHandler.php:1155
 msgid "This is the last slide"
 msgstr ""
 
@@ -4994,6 +8498,38 @@ msgid ""
 "%1$s API. To find out more about the specific problem and receive clear "
 "instructions on how to resolve it, kindly visit the %2$sPlatforms Settings "
 "Page%3$s of the WP Social Ninja plugin on your website."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:917
+msgid "This message is only visible to admins."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:918
+msgid "This will allow the plugin to connect to the X (Twitter) API"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:919
+msgid "This will clear all images associated with this platform"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:920
+msgid "This will clear all images stored locally for the Reviews platform."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:921
+msgid "This will clear all links cached data that have X (Twitter) Cards."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:922
+msgid "Thumbnail (150*150)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:923
+msgid "Thumbnail (80*80)"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:924
+msgid "Thumbs"
 msgstr ""
 
 #: app/Services/Platforms/Chats/Config.php:71
@@ -5008,7 +8544,7 @@ msgstr ""
 msgid "TikTok Feed"
 msgstr ""
 
-#: app/Models/Post.php:182 app/Http/Controllers/TemplatesController.php:97
+#: app/Models/Post.php:196 app/Http/Controllers/TemplatesController.php:97
 msgid "TikTok Template"
 msgstr ""
 
@@ -5016,6 +8552,11 @@ msgstr ""
 msgid "TikTok video feed template"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:925
+msgid "Timeline"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:926
 #: app/Services/Onboarding/OnboardingService.php:153
 #: app/Services/Onboarding/OnboardingService.php:173
 #: app/Services/Onboarding/OnboardingService.php:217
@@ -5031,6 +8572,7 @@ msgstr ""
 msgid "Timor-Leste"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:927
 #: app/Services/Widgets/YoutubeWidget.php:336
 #: app/Services/Widgets/ReviewsWidget.php:306
 #: app/Services/Widgets/Oxygen/YouTubeWidget.php:250
@@ -5071,12 +8613,20 @@ msgstr ""
 msgid "Title Line Height"
 msgstr ""
 
-#: app/Http/Controllers/TemplatesController.php:282
+#: app/Services/TranslationStrings.php:928
+msgid "Title Text"
+msgstr ""
+
+#: app/Http/Controllers/TemplatesController.php:289
 msgid "Title updated successfully!!"
 msgstr ""
 
 #: app/Services/SidebarWidgets.php:52
 msgid "Title:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:929
+msgid "To"
 msgstr ""
 
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
@@ -5085,6 +8635,15 @@ msgstr ""
 msgid ""
 "To avoid automated data deletion, simply view the %s on your website within "
 "the next 7 days."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:930
+#, php-format
+msgid "To configure %1$s and %2$s settings, go to"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1057
+msgid "to configure your settings first!"
 msgstr ""
 
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
@@ -5108,6 +8667,12 @@ msgid ""
 "your source for the plugin platforms %s within 7 days."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:931
+msgid ""
+"To use the AI Review Summarizer feature, you need to have an API key from "
+"whichever AI platform you plan to use."
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1433
 msgid "Togo"
 msgstr ""
@@ -5124,6 +8689,14 @@ msgstr ""
 msgid "Tools"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:932
+msgid "Top Left"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:933
+msgid "Top Right"
+msgstr ""
+
 #: app/Services/Widgets/Oxygen/TwitterWidget.php:241
 #: app/Services/Platforms/Feeds/Youtube/Config.php:254
 #: app/Services/Platforms/Feeds/Youtube/Config.php:317
@@ -5131,10 +8704,38 @@ msgstr ""
 msgid "Top Spacing"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:934
+msgid "Total Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:935
+msgid "Transform"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:517
 msgid ""
 "Transform detailed customer reviews into clear, compelling summaries that "
 "highlight key insights and build trust—automatically and in real time."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:936
+msgid "Translation Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:937
+msgid "Trim Caption Words"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:938
+msgid "Trim Description Words"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:939
+msgid "Trim Excerpt Words"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:940
+msgid "Trim Title Words"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1438
@@ -5187,10 +8788,35 @@ msgid ""
 "hassle."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:941
+msgid "Turnstile"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:943
+msgid "Turnstile keys are managed from Global Review Settings."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:942
+msgid "Turnstile Settings"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:944
+msgid "Turnstile settings cleared successfully."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:945
+msgid "Turnstile settings could not be cleared."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:946
+msgid "Turnstile settings validated and saved successfully."
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1450
 msgid "Tuvalu"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:947
 #: app/Services/TranslationString.php:24
 msgid "Tweets"
 msgstr ""
@@ -5212,11 +8838,28 @@ msgstr ""
 msgid "Type a message"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:948
+msgid "Type post id and press enter.."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:949
+msgid "Type something and press enter...."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:950
+msgid "Type video id and press enter.."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:951
+msgid "Types of Posts"
+msgstr ""
+
 #: app/Services/Platforms/Chats/Config.php:100
 #: app/Services/Platforms/Chats/Config.php:116
 msgid "Typically replies within an hour"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:952
 #: app/Services/Widgets/YoutubeWidget.php:118
 #: app/Services/Widgets/YoutubeWidget.php:166
 #: app/Services/Widgets/YoutubeWidget.php:216
@@ -5317,6 +8960,14 @@ msgstr ""
 msgid "Ukraine"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:954
+msgid "Underline"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:955
+msgid "Underline Overline"
+msgstr ""
+
 #: app/Services/Includes/CountryNames.php:1455
 msgid "United Arab Emirates"
 msgstr ""
@@ -5347,6 +8998,14 @@ msgstr ""
 
 #: app/Services/Helper.php:337 app/Services/Helper.php:356
 msgid "Untitled"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:956
+msgid "Upcoming"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:957
+msgid "Update"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:623
@@ -5385,6 +9044,10 @@ msgstr ""
 msgid "Update to Pro to Display Yelp Reviews"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:958
+msgid "Upgrade Now"
+msgstr ""
+
 #: app/Hooks/Handlers/AdminMenuHandler.php:134
 msgid "Upgrade To Pro"
 msgstr ""
@@ -5392,6 +9055,46 @@ msgstr ""
 #: app/Services/DashboardNotices.php:312 app/Services/DashboardNotices.php:325
 #: app/Services/DashboardNotices.php:582 app/Hooks/filters.php:161
 msgid "Upgrade to Pro"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:960
+msgid "Upgrade to pro to display more TikTok videos."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:961
+msgid "Upgrade to pro to display unlimited Instagram Post."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:962
+msgid "Upgrade to pro to display unlimited reviews."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:959
+msgid "Upgrade to WP Social Ninja Pro and unlock all the features."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:963
+msgid "Upload"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:965
+msgid "Upload a avatar or image of the"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:966
+msgid "Upload author website logo. Use a 120x120 pixel square image"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:964
+msgid "Upload Custom Banner"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:967
+msgid "Uppercase"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:953
+msgid "URL"
 msgstr ""
 
 #: app/Services/Platforms/Reviews/Airbnb.php:173
@@ -5413,8 +9116,29 @@ msgstr ""
 msgid "Use --key=LICENSE_KEY to activate the license."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:969
+msgid "Use a 120x120 pixel square image"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:968
+msgid "Use WP Social Ninja as the primary interface for managing all reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:970
+msgid "User Account"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:971
+msgid "User Email Address"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:972
 #: app/Services/Platforms/Feeds/Facebook/Config.php:31
 msgid "User Name"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:973
+msgid "User Timeline"
 msgstr ""
 
 #: app/Services/Platforms/Chats/SocialChat.php:263
@@ -5427,6 +9151,7 @@ msgstr ""
 msgid "UserName"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:974
 #: app/Services/Widgets/Oxygen/InstagramWidget.php:51
 #: app/Services/Widgets/Oxygen/TwitterWidget.php:88
 #: app/Services/Widgets/Oxygen/FacebookWidget.php:51
@@ -5442,8 +9167,26 @@ msgstr ""
 msgid "Uzbekistan"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:975
+msgid "Validate & Save"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:976
+msgid ""
+"Validate the preview and save this Turnstile configuration for all native "
+"forms, or disconnect it completely."
+msgstr ""
+
 #: app/Hooks/CLI/Commands.php:85
 msgid "Validating license, please wait..."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:977
+msgid "Validation Preview"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:978
+msgid "Validation Status"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1475
@@ -5462,16 +9205,49 @@ msgstr ""
 msgid "Venezuela"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:979
+msgid "Verified Badge Tooltip Text"
+msgstr ""
+
 #: app/Services/Platforms/Reviews/Helper.php:127
 msgid "Verified Customer"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:980
+msgid "Verified Purchase Required"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:981
+msgid "Verify Code"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:982
+msgid "Verify License"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:983
+msgid "Vertical"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:984
+msgid "Vertical Mode? :"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:985
 #: app/Views/public/feeds-templates/facebook/elements/media.php:29
 msgid "Video"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:179
 msgid "Video Feed"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:986
+msgid "Video ID"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:987
+msgid "Video Loop"
 msgstr ""
 
 #: app/Services/DashboardNotices.php:412
@@ -5482,8 +9258,13 @@ msgstr ""
 msgid "Video Playlist Feed"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:988
 #: app/Services/TranslationString.php:22
 msgid "Videos"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:989
+msgid "Videos Only"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1478
@@ -5494,23 +9275,31 @@ msgstr ""
 msgid "View Documentation"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:990
 #: app/Services/TranslationString.php:35
-#: app/Hooks/Handlers/ShortcodeHandler.php:1136
+#: app/Hooks/Handlers/ShortcodeHandler.php:1137
 msgid "View on Facebook"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:991
 #: app/Services/TranslationString.php:36
-#: app/Hooks/Handlers/ShortcodeHandler.php:1139
+#: app/Hooks/Handlers/ShortcodeHandler.php:1140
 msgid "View on Instagram"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:992
 #: app/Services/TranslationString.php:37
-#: app/Hooks/Handlers/ShortcodeHandler.php:1140
+#: app/Hooks/Handlers/ShortcodeHandler.php:1141
 msgid "View on TikTok"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:993
 #: app/Services/TranslationString.php:23
 msgid "Views"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:994
+msgid "Views Counter"
 msgstr ""
 
 #: app/Services/Includes/CountryNames.php:1481
@@ -5525,15 +9314,24 @@ msgstr ""
 msgid "Wednesday"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:995
+msgid "Weight"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:996
+msgid "Welcome Message"
+msgstr ""
+
 #: app/Http/Controllers/OnboardingController.php:173
 msgid "Welcome to WP Social Ninja!"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:997
 #: app/Services/TranslationString.php:43
 msgid "Went"
 msgstr ""
 
-#: app/Hooks/Handlers/ShortcodeHandler.php:1144
+#: app/Hooks/Handlers/ShortcodeHandler.php:1145
 msgid "went"
 msgstr ""
 
@@ -5541,8 +9339,24 @@ msgstr ""
 msgid "Western Sahara"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:998
+msgid "When to Display Online"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:999
+msgid "Where would you like to import the reviews?"
+msgstr ""
+
 #: app/Services/TranslationString.php:27
 msgid "Where you want to leave a review"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1000
+msgid "Wide"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1001
+msgid "Wider"
 msgstr ""
 
 #: app/Services/Onboarding/OnboardingService.php:787
@@ -5550,17 +9364,31 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1003
+msgid ""
+"WooCommerce is not active. Reviews will fall back to generic mode until "
+"reactivated."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1002
+msgid "WooCommerce Product"
+msgstr ""
+
 #: app/Services/DashboardNotices.php:692
 #: app/Hooks/Handlers/AdminMenuHandler.php:616
 msgid "WooCommerce Reviews"
 msgstr ""
 
-#: app/Models/Post.php:184 app/Http/Controllers/TemplatesController.php:99
+#: app/Models/Post.php:198 app/Http/Controllers/TemplatesController.php:99
 msgid "WooCommerce Template"
 msgstr ""
 
 #: app/Services/TranslationString.php:59
 msgid "Would you like to clear all the errors stored in the error log"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1004
+msgid "Would you like to clear all the errors stored in the error log?"
 msgstr ""
 
 #. Name of the plugin
@@ -5589,6 +9417,7 @@ msgstr ""
 msgid "WPManageNinja LLC"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1005
 #: app/Services/Platforms/Reviews/Helper.php:190
 msgid "Write a Review"
 msgstr ""
@@ -5618,6 +9447,14 @@ msgstr ""
 msgid "X (Twitter)"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1006
+msgid "X (Twitter) App"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1007
+msgid "X (Twitter) Configuration"
+msgstr ""
+
 #: app/Services/Widgets/Oxygen/TwitterWidget.php:10
 #: app/Services/Widgets/Beaver/Twitter/TwitterWidget.php:20
 msgid "X (Twitter) Feeds"
@@ -5637,6 +9474,10 @@ msgstr ""
 msgid "Yemen"
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1008
+msgid "Yes"
+msgstr ""
+
 #: app/Services/Platforms/Reviews/GoogleMyBusiness.php:462
 #: app/Services/Platforms/Feeds/Youtube/YoutubeFeed.php:111
 msgid "You are Successfully Verified"
@@ -5648,6 +9489,94 @@ msgstr ""
 
 #: app/Services/Platforms/Feeds/Instagram/InstagramFeed.php:219
 msgid "You are successfully verified."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1009
+msgid "You can add custom reviews manually by selecting the button below."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1010
+msgid ""
+"You can add sources to get custom reviews easily, click below button to add "
+"sources."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1011
+msgid "You can filter using this category."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1012
+msgid "You can find the ID of your TikTok video from the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1013
+msgid ""
+"You can find the post ID by viewing the post on Facebook and copying the ID "
+"number from the end of the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1014
+msgid ""
+"You can find the post ID by viewing the post on Instagram and copying the ID "
+"number from the end of the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1015
+msgid ""
+"You can find the post ID by viewing the post on TikTok and copying the ID "
+"number from the end of the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1016
+msgid ""
+"You can find the post ID by viewing the post on X (Twitter) and copying the "
+"ID number from the end of the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1017
+msgid ""
+"You can find the video ID by viewing the video on YouTube and copying the ID "
+"number from the end of the URL."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1018
+msgid ""
+"You can use this setting to hide posts that contain certain specific words "
+"or hashtags in the caption."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1019
+msgid ""
+"You can use this setting to show posts that contain certain specific words "
+"or hashtags in the caption."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1020
+msgid ""
+"You can use this {review_rating} shortcode to show dynamic value in a text. "
+"Ex: Just left us a {review_rating} star review."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1021
+msgid ""
+"You can use this {reviews_count} shortcode to show dynamic value in a text. "
+"Ex: Read our {reviews_count} Reviews"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1022
+msgid ""
+"You can use this {total_reviews} shortcode to show dynamic value in a text. "
+"Ex: Based on {total_reviews} Reviews."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1023
+msgid ""
+"You haven’t added any testimonials. Add one now to start showcasing them in "
+"your template."
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1024
+msgid "You need to upgrade to Pro to use this channel."
 msgstr ""
 
 #: app/Views/public/feeds-templates/facebook/template1.php:16
@@ -5664,6 +9593,10 @@ msgstr ""
 
 #: app/Services/Platforms/Feeds/Instagram/InstagramFeed.php:127
 msgid "You've successfully connected your account!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1025
+msgid "Your"
 msgstr ""
 
 #. Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
@@ -5692,6 +9625,62 @@ msgid ""
 "our website for easy steps to prevent this issue in the future. %1$s."
 msgstr ""
 
+#: app/Services/TranslationStrings.php:1026
+msgid "Your Account"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1035
+msgid "Your all chat widgets are here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1036
+msgid "Your all popups are here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1037
+msgid "Your all reviews are here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1038
+msgid "Your all templates are here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1039
+msgid "Your all testimonials are here"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1027
+msgid "Your Authorized Businesses List"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1040
+msgid "Your business info is empty!!"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1028
+msgid "Your Connected Account"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1029
+msgid "Your Connected Account:"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1030
+msgid "Your Connected Accounts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1031
+msgid "Your Connected Business Accounts"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1032
+msgid "Your Connected FluentCart Products"
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1033
+msgid "Your Connected WooCommerce Products"
+msgstr ""
+
 #: app/Services/Platforms/Feeds/Instagram/InstagramFeed.php:419
 msgid "Your Instagram Account Successfully Disconnected!"
 msgstr ""
@@ -5706,6 +9695,10 @@ msgstr ""
 
 #: app/Hooks/CLI/Commands.php:104 app/Hooks/CLI/Commands.php:148
 msgid "Your License Status: "
+msgstr ""
+
+#: app/Services/TranslationStrings.php:1034
+msgid "Your Location List"
 msgstr ""
 
 #: app/Services/Platforms/PlatformData.php:519

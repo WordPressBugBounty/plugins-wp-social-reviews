@@ -164,12 +164,12 @@ class TemplatesController extends Controller
 
             $template = Template::find($id);
 
-            $template['post_title'] = '(Duplicate) ' . $template['post_title'];
-            $template = $this->app->applyCustomFilters('template_duplicate', $template);
-
             if (!$template) {
                 continue;
             }
+
+            $template['post_title'] = '(Duplicate) ' . $template['post_title'];
+            $template = $this->app->applyCustomFilters('template_duplicate', $template);
 
             $templateId = $post->createPost(
                 [
@@ -234,7 +234,9 @@ class TemplatesController extends Controller
 
         $deletedCount = 0;
         foreach ($ids as $id) {
-            $post->deletePost($id);
+            if (!$post->deletePost($id, $this->postType)) {
+                continue;
+            }
             $deletedCount++;
             do_action('wpsocialreviews/template_deleted', $id);
         }
@@ -275,7 +277,12 @@ class TemplatesController extends Controller
                 'post_title' => $templateTitle,
             ];
             $args   = $this->app->applyCustomFilters('template_title', $updateArgs);
-            $result = $post->updatePost($args);
+            $result = $post->updatePost($args, $this->postType);
+            if ($result === false) {
+                wp_send_json_error([
+                    'message' => __('Failed to update title', 'wp-social-reviews')
+                ], 422);
+            }
             $this->app->doCustomAction('after_save_title', $templateId);
 
             return [

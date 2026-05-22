@@ -2,9 +2,9 @@
 Contributors: techjewel, adreastrian, devutpol, sabbir345, wpmanageninja
 Tags: Customer Reviews, Google Reviews, Social Reviews, Social Feeds,  Instagram Feeds
 Requires at least: 6.2
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 4.2.1
+Stable tag: 4.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -334,6 +334,16 @@ If you like this plugin, please give us [5 stars](https://wordpress.org/plugins/
 8. Make templates your own way, and all will look perfect on any screen
 
 == Changelog ==
+
+4.2.2 ( Date: May 22, 2026 )
+- Improved translation coverage for admin UI strings
+- Fixed reviewer avatar and notification popup platform icon images to include explicit dimensions, reducing layout shift on review template pages
+- Fixed "Write a Review" button allowing save with a blank custom URL — the editor now validates and blocks save when the custom URL is empty
+- Fixed "Write a Review" button not rendering on the frontend when a custom URL source was configured (Pro)
+- Fixed FluentCart reviews not showing the Edit action in the admin review list (Pro)
+- Removed incomplete "View Submissions" action from the native review form actions menu (Pro)
+- Added extra security checks for YouTube video popup and Facebook album requests (Pro)
+- Improved validation to prevent editing the wrong templates, widgets, or notifications
 
 4.2.1 ( Date: 24 April 2026 )
 - Fix custom review images with optimization enabled

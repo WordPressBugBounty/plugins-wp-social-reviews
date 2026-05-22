@@ -126,6 +126,7 @@ return array(
     'WPSocialReviews\\App\\Services\\ReviewApprovalService' => $baseDir . '/app/Services/ReviewApprovalService.php',
     'WPSocialReviews\\App\\Services\\SidebarWidgets' => $baseDir . '/app/Services/SidebarWidgets.php',
     'WPSocialReviews\\App\\Services\\TranslationString' => $baseDir . '/app/Services/TranslationString.php',
+    'WPSocialReviews\\App\\Services\\TranslationStrings' => $baseDir . '/app/Services/TranslationStrings.php',
     'WPSocialReviews\\App\\Services\\Widgets\\Beaver\\BeaverWidget' => $baseDir . '/app/Services/Widgets/Beaver/BeaverWidget.php',
     'WPSocialReviews\\App\\Services\\Widgets\\ElementorWidget' => $baseDir . '/app/Services/Widgets/ElementorWidget.php',
     'WPSocialReviews\\App\\Services\\Widgets\\FacebookFeedWidget' => $baseDir . '/app/Services/Widgets/FacebookFeedWidget.php',

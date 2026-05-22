@@ -155,6 +155,7 @@ class ComposerStaticInit0fd2dd2c383b895d4bb22d509da50f97
         'WPSocialReviews\\App\\Services\\ReviewApprovalService' => __DIR__ . '/../..' . '/app/Services/ReviewApprovalService.php',
         'WPSocialReviews\\App\\Services\\SidebarWidgets' => __DIR__ . '/../..' . '/app/Services/SidebarWidgets.php',
         'WPSocialReviews\\App\\Services\\TranslationString' => __DIR__ . '/../..' . '/app/Services/TranslationString.php',
+        'WPSocialReviews\\App\\Services\\TranslationStrings' => __DIR__ . '/../..' . '/app/Services/TranslationStrings.php',
         'WPSocialReviews\\App\\Services\\Widgets\\Beaver\\BeaverWidget' => __DIR__ . '/../..' . '/app/Services/Widgets/Beaver/BeaverWidget.php',
         'WPSocialReviews\\App\\Services\\Widgets\\ElementorWidget' => __DIR__ . '/../..' . '/app/Services/Widgets/ElementorWidget.php',
         'WPSocialReviews\\App\\Services\\Widgets\\FacebookFeedWidget' => __DIR__ . '/../..' . '/app/Services/Widgets/FacebookFeedWidget.php',

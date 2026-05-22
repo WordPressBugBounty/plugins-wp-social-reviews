@@ -114,10 +114,12 @@ class YoutubeTemplateHandler
 
     public function renderPopupFeed()
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading popup parameters for display context, not processing form data
-        $feedId =  Arr::get($_REQUEST, 'feedId');
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading popup parameters for display context, not processing form data
-        $templateId = absint(Arr::get($_REQUEST, 'templateId'));
+        if (!check_ajax_referer('wpsr-ajax-nonce', 'security', false)) {
+            wp_send_json_error(['message' => __('Security validation failed.', 'wp-social-reviews')], 403);
+        }
+
+        $feedId     = Arr::get($_REQUEST, 'feedId'); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified above
+        $templateId = absint(Arr::get($_REQUEST, 'templateId')); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified above
 
         $app = App::getInstance();
         $shortcodeHandler = new ShortcodeHandler();

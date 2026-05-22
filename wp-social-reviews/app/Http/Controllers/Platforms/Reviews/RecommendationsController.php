@@ -189,8 +189,11 @@ class RecommendationsController extends Controller
             return __('No reviews selected', 'wp-social-reviews');
         }
 
-        // Optimize: Use whereIn to fetch all reviews in one query instead of N queries
-        $reviewsToDuplicate = Review::whereIn('id', $ids)->get();
+        // Only allow duplicating user-editable review types; platform-imported reviews are read-only.
+        $duplicatablePlatforms = apply_filters('wpsocialreviews/duplicatable_review_platforms', ['custom', 'testimonial', 'native_form']);
+        $reviewsToDuplicate = Review::whereIn('id', $ids)
+            ->whereIn('platform_name', $duplicatablePlatforms)
+            ->get();
 
         $duplicatedCount = 0;
         $createdReviews = [];
@@ -268,16 +271,16 @@ class RecommendationsController extends Controller
             return __('No reviews selected', 'wp-social-reviews');
         }
 
-        // Optimize: Use whereIn to delete in bulk instead of N queries
+        // Snapshot rows, DELETE, then fire actions. Listeners that recompute per-product stats
+        // (handleUpdateBusinessInfo) re-query the table, so the action must fire after the DELETE
+        // or the recomputed total/avg will still include the rows being removed.
         $reviewsToDelete = Review::whereIn('id', $ids)->get();
-        $deletedCount = 0;
+
+        $deletedCount = Review::whereIn('id', $ids)->delete();
 
         foreach ($reviewsToDelete as $review) {
             do_action('wpsocialreviews/custom_review_deleted', $review);
         }
-
-        // Bulk delete for better performance
-        $deletedCount = Review::whereIn('id', $ids)->delete();
 
         return sprintf(
             // translators: %d is the number of reviews that were deleted

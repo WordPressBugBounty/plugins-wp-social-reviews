@@ -60,7 +60,11 @@ class TranslationString
             'Select Bubble Icon' => __('Select Bubble Icon', 'wp-social-reviews')
         );
 
-        return apply_filters('wpsocialreviews/translation_strings_i18n', $i18n);
+        // Merge auto-extracted admin strings first (lower priority),
+        // then overlay with user-configurable strings from $i18n above.
+        $merged = array_merge(TranslationStrings::getAdminStrings(), $i18n);
+
+        return apply_filters('wpsocialreviews/translation_strings_i18n', $merged);
     }
 
 }

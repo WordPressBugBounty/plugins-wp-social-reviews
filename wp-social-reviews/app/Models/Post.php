@@ -105,8 +105,14 @@ class Post extends Model
      *
      * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
      */
-    public function updatePost($args)
+    public function updatePost($args, $allowedType = null)
     {
+        if ($allowedType !== null && isset($args['ID'])) {
+            if (get_post_type(intval($args['ID'])) !== $allowedType) {
+                return false;
+            }
+        }
+
         $result = wp_update_post($args, true);
 
         if (is_wp_error($result)) {
@@ -123,11 +129,19 @@ class Post extends Model
      *
      * @return WP_Post|false|null Post data on success, false or null on failure.
      */
-    public function deletePost($postId)
+    public function deletePost($postId, $allowedType = null)
     {
+        if ($allowedType !== null && get_post_type($postId) !== $allowedType) {
+            return false;
+        }
+
         $result = wp_delete_post($postId, true);
-        delete_post_meta($postId, '_wpsr_template_config', true);
-        return $result !== false;
+
+        if($result){
+            delete_post_meta($postId, '_wpsr_template_config', true);
+        }
+        
+        return (bool) $result;
     }
 
     /**

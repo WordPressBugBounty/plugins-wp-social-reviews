@@ -9,7 +9,7 @@ class MetaController extends Controller
 {
     public function index(Request $request, $postId)
     {
-        $platform = $request->get('platform');
+        $platform = sanitize_key($request->get('platform'));
         $args = [
             'postId' => $postId,
             'postType' => $request->get('postType'),
@@ -20,7 +20,7 @@ class MetaController extends Controller
 
     public function update(Request $request, $postId)
     {
-        $platform = $request->get('platform');
+        $platform = sanitize_key($request->get('platform'));
         $settings = json_decode($request->get('settings'), true);
         $settings = wp_unslash($settings);
         do_action('wpsocialreviews/update_editor_settings_' . $platform, $settings, $postId);
@@ -28,7 +28,7 @@ class MetaController extends Controller
 
     public function edit(Request $request, $postId)
     {
-        $platform = $request->get('platform');
+        $platform = sanitize_key($request->get('platform'));
         $settings = json_decode($request->get('settings'), true);
         $settings = wp_unslash($settings);
         do_action('wpsocialreviews/edit_editor_settings_' . $platform, $settings, $postId);

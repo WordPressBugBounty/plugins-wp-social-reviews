@@ -104,7 +104,7 @@ class ShoppablesController extends Controller
     public function storeTemplateSettings(Request $request, $postId)
     {
         $postId = intval($postId);
-        $platform = sanitize_text_field($request->get('platform', ''));
+        $platform = sanitize_key($request->get('platform', ''));
 
         $json_data = $request->get('shoppable_fields');
         $raw_data  = json_decode($json_data, true);
