@@ -5,10 +5,11 @@ namespace WPSocialReviews\App\Http\Controllers\Platforms\Reviews;
 use WPSocialReviews\App\Models\Review;
 use WPSocialReviews\App\Services\Platforms\PlatformData;
 use WPSocialReviews\Framework\Foundation\Application;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Http\Controllers\Controller;
 use WPSocialReviews\App\Services\Platforms\Feeds\CacheHandler;
 use WPSocialReviews\App\Services\Platforms\ReviewImageOptimizationHandler;
+use WPSocialReviews\Framework\Support\Arr;
 
 class ConfigsController extends Controller
 {
@@ -23,14 +24,41 @@ class ConfigsController extends Controller
     {
         $platformName   = sanitize_text_field($request->get('platform', ''));
         $credential     = $this->app->applyCustomFilters('api_credential_' . $platformName, []);
-        $businessInfo   = $this->app->applyCustomFilters('business_info_' . $platformName, []);
         $additionalInfo = $this->app->applyCustomFilters('additional_info_' . $platformName, []);
 
-        return [
+        $response = [
             'credential'      => $credential,
-            'business_info'   => $businessInfo,
             'additional_info' => $additionalInfo
         ];
+
+        // Opt-in pagination: only applied when the caller sends per_page (e.g. the
+        // WooCommerce/FluentCart connected-products list, which can run into the
+        // thousands). Page/per_page are forwarded into the business_info_* filter
+        // so platforms that support it (see ProductReviewPlatform::getBusinessInfo())
+        // slice BEFORE enrichment runs, instead of enriching every connected
+        // product just to slice the response down afterwards. Platforms that
+        // don't send per_page keep getting the full list.
+        if ($request->has('per_page')) {
+            $perPage = max(1, intval($request->get('per_page', 10)));
+            $page    = max(1, intval($request->get('page', 1)));
+
+            // Cheap total count straight from the option — the enrichment loop
+            // (the expensive part) never touches anything beyond the current page.
+            $rawBusinessInfo = get_option('wpsr_reviews_' . $platformName . '_business_info', []);
+            $total = is_array($rawBusinessInfo) ? count($rawBusinessInfo) : 0;
+
+            $response['business_info'] = $this->app->applyCustomFilters('business_info_' . $platformName, [], $page, $perPage);
+            $response['pagination']    = [
+                'page'        => $page,
+                'per_page'    => $perPage,
+                'total'       => $total,
+                'total_pages' => (int) ceil($total / $perPage),
+            ];
+        } else {
+            $response['business_info'] = $this->app->applyCustomFilters('business_info_' . $platformName, []);
+        }
+
+        return $response;
     }
 
     public function store(Request $request)
@@ -39,6 +67,62 @@ class ConfigsController extends Controller
         $configs  = $request->get('verificationData');
         $configs = sanitize_text_field((string) $configs);
         $this->app->doCustomAction('save_configs' . $platform, $configs);
+    }
+
+    public function prepare(Request $request)
+    {
+        $wpsr_sanitize_map = [
+            'platform'   => 'sanitize_key',
+            'provider'   => 'sanitize_key',
+            'flow'       => 'sanitize_key',
+            'return_url' => 'esc_url_raw',
+            'source'     => 'sanitize_text_field'
+        ];
+        $wpsr_request_data = $request->all();
+        $wpsr_settings = wpsr_backend_sanitizer($wpsr_request_data, $wpsr_sanitize_map);
+        $wpsr_platform = Arr::get($wpsr_settings, 'platform', '');
+
+        if (!$wpsr_platform) {
+            return $this->sendError([
+                'message' => __('Missing platform data.', 'wp-social-reviews')
+            ], 423);
+        }
+
+        // Handlers are registered per-platform by review services with $authProvider set (see
+        // BaseReview::registerHooks). Google/Airbnb live in this repo; Facebook, Yelp, etc. are
+        // Pro-only and registered by wp-social-ninja-pro (e.g. FacebookBusiness, $authProvider
+        // = 'facebook'). A missing handler here means Pro is inactive for a Pro-only platform,
+        // not a wiring bug — the matching UI is gated behind has_pro.
+        return $this->dispatchAction(
+            'wpsocialreviews/prepare_review_auth_' . $wpsr_platform,
+            [$wpsr_settings],
+            __('No authentication handler is registered for this platform.', 'wp-social-reviews')
+        );
+    }
+
+    public function consume(Request $request)
+    {
+        $wpsr_sanitize_map = [
+            'platform'  => 'sanitize_key',
+            'result_id' => 'wpsr_sanitize_opaque_token',
+            'flow_id'   => 'wpsr_sanitize_opaque_token',
+            'payload'   => 'wpsr_sanitize_opaque_token'
+        ];
+        $wpsr_request_data = $request->all();
+        $wpsr_settings = wpsr_backend_sanitizer($wpsr_request_data, $wpsr_sanitize_map);
+        $wpsr_platform = Arr::get($wpsr_settings, 'platform', '');
+
+        if (!$wpsr_platform) {
+            return $this->sendError([
+                'message' => __('Missing platform data.', 'wp-social-reviews')
+            ], 423);
+        }
+
+        return $this->dispatchAction(
+            'wpsocialreviews/consume_review_auth_' . $wpsr_platform,
+            [$wpsr_settings],
+            __('No authentication handler is registered for this platform.', 'wp-social-reviews')
+        );
     }
 
     public function saveReviews(Request $request)
@@ -102,12 +186,14 @@ class ConfigsController extends Controller
         $sourceId           = sanitize_text_field($request->get('sourceId', ''));
         $settings_option_name = 'wpsr_reviews_' . $platform . '_settings';
         $business_info_option_name = 'wpsr_reviews_' . $platform . '_business_info';
-        $settings           = get_option($settings_option_name);
-        $businessInfo       = get_option($business_info_option_name);
+        $settings           = get_option($settings_option_name, []);
+        $businessInfo       = get_option($business_info_option_name, []);
+        $settings           = is_array($settings) ? $settings : [];
+        $businessInfo       = is_array($businessInfo) ? $businessInfo : [];
 
         do_action('wpsocialreviews/clear_reviews_verification_configs_' . $platform, $sourceId);
 
-        if($sourceId){
+        if($sourceId && $sourceId !== 'clear-locations'){
             unset($settings[$sourceId]);
             unset($businessInfo[$sourceId]);
         }

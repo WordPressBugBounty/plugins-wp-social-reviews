@@ -24,6 +24,10 @@ class FacebookFeed extends BaseFeed
 {
     public $platform = 'facebook_feed';
 
+    protected $authProvider = 'facebook';
+
+    protected $authFlow = 'feed';
+
     private $remoteFetchUrl = 'https://graph.facebook.com/';
 
     protected $cacheHandler;
@@ -56,6 +60,52 @@ class FacebookFeed extends BaseFeed
             $platforms['facebook_feed'] = __('Facebook Feed', 'wp-social-reviews');
         }
         return $platforms;
+    }
+
+    /**
+     * Persist the token returned by the RemoteAuth bridge.
+     *
+     * Mirrors the legacy OAuth path: store the user-level verification
+     * configs and fetch the list of authorized Pages so the page-selection
+     * modal can be shown to the user.
+     *
+     * @param array $result
+     * @return array
+     */
+    protected function persistAuthResult($result)
+    {
+        if (!Arr::get($result, 'ok')) {
+            return $result;
+        }
+
+        $platform = Arr::get($result, 'platform', '');
+        if ($platform !== $this->platform) {
+            throw new \RuntimeException(esc_html__('Invalid auth platform response.', 'wp-social-reviews'));
+        }
+
+        $token       = Arr::get($result, 'token', []);
+        $accessToken = Arr::get($token, 'access_token', '');
+
+        if (!$accessToken) {
+            throw new \RuntimeException(esc_html__('Facebook access token is missing.', 'wp-social-reviews'));
+        }
+
+        $this->saveVerificationConfigs($accessToken, 'oauth');
+        $this->saveAuthorizedSourceList($accessToken);
+
+        $result['platform']               = $this->platform;
+        $result['authorized_source_list'] = $this->getAuthorizedSourceList();
+
+        return $result;
+    }
+
+    protected function formatAuthResultForResponse($result)
+    {
+        return [
+            'ok'                     => true,
+            'platform'               => $this->platform,
+            'authorized_source_list' => Arr::get($result, 'authorized_source_list', []),
+        ];
     }
 
     public function handleCredential($args = [])
@@ -217,41 +267,20 @@ class FacebookFeed extends BaseFeed
 
     public function saveAuthorizedSourceList($access_token)
     {
-        $api = $this->remoteFetchUrl.'me/accounts?limit=500&access_token='.$access_token;
-        $response = wp_remote_get($api);
+        // Shared fetch+paginate kernel (used by Facebook reviews too); we keep our own
+        // per-page formatting and storage format here.
+        $managed = GlobalHelper::fetchFacebookManagedPages($access_token);
 
-        if(is_wp_error($response)) {
-            throw new \Exception(esc_html($response->get_error_message()));
-        }
-
-        if(200 !== wp_remote_retrieve_response_code($response)) {
-            $errorMessage = $this->getErrorMessage($response);
-            throw new \Exception(esc_html($errorMessage));
-        }
-
-        if(200 === wp_remote_retrieve_response_code($response)) {
-            $result = json_decode(wp_remote_retrieve_body($response), true);
-
-            $nextUrl = Arr::get($result, 'paging.next');
-            if($nextUrl){
-                while($nextUrl) {
-                    $result = $this->getNextPageUrlResponse($nextUrl, $result);
-                    $nextUrl = Arr::get($result, 'paging.next');
+        $data = Arr::get($managed, 'pages', []);
+        if ($data) {
+            $connected_accounts = [];
+            foreach ($data as $index => $page) {
+                if (Arr::get($page, 'id') && Arr::get($page, 'name')) {
+                    $pageId = (string)$page['id'];
+                    $connected_accounts[] = $this->formatPageData($page, $pageId);
                 }
             }
-
-            $data = Arr::get($result, 'data', []);
-
-            if ($data) {
-                $connected_accounts = [];
-                foreach ($data as $index => $page) {
-                    if (Arr::get($page, 'id') && Arr::get($page, 'name')) {
-                        $pageId = (string)$page['id'];
-                        $connected_accounts[] = $this->formatPageData($page, $pageId);
-                    }
-                }
-                update_option('wpsr_facebook_feed_authorized_sources', array('sources' => $connected_accounts));
-            }
+            update_option('wpsr_facebook_feed_authorized_sources', array('sources' => $connected_accounts));
         }
     }
 
@@ -905,6 +934,23 @@ class FacebookFeed extends BaseFeed
                         $this->cacheHandler->createCache($pageCacheName, $feeds);
                     }
 
+                    // Store the original relative inputs alongside the feed cache so the
+                    // background refresh can re-resolve them instead of replaying the
+                    // absolute timestamps frozen into the cache name. Absolute ranges don't
+                    // drift, so they need no descriptor.
+                    if ($isDateRangeEnabled && isset($dateRangeType) && $dateRangeType === 'relative_date') {
+                        $dateRangeMeta = array(
+                            'date_range_type'  => 'relative_date',
+                            'date_range_start' => $originalDateRangeStart,
+                            'date_range_end'   => $originalDateRangeEnd,
+                        );
+                        if ($this->extendedCacheTime) {
+                            $this->cacheHandler->createCacheWithExpirationTime($pageCacheName . '_drmeta', $dateRangeMeta, $extendedCacheTime);
+                        } else {
+                            $this->cacheHandler->createCache($pageCacheName . '_drmeta', $dateRangeMeta);
+                        }
+                    }
+
                     $errorHasAppPermissionError = Arr::get($page, 'has_app_permission_error', false);
                     $errorMessage = Arr::get($page, 'error_message', '');
 
@@ -917,6 +963,26 @@ class FacebookFeed extends BaseFeed
 
                 }
             }
+        }
+
+        // Safety-net date-range filter for event feeds.
+        // The Facebook /events Graph API edge honours `since` (start_time >= since) but
+        // does not reliably exclude events past `until`, so a future event can leak into a
+        // past-range request. Filter event start_time locally against the requested range.
+        // Runs on both freshly-fetched and cached feeds, using the current "now"-aware bounds.
+        if($feedType === 'event_feed' && $isDateRangeEnabled && !empty($feeds) && is_array($feeds)
+            && isset($cacheKeyStart, $cacheKeyEnd) && is_numeric($cacheKeyStart) && is_numeric($cacheKeyEnd)) {
+            $feeds = array_values(array_filter($feeds, function ($feed) use ($cacheKeyStart, $cacheKeyEnd) {
+                $startTime = is_array($feed) ? Arr::get($feed, 'start_time', null) : null;
+                if (empty($startTime)) {
+                    return false;
+                }
+                $startTimestamp = strtotime($startTime);
+                if ($startTimestamp === false) {
+                    return false;
+                }
+                return $startTimestamp >= $cacheKeyStart && $startTimestamp <= $cacheKeyEnd;
+            }));
         }
 
         if(!empty($feeds) && is_array($feeds)){
@@ -935,10 +1001,8 @@ class FacebookFeed extends BaseFeed
 
     public function getNextPageUrlResponse($nextUrl, $pageData)
     {
-        $args     = array(
-            'timeout'   => 60
-        );
-        $response = wp_remote_get($nextUrl, $args);
+        $request  = GlobalHelper::requestFacebookGraph($nextUrl, 'facebook_feed');
+        $response = $request['response'];
 
         if(is_wp_error($response)) {
             $errorMessage = ['error_message' => $response->get_error_message()];
@@ -950,15 +1014,11 @@ class FacebookFeed extends BaseFeed
             return ['error_message' => $errorMessage];
         }
 
-        $result = $pageData;
-        if(Arr::get($response, 'response.code') === 200) {
-            $result = json_decode(wp_remote_retrieve_body($response), true);
+        $result  = $request['body'];
+        $newData = Arr::get($result, 'data', []);
+        $oldData = Arr::get($pageData, 'data', []);
 
-            $newData = Arr::get($result, 'data', []);
-            $oldData = Arr::get($pageData, 'data', []);
-
-            $result['data'] = array_merge($newData, $oldData);
-        }
+        $result['data'] = array_merge($newData, $oldData);
 
         return $result;
     }
@@ -1065,8 +1125,23 @@ class FacebookFeed extends BaseFeed
     {
         $this->cacheHandler->clearPageCaches($this->platform);
 
+        // Index the relative date-range descriptors (see getPageFeed) so their
+        // windows can be re-resolved instead of using the frozen cache-name timestamps.
+        $dateRangeMetaMap = [];
+        foreach ($caches as $cache) {
+            if (isset($cache['option_name']) && strpos($cache['option_name'], '_drmeta') !== false) {
+                $dateRangeMetaMap[$cache['option_name']] = Arr::get($cache, 'option_value');
+            }
+        }
+
         foreach ($caches as $index => $cache) {
             $optionName = $cache['option_name'];
+
+            // Descriptor siblings are metadata, not feeds — skip them.
+            if (strpos($optionName, '_drmeta') !== false) {
+                continue;
+            }
+
             $num_position = strpos($optionName, '_num_');
             $total    = substr($optionName, $num_position + strlen('_num_'), strlen($optionName));
 
@@ -1083,6 +1158,21 @@ class FacebookFeed extends BaseFeed
                 $apiSettings['date_range'] = true;
                 $apiSettings['date_range_start'] = $dateRangeStartTime;
                 $apiSettings['date_range_end'] = $dateRangeEndTime;
+
+                // Frozen-"now" fix: for relative ranges, re-resolve from the stored
+                // inputs so the refreshed window tracks the current time rather than the
+                // timestamps frozen into the name. Absolute ranges keep their timestamps.
+                $dateRangeMeta = Arr::get($dateRangeMetaMap, $optionName . '_drmeta');
+                if (is_array($dateRangeMeta) && Arr::get($dateRangeMeta, 'date_range_type') === 'relative_date') {
+                    $apiSettings['date_range_type']  = 'relative_date';
+                    $apiSettings['date_range_start'] = Arr::get($dateRangeMeta, 'date_range_start');
+                    $apiSettings['date_range_end']   = Arr::get($dateRangeMeta, 'date_range_end');
+
+                    // Re-resolving yields a NEW cache name, so delete this stale row now
+                    // to avoid orphans. The LIKE-prefix match also sweeps the "_drmeta"
+                    // sibling and never matches the new current-time name.
+                    $this->cacheHandler->clearCacheByName($optionName);
+                }
             }
 
             $feed_type  = '';

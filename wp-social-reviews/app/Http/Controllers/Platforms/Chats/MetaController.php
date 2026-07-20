@@ -4,7 +4,7 @@ namespace WPSocialReviews\App\Http\Controllers\Platforms\Chats;
 
 use WPSocialReviews\App\Http\Controllers\Controller;
 use WPSocialReviews\App\Services\Platforms\Chats\Helper as ChatHelper;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 
 class MetaController extends Controller
 {
@@ -50,6 +50,11 @@ class MetaController extends Controller
             'chat_button.button_text'           => 'sanitize_text_field',
             'chat_button.display_icon'          => 'wpsr_sanitize_boolean',
             'chat_button.prefilled_message'     => 'wpsr_sanitize_boolean',
+            'chat_button.message_context'       => [$this, 'sanitizeMessageContext'],
+            'chat_button.custom_message_format' => 'sanitize_textarea_field',
+            'chat_button.page_message_format'   => 'sanitize_textarea_field',
+            'chat_button.woocommerce_message_format' => 'sanitize_textarea_field',
+            'chat_button.fluentcart_message_format' => 'sanitize_textarea_field',
             'chat_button.prefilled_placeholder_text' => 'sanitize_text_field',
 
             // --- Settings ---
@@ -139,6 +144,24 @@ class MetaController extends Controller
         $settings = wpsr_backend_sanitizer($settings, $sanitizeMap);
 
         return $settings;
+    }
+
+    /**
+     * Sanitize WhatsApp message context mode.
+     *
+     * @param string $messageContext
+     * @return string
+     */
+    private function sanitizeMessageContext($messageContext)
+    {
+        if (!defined('WPSOCIALREVIEWS_PRO')) {
+            return 'none';
+        }
+
+        $messageContext = sanitize_key($messageContext);
+        $allowedContexts = ['none', 'page', 'woocommerce_product', 'fluentcart_product', 'custom'];
+
+        return in_array($messageContext, $allowedContexts, true) ? $messageContext : 'none';
     }
 
     /**

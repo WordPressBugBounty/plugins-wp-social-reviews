@@ -6,7 +6,7 @@ use WPSocialReviews\App\App;
 use WPSocialReviews\App\Http\Controllers\Controller;
 use WPSocialReviews\App\Services\GlobalSettings;
 use WPSocialReviews\App\Services\Platforms\PlatformManager;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Models\Review;
 use WPSocialReviews\App\Services\Platforms\Reviews\Helper;
 use WPSocialReviews\App\Services\Helper as GlobalHelper;

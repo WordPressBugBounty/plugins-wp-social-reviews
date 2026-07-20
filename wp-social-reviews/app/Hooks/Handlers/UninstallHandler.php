@@ -54,6 +54,8 @@ class UninstallHandler
             'wpsr_available_valid_platforms',
             'wpsr_onboarding_sessions',
             'wpsr_global_shoppable_settings',
+            'wpsr_review_form_captcha_settings',
+            'wpsr_fluentcrm_integration_settings',
         ];
 
         foreach ($optionsToDelete as $option) {

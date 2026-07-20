@@ -108,7 +108,8 @@ class Post extends Model
     public function updatePost($args, $allowedType = null)
     {
         if ($allowedType !== null && isset($args['ID'])) {
-            if (get_post_type(intval($args['ID'])) !== $allowedType) {
+            // $allowedType may be a single post type or a list of allowed types.
+            if (!in_array(get_post_type(intval($args['ID'])), (array) $allowedType, true)) {
                 return false;
             }
         }
@@ -131,7 +132,7 @@ class Post extends Model
      */
     public function deletePost($postId, $allowedType = null)
     {
-        if ($allowedType !== null && get_post_type($postId) !== $allowedType) {
+        if ($allowedType !== null && !in_array(get_post_type($postId), (array) $allowedType, true)) {
             return false;
         }
 

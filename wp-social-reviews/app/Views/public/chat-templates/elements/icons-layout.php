@@ -19,7 +19,7 @@ if($settings['channels'] && (in_array('fluent_forms', $channel_name) || in_array
 
         
     <!-- Hidden Chat Container -->
-    <div class="iconChatContainer" style="display: none;">
+    <div class="wpsr_icon_chat_container" style="display: none;">
         <div class="wpsr-fm-chat-close" style="--wpsn-chat-close-btn-color: <?php echo ($wpsr_close_button_color) ? esc_attr($wpsr_close_button_color) : '#1d2129'; ?>"></div>
         
         <?php

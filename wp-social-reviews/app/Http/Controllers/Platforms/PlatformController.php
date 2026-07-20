@@ -3,7 +3,7 @@
 namespace WPSocialReviews\App\Http\Controllers\Platforms;
 
 use WPSocialReviews\App\Http\Controllers\Controller;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Services\Platforms\Reviews\Helper;
 use WPSocialReviews\App\Services\DashboardNotices;
 use WPSocialReviews\App\Services\Platforms\PlatformErrorManager;
@@ -40,12 +40,40 @@ class PlatformController extends Controller
             'email' => $email,
         ];
 
+        // Allow add-ons (e.g. Pro) to inject their own dashboard notices, such as
+        // a "Pro requires a newer WP Social Ninja version" compatibility warning.
+        //
+        // The filter must return a list (array) of notices. Each notice is an
+        // associative array with the following shape:
+        //
+        //   [
+        //       'type'        => 'warning',          // optional: 'warning'|'error'|'info' (default 'warning')
+        //       'title'       => 'Plain text title', // optional: rendered as escaped text
+        //       'message'     => 'Plain text body.', // optional: rendered as escaped text (NO HTML)
+        //       'dismissible' => true,               // optional: set false to hide the close button (default true)
+        //       'actions'     => [                    // optional: call-to-action links
+        //           [
+        //               'label'  => 'Update now',    // link text (falls back to the url)
+        //               'url'    => 'https://...',    // http(s) or relative URL; unsafe schemes are dropped
+        //               'target' => '_blank',         // optional: '_blank' adds rel="noopener noreferrer"
+        //           ],
+        //       ],
+        //   ]
+        //
+        // IMPORTANT: 'title' and 'message' are rendered as plain text (no markup).
+        // Add-ons MUST NOT embed HTML in them; use the 'actions' array for links.
+        $customNotices = apply_filters('wpsocialreviews/dashboard_notices', []);
+        if (!is_array($customNotices)) {
+            $customNotices = [];
+        }
+
         wp_send_json_success([
             'displayNotice' => empty($hasAdminErrors) && $notices->getNoticesStatus(),
             'displayOptInNotice'  => empty($hasAdminErrors) && $displayOptInNotice,
             'displayProUpdateNotice' => $displayProUpdateNotice,
             'userData' => $notices->maybeDisplayNewsletter() ? $userData : [],
-            'displayNewsletter' => empty($hasAdminErrors) && $notices->maybeDisplayNewsletter()
+            'displayNewsletter' => empty($hasAdminErrors) && $notices->maybeDisplayNewsletter(),
+            'customNotices' => array_values($customNotices)
         ], 200);
     }
 

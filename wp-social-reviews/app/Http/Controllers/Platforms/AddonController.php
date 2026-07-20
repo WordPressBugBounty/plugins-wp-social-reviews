@@ -3,7 +3,7 @@
 namespace WPSocialReviews\App\Http\Controllers\Platforms;
 
 use WPSocialReviews\App\Http\Controllers\Controller;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 
 class AddonController extends Controller
 {

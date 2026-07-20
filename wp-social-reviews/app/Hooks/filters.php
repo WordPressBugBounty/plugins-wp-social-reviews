@@ -157,12 +157,11 @@ add_filter('plugin_row_meta', function ($meta, $plugin_file){
         );
 
         if(!defined('WPSOCIALREVIEWS_PRO')) {
-            $upgradeButtonConfig = (new \WPSocialReviews\App\Services\DashboardNotices())->getUpgradeButtonConfig();
+            $dashboardNotices = new \WPSocialReviews\App\Services\DashboardNotices();
+            $upgradeButtonConfig = $dashboardNotices->getUpgradeButtonConfig();
             $upgradeButtonText = \WPSocialReviews\Framework\Support\Arr::get($upgradeButtonConfig, 'text', __('Upgrade to Pro', 'wp-social-reviews'));
-            $upgradeButtonUrl = \WPSocialReviews\Framework\Support\Arr::get(
-                $upgradeButtonConfig,
-                'pro_purchase_url',
-                'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=upgrade'
+            $upgradeButtonUrl = $dashboardNotices->getProUrl(
+                \WPSocialReviews\App\Services\UpgradeUrl::PLACEMENT_PLUGIN_ROW_META
             );
 
             $row_meta['pro'] = '<a rel="noopener" href="' . esc_url($upgradeButtonUrl) . '" style="color: #5525d9;font-weight: bold;" aria-label="' . esc_attr($upgradeButtonText) . '" target="_blank">' . esc_html($upgradeButtonText) . '</a>';

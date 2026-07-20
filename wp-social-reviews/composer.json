@@ -21,7 +21,7 @@
         }
     ],
     "require": {
-        "wpfluent/framework": "^1.0"
+        "wpfluent/framework": "^2.11.12"
     },
     "autoload": {
         "psr-4": {

@@ -6,7 +6,7 @@ use WPSocialReviews\App\Services\Platforms\Feeds\CacheHandler;
 use WPSocialReviews\App\Services\TranslationString;
 use WPSocialReviews\App\Services\Platforms\Reviews\Helper;
 use WPSocialReviews\Framework\Support\Arr;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Services\GlobalSettings;
 use WPSocialReviews\App\Services\Platforms\PlatformManager;
 use WPSocialReviews\App\Hooks\Handlers\UninstallHandler;

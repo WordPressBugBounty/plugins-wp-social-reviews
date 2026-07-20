@@ -21,7 +21,44 @@ class DashboardNotices
      **/
     private $option_name = 'wpsr_statuses';
 
-    private $pro_purchase_url = 'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=upgrade';
+    /**
+     * Build a tracked, affiliate-aware upgrade URL for a given placement.
+     *
+     * Affiliate handling stays last: the wpsocialreviews/link filter is allowed to
+     * replace the destination entirely, so it must see the finished tracked URL.
+     *
+     * @param string $content Placement, from UpgradeUrl::PLACEMENT_* or featureLock().
+     * @param array|null $activeOffer Live promo, when one is running.
+     * @return string
+     */
+    private function buildProUrl($content, $activeOffer = null)
+    {
+        $args = [];
+
+        if (!empty($activeOffer)) {
+            // Promos belong in utm_id. utm_campaign stays upgrade_pro so that
+            // "what we asked for" and "which promo was running" stay separable.
+            $args['id'] = Arr::get($activeOffer, 'id', '');
+
+            $discountCode = Arr::get($activeOffer, 'discount_code', '');
+            if (!empty($discountCode)) {
+                $args['extra'] = ['discount' => $discountCode];
+            }
+        }
+
+        return $this->applyAffiliateLink(UpgradeUrl::build($content, $args));
+    }
+
+    /**
+     * Tracked upgrade URL for a placement, with any live promo already applied.
+     *
+     * @param string $content Placement, from UpgradeUrl::PLACEMENT_* or featureLock().
+     * @return string
+     */
+    public function getProUrl($content)
+    {
+        return $this->buildProUrl($content, $this->getActiveOffer());
+    }
 
     public function noticeTracker()
     {
@@ -96,7 +133,9 @@ class DashboardNotices
         }
 
         if($notice_type === 'hide_pro_upgrade_notice' && $value === '1'){
-            $statuses['hide_pro_upgrade_notice'] = '1';
+            // Store the version it was dismissed for so the notice can reappear
+            // on the next framework-upgrade cycle (see maybeDisplayProUpdateNotice).
+            $statuses['hide_pro_upgrade_notice'] = defined('WPSOCIALREVIEWS_PRO_MIN_VERSION') ? WPSOCIALREVIEWS_PRO_MIN_VERSION : '1';
             update_option($this->option_name, $statuses, false);
         }
 
@@ -168,9 +207,16 @@ class DashboardNotices
     public function maybeDisplayProUpdateNotice()
     {
         $statuses = get_option($this->option_name, []);
-        $hide_pro_upgrade_notice = Arr::get($statuses, 'hide_pro_upgrade_notice');
 
-        return !$hide_pro_upgrade_notice && defined('WPSOCIALREVIEWS_PRO_VERSION') && version_compare(WPSOCIALREVIEWS_PRO_VERSION, '3.10.0', '<=');
+        $minProVersion = defined('WPSOCIALREVIEWS_PRO_MIN_VERSION') ? WPSOCIALREVIEWS_PRO_MIN_VERSION : '4.2.3';
+
+        // Dismissal is scoped to the minimum-Pro version, so a user who hid a
+        // previous restructure notice still sees the one for this upgrade cycle.
+        $dismissedFor = Arr::get($statuses, 'hide_pro_upgrade_notice');
+
+        return $dismissedFor !== $minProVersion
+            && defined('WPSOCIALREVIEWS_PRO_VERSION')
+            && version_compare(WPSOCIALREVIEWS_PRO_VERSION, $minProVersion, '<');
     }
 
 
@@ -222,8 +268,8 @@ class DashboardNotices
      */
     private function isOfferActive($offer, $now)
     {
-        $startDate = strtotime(Arr::get($offer, 'start_date'));
-        $endDate = strtotime(Arr::get($offer, 'end_date') . ' 23:59:59');
+        $startDate = strtotime(Arr::get($offer, 'start_date', ''));
+        $endDate = strtotime(Arr::get($offer, 'end_date', '') . ' 23:59:59');
         $isEnabled = Arr::get($offer, 'enabled', true);
 
         return $isEnabled && $now >= $startDate && $now <= $endDate;
@@ -231,6 +277,11 @@ class DashboardNotices
 
     /**
      * Get all offers configuration
+     *
+     * An offer no longer carries its own URL. It contributes an `id` (emitted as
+     * utm_id) and an optional `discount_code`; the destination and the rest of the
+     * tracking vocabulary are assembled by UpgradeUrl so that a promo can never
+     * overwrite utm_campaign or drop the placement.
      *
      * @return array
      */
@@ -244,58 +295,89 @@ class DashboardNotices
 //                'id' => 'black_friday',
 //                'name' => __('Black Friday Sale', 'wp-social-reviews'),
 //                'discount_percentage' => 50,
+//                'discount_code' => 'BLACKFRIDAY50',
 //                'start_date' => $currentYear . '-11-24',
 //                'end_date' => $currentYear . '-11-30',
 //                'enabled' => true,
 //                'button_text' => __('Get 50% OFF - Limited Time!', 'wp-social-reviews'),
 //                'urgency_text' => __('Black Friday Special - 50% OFF', 'wp-social-reviews'),
-//                'pro_purchase_url' => 'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=black_friday&discount=BLACKFRIDAY50',
 //            ],
 //            [
 //                'id' => 'cyber_monday',
 //                'name' => __('Cyber Monday Sale', 'wp-social-reviews'),
 //                'discount_percentage' => 45,
+//                'discount_code' => 'CYBER45',
 //                'start_date' => $currentYear . '-12-01',
 //                'end_date' => $currentYear . '-12-02',
 //                'enabled' => true,
 //                'button_text' => __('Cyber Monday - 45% OFF', 'wp-social-reviews'),
 //                'urgency_text' => __('Cyber Monday Special - 45% OFF', 'wp-social-reviews'),
-//                'pro_purchase_url' => 'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=cyber_monday&discount=CYBER45',
 //            ],
 //            [
 //                'id' => 'new_year',
 //                'name' => __('New Year Sale', 'wp-social-reviews'),
 //                'discount_percentage' => 30,
+//                'discount_code' => 'NEWYEAR30',
 //                'start_date' => $currentYear . '-12-26',
 //                'end_date' => $nextYear . '-01-07',
 //                'enabled' => true,
 //                'button_text' => __('New Year Deal - 30% OFF', 'wp-social-reviews'),
 //                'urgency_text' => __('Start the year right - 30% OFF', 'wp-social-reviews'),
-//                'pro_purchase_url' => 'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=new_year&discount=NEWYEAR30',
 //            ],
 //            [
 //                'id' => 'birthday',
 //                'name' => __('WP Social Ninja Birthday', 'wp-social-reviews'),
 //                'discount_percentage' => 40,
+//                'discount_code' => 'BIRTHDAY40',
 //                'start_date' => $currentYear . '-09-12',
 //                'end_date' => $currentYear . '-09-30',
 //                'enabled' => true,
 //                'button_text' => __('Birthday Special - 40% OFF', 'wp-social-reviews'),
 //                'urgency_text' => __('Celebrating our birthday - 40% OFF', 'wp-social-reviews'),
-//                'pro_purchase_url' => 'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=birthday&discount=BIRTHDAY40',
 //            ],
 //            [
 //                'id' => 'halloween',
 //                'name' => __('Halloween Sale', 'wp-social-reviews'),
 //                'discount_percentage' => 35,
+//                'discount_code' => 'HALLOWEEN35',
 //                'start_date' => $nextYear . '-10-28',
 //                'end_date' => $nextYear . '-11-01',
 //                'enabled' => true,
 //                'button_text' => __('Halloween Treat - 35% OFF', 'wp-social-reviews'),
 //                'urgency_text' => __('Spooky savings - 35% OFF', 'wp-social-reviews'),
-//                'pro_purchase_url' => 'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=halloween&discount=HALLOWEEN35',
 //            ]
         ];
+    }
+
+    /**
+     * Apply partner affiliate attribution to an outbound Pro/upgrade URL.
+     *
+     *   add_filter('wpsocialreviews/link', function ($args) {
+     *       $args['affiliate'] = 'my_partner_id';
+     *       return $args;
+     *   });
+     *
+     * The affiliate id is appended as a `ref` query argument. Partners that need
+     * a completely different destination can set `$args['url']` instead.
+     *
+     * @param string $url Default Pro purchase/upgrade URL.
+     * @return string
+     */
+    public function applyAffiliateLink($url)
+    {
+        $args = (array) apply_filters('wpsocialreviews/link', array(
+            'url'       => $url,
+            'affiliate' => '',
+        ));
+
+        $url       = !empty($args['url']) ? $args['url'] : $url;
+        $affiliate = isset($args['affiliate']) ? trim((string) $args['affiliate']) : '';
+
+        if ($affiliate !== '') {
+            $url = add_query_arg('ref', rawurlencode($affiliate), $url);
+        }
+
+        return esc_url_raw($url);
     }
 
     /**
@@ -310,7 +392,7 @@ class DashboardNotices
         if ($activeOffer) {
             $upgradeButtonConfig = [
                 'text' => Arr::get($activeOffer, 'button_text', __('Upgrade to Pro', 'wp-social-reviews')),
-                'pro_purchase_url' => Arr::get($activeOffer, 'pro_purchase_url'),
+                'pro_purchase_url' => $this->buildProUrl(UpgradeUrl::PLACEMENT_UPGRADE_PAGE, $activeOffer),
                 'discount_percentage' => Arr::get($activeOffer, 'discount_percentage', 0),
                 'urgency_text' => Arr::get($activeOffer, 'urgency_text'),
                 'has_offer' => true,
@@ -318,12 +400,12 @@ class DashboardNotices
                 'offer_name' => Arr::get($activeOffer, 'name')
             ];
 
-            return (array) apply_filters('wpsocialreviews/upgrade_to_pro_cta', $upgradeButtonConfig, $activeOffer);
+            return $upgradeButtonConfig;
         }
 
         $upgradeButtonConfig = [
             'text' => __('Upgrade to Pro', 'wp-social-reviews'),
-            'pro_purchase_url' => $this->pro_purchase_url,
+            'pro_purchase_url' => $this->buildProUrl(UpgradeUrl::PLACEMENT_UPGRADE_PAGE),
             'discount_percentage' => 0,
             'urgency_text' => null,
             'has_offer' => false,
@@ -331,7 +413,52 @@ class DashboardNotices
             'offer_name' => null
         ];
 
-        return (array) apply_filters('wpsocialreviews/upgrade_to_pro_cta', $upgradeButtonConfig, null);
+        return $upgradeButtonConfig;
+    }
+
+    /**
+     * Give every locked feature in the extensions tree its own tracked URL.
+     *
+     * The tree is keyed [platform][feature], which is exactly the pair the upgrade
+     * modal already receives as props, so each leaf can carry a URL naming the
+     * precise feature the user just hit. This is the signal the UTM spec exists
+     * for: which locked feature actually drives a purchase.
+     *
+     * Naming rules applied here:
+     *  - the "general" bucket is not a platform, so its features are not prefixed
+     *    ("filters" -> feature_lock_filters, not feature_lock_general_filters)
+     *  - "general.default" is the unnamed catch-all popup -> feature_lock_general
+     *  - a "_feed" platform suffix is dropped to avoid feature_lock_facebook_feed_video_feed
+     *
+     * @param array $config
+     * @param array|null $activeOffer
+     * @return array
+     */
+    private function addFeatureLockUrls($config, $activeOffer = null)
+    {
+        foreach ($config as $platform => $features) {
+            if (!is_array($features)) {
+                continue;
+            }
+
+            $namespace = ($platform === 'general') ? '' : preg_replace('/_feed$/', '', $platform);
+
+            foreach ($features as $feature => $featureConfig) {
+                if (!is_array($featureConfig)) {
+                    continue;
+                }
+
+                if ($platform === 'general' && $feature === 'default') {
+                    $content = UpgradeUrl::featureLock('general');
+                } else {
+                    $content = UpgradeUrl::featureLock($feature, $namespace);
+                }
+
+                $config[$platform][$feature]['pro_purchase_url'] = $this->buildProUrl($content, $activeOffer);
+            }
+        }
+
+        return $config;
     }
 
     /**
@@ -343,12 +470,12 @@ class DashboardNotices
     public function getSpecificFeaturePopupConfig()
     {
         $activeOffer = $this->getActiveOffer();
-        $defaultConfig = $this->getDefaultExtensionsConfig();
+        $defaultConfig = $this->addFeatureLockUrls($this->getDefaultExtensionsConfig(), $activeOffer);
 
         if ($activeOffer) {
             return array_merge($defaultConfig,
                 [
-                    'pro_purchase_url' => Arr::get($activeOffer, 'pro_purchase_url'),
+                    'pro_purchase_url' => $this->buildProUrl(UpgradeUrl::featureLock('general'), $activeOffer),
                     'discount_percentage' => Arr::get($activeOffer, 'discount_percentage', 0),
                     'offer_active' => true,
                     'offer_id' => Arr::get($activeOffer, 'id'),
@@ -359,7 +486,7 @@ class DashboardNotices
 
         return array_merge($defaultConfig, [
             'offer_active' => false,
-            'pro_purchase_url' => $this->pro_purchase_url,
+            'pro_purchase_url' => $this->buildProUrl(UpgradeUrl::featureLock('general')),
         ]);
     }
 
@@ -573,9 +700,19 @@ class DashboardNotices
         $activeOffer = $this->getActiveOffer();
         $basePromotion = $this->getBasePlatformPromotion($platform);
 
+        if (empty($basePromotion) || !is_array($basePromotion)) {
+            return $basePromotion;
+        }
+
+        // Each review platform is a distinct locked feature, so it gets its own
+        // placement rather than sharing one generic upgrade link.
+        $platformSlug = Arr::get($basePromotion, 'platform', $platform);
+        $basePromotion['pro_purchase_url'] = $this->buildProUrl(
+            UpgradeUrl::featureLock($platformSlug, 'reviews'),
+            $activeOffer
+        );
+
         if ($activeOffer) {
-            // Merge active offer data with base promotion
-            $basePromotion['pro_purchase_url'] = Arr::get($activeOffer, 'pro_purchase_url', $basePromotion['pro_purchase_url']);
             $basePromotion['discount_percentage'] = Arr::get($activeOffer, 'discount_percentage', 0);
             $basePromotion['offer_active'] = true;
             $basePromotion['offer_text'] = Arr::get($activeOffer, 'urgency_text', '');
@@ -624,7 +761,6 @@ class DashboardNotices
                 'description' => __('Display Airbnb reviews & engage with your customers post purchasing to hook your site visitors instantly.', 'wp-social-reviews'),
                 'img' => $promoteBase . 'airbnb.png',
                 'video' => null,
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'airbnb'
             ],
@@ -634,7 +770,6 @@ class DashboardNotices
                 'description' => __('Display Yelp reviews on your website & take on board your potential customers to kickstart your business.', 'wp-social-reviews'),
                 'img' => '',
                 'video' => '',
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'yelp'
             ],
@@ -644,7 +779,6 @@ class DashboardNotices
                 'description' => __('Add Tripadvisor reviews any where on your website to improve your brand\'s social media marketing.', 'wp-social-reviews'),
                 'img' => $promoteBase . 'tripadvisor.png',
                 'video' => null,
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'tripadvisor'
             ],
@@ -654,7 +788,6 @@ class DashboardNotices
                 'description' => __('Fetch & exhibit Amazon reviews on your website & reach out to larger audiences for better brand exposure.', 'wp-social-reviews'),
                 'img' => '',
                 'video' => '',
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'amazon'
             ],
@@ -664,7 +797,6 @@ class DashboardNotices
                 'description' => __('Show the best AliExpress reviews on your website to promote your brand with a detailed customization option.', 'wp-social-reviews'),
                 'img' => null,
                 'video' => 'https://www.youtube.com/embed/uWeALyqO42I',
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'aliexpress'
             ],
@@ -674,7 +806,6 @@ class DashboardNotices
                 'description' => __('Fetch & display your Booking.com reviews to connect with your audiences without wasting any time.', 'wp-social-reviews'),
                 'img' => $promoteBase . 'booking.png',
                 'video' => null,
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'booking.com'
             ],
@@ -684,7 +815,6 @@ class DashboardNotices
                 'description' => __('Showcase Facebook reviews on your WordPress website & prove your business credibility to another level.', 'wp-social-reviews'),
                 'img' => null,
                 'video' => 'https://www.youtube.com/embed/88yM4eACxLU',
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'facebook'
             ],
@@ -694,7 +824,6 @@ class DashboardNotices
                 'description' => __('Fetch & display your WooCommerce reviews to connect with your audiences without wasting any time.', 'wp-social-reviews'),
                 'img' => $promoteBase . 'woocommerce.png',
                 'video' => null,
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'woocommerce'
             ],
@@ -704,7 +833,6 @@ class DashboardNotices
                 'description' => __('Store & display your Custom reviews to connect with your audiences without wasting any time.', 'wp-social-reviews'),
                 'img' => $promoteBase . 'icon-custom-platform.svg',
                 'video' => 'https://www.youtube.com/embed/K94shMHULe0',
-                'pro_purchase_url' => $this->pro_purchase_url,
                 'features' => $this->getReviewsFeatureList(),
                 'platform' => 'custom'
             ]

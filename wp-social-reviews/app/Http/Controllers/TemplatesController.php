@@ -5,7 +5,7 @@ namespace WPSocialReviews\App\Http\Controllers;
 use WPSocialReviews\App\Models\Post;
 use WPSocialReviews\App\Models\Template;
 use WPSocialReviews\Framework\Foundation\Application;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Services\Platforms\Reviews\ReviewsTrait;
 use WPSocialReviews\App\Services\Widgets\Helper;
 class TemplatesController extends Controller
@@ -14,6 +14,17 @@ class TemplatesController extends Controller
 
     protected $app = null;
     protected $postType = 'wp_social_reviews';
+
+    // The shared title/delete endpoints serve every WP Social Ninja template
+    // type (review/feed, notification, chat widget, custom source). The type
+    // guard in Post::updatePost()/deletePost() must allow all of them — while
+    // still rejecting non-WPSN posts.
+    protected $managedPostTypes = [
+        'wp_social_reviews',
+        'wpsr_reviews_notify',
+        'wpsr_social_chats',
+        'wpsr_custom_source',
+    ];
 
     public function __construct(Application $app)
     {
@@ -234,7 +245,7 @@ class TemplatesController extends Controller
 
         $deletedCount = 0;
         foreach ($ids as $id) {
-            if (!$post->deletePost($id, $this->postType)) {
+            if (!$post->deletePost($id, $this->managedPostTypes)) {
                 continue;
             }
             $deletedCount++;
@@ -277,7 +288,7 @@ class TemplatesController extends Controller
                 'post_title' => $templateTitle,
             ];
             $args   = $this->app->applyCustomFilters('template_title', $updateArgs);
-            $result = $post->updatePost($args, $this->postType);
+            $result = $post->updatePost($args, $this->managedPostTypes);
             if ($result === false) {
                 wp_send_json_error([
                     'message' => __('Failed to update title', 'wp-social-reviews')

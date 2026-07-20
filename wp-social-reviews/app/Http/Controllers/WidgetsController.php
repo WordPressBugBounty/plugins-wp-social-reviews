@@ -3,7 +3,7 @@
 namespace WPSocialReviews\App\Http\Controllers;
 
 use WPSocialReviews\App\Models\Widget;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Services\Platforms\Chats\Config;
 use WPSocialReviews\App\Models\Post;
 use WPSocialReviews\Framework\Foundation\Application;

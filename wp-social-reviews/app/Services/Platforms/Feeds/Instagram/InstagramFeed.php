@@ -23,6 +23,7 @@ if (!defined('ABSPATH')) {
 class InstagramFeed extends BaseFeed
 {
     public $platform = 'instagram';
+    protected $authProvider = 'instagram';
 
     protected $cacheHandler;
 
@@ -45,6 +46,115 @@ class InstagramFeed extends BaseFeed
 
         add_action('wpsr_instagram_access_token_refresh_weekly', array($this, 'doTokenRefreshes'));
         add_action('wpsr_instagram_send_email_report', array($this, 'maybeSendFeedIssueEmail'));
+    }
+
+    protected function persistAuthResult($result)
+    {
+        if (!Arr::get($result, 'ok')) {
+            return $result;
+        }
+
+        $platform = Arr::get($result, 'platform', '');
+        if ($platform !== $this->platform) {
+            throw new \RuntimeException(esc_html__('Invalid auth platform response.', 'wp-social-reviews'));
+        }
+
+        $flow        = Arr::get($result, 'flow', 'business_basic');
+        $flowAliases = ['advanced' => 'business', 'basic' => 'business_basic'];
+        $flow        = isset($flowAliases[$flow]) ? $flowAliases[$flow] : $flow;
+
+        $token       = Arr::get($result, 'token', []);
+        $accessToken = Arr::get($token, 'access_token', '');
+
+        if (!$accessToken) {
+            throw new \RuntimeException(esc_html__('Instagram access token is missing.', 'wp-social-reviews'));
+        }
+
+        if ($flow === 'business') {
+            return $this->persistBusinessAuth($result, $accessToken);
+        }
+
+        return $this->persistBusinessBasicAuth($result, $accessToken, $token);
+    }
+
+    private function persistBusinessBasicAuth($result, $accessToken, $token)
+    {
+        $args = [
+            'api_type'         => 'business_basic',
+            'credentials_type' => 'business_basic',
+            'access_token'     => $accessToken,
+            'expires_in'       => Arr::get($token, 'expires_in', ''),
+            'selectedAccounts' => [],
+        ];
+
+        $apiUrl   = $this->getHeaderApiUrl($args, 'verification_header');
+        $response = (new Common())->makeRequest($apiUrl);
+
+        if (is_wp_error($response) || (new Common())->instagramError($response)) {
+            throw new \RuntimeException(esc_html($this->getErrorMessage($response)));
+        }
+
+        if (!isset($response['username']) || !isset($response['user_id'])) {
+            throw new \RuntimeException(esc_html__('Could not retrieve Instagram account details.', 'wp-social-reviews'));
+        }
+
+        $accountArgs = $this->setBusinessBasicAccount($response, $args);
+        $this->updateVerificationConfigs($accountArgs);
+        $this->setGlobalSettings();
+
+        foreach ($accountArgs as $account) {
+            $userId = Arr::get($account, 'user_id');
+            if ($userId) {
+                $this->clearFeedCache($userId);
+            }
+        }
+
+        $result['platform'] = $this->platform;
+        $result['flow']     = 'business_basic';
+        $result['account']  = [
+            'user_id'  => Arr::get($response, 'user_id', ''),
+            'username' => Arr::get($response, 'username', ''),
+            'api_type' => 'business_basic',
+        ];
+
+        return $result;
+    }
+
+    private function persistBusinessAuth($result, $accessToken)
+    {
+        $fbUrl    = 'https://graph.facebook.com/me/accounts?fields=instagram_business_account,access_token&limit=500&access_token=' . $accessToken;
+        $response = (new Common())->makeRequest($fbUrl);
+
+        if (is_wp_error($response)) {
+            throw new \RuntimeException(esc_html($response->get_error_message()));
+        }
+
+        $businessAccounts = $this->setAuthorizedBusinessAccount($response);
+
+        $result['platform']          = $this->platform;
+        $result['flow']              = 'business';
+        $result['business_accounts'] = $businessAccounts;
+
+        return $result;
+    }
+
+    protected function formatAuthResultForResponse($result)
+    {
+        if (Arr::get($result, 'flow') === 'business') {
+            return [
+                'ok'               => true,
+                'platform'         => $this->platform,
+                'flow'             => 'business',
+                'business_accounts' => Arr::get($result, 'business_accounts', []),
+            ];
+        }
+
+        return [
+            'ok'      => true,
+            'platform' => $this->platform,
+            'flow'    => Arr::get($result, 'flow', 'business_basic'),
+            'account' => Arr::get($result, 'account', []),
+        ];
     }
 
     public function pushValidPlatform($platforms)
@@ -94,6 +204,9 @@ class InstagramFeed extends BaseFeed
 
             if (!is_wp_error($response) && !(new Common())->instagramError($response) && sizeof($args['selectedAccounts']) === 0 && $args['api_type'] === 'business' && $args['credentials_type'] !== 'manually'){
                 $this->setAuthorizedBusinessAccount($response);
+                wp_send_json_success([
+                    'message' => __('You are successfully verified.', 'wp-social-reviews')
+                ], 200);
             }
 
             if ($args['api_type'] === 'business_basic' && !is_wp_error($response) && !(new Common())->instagramError($response) && isset($response['username']) && isset($response['user_id'])) {
@@ -215,9 +328,8 @@ class InstagramFeed extends BaseFeed
         }
 
         update_option('wpsr_instagram_authorized_business_accounts_list', $business_accounts);
-        wp_send_json_success([
-            'message'  => __('You are successfully verified.', 'wp-social-reviews')
-        ], 200);
+
+        return $business_accounts;
     }
 
     public function setBusinessBasicAccount($response = [], $args = [])

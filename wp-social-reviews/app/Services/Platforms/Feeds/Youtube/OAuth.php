@@ -3,6 +3,8 @@
 namespace WPSocialReviews\App\Services\Platforms\Feeds\Youtube;
 
 use WPSocialReviews\Framework\Support\Arr;
+use WPSocialReviews\App\Services\DataProtector;
+use WPSocialReviews\App\Services\Platforms\RemoteAuth;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -12,8 +14,8 @@ class OAuth
 {
     private $api = 'https://accounts.google.com/o/oauth2/token';
     private $redirect = 'https://wpsocialninja.com/gapi/';
-    private $clientId = '324795500171-938tfnrb8bfna4n9hrfmtncq17vnhpf7.apps.googleusercontent.com';
-    private $clientSecret = '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';
+    private $clientId = '';
+    private $clientSecret = '';
     private $optionKey = 'wpsr_youtube_verification_configs';
 
     public function __construct()
@@ -75,23 +77,30 @@ class OAuth
 
     public function getAccessToken()
     {
+        $protector = new DataProtector();
         $tokens = get_option($this->optionKey);
         if (!$tokens) {
             return false;
         }
+        // Tokens are stored encrypted at rest; decrypt for expiry math and API use.
+        $tokens = $protector->maybe_decrypt_tokens($tokens, YoutubeFeed::TOKEN_CONFIG_KEYS);
         if (($tokens['created_at'] + $tokens['expires_in'] - 30) < time()) {
             // It's expired so we have to re-issue again
             $refreshTokens = $this->refreshToken($tokens);
             if (!is_wp_error($refreshTokens)) {
-                $tokens['access_token']     = $refreshTokens['access_token'];
-                $tokens['expires_in']       = $refreshTokens['expires_in'];
-                $tokens['created_at']       = time();
+                $tokens['access_token']     = Arr::get($refreshTokens, 'access_token', $tokens['access_token']);
+                $tokens['expires_in']       = Arr::get($refreshTokens, 'expires_in', $tokens['expires_in']);
+                // created_at is the bridge's clock (issued-at for expiry math).
+                $tokens['created_at']       = Arr::get($refreshTokens, 'created_at', time());
                 $tokens['credentials_type'] = 'oauth2.0';
-                $tokens['refresh_token']    = $tokens['refresh_token'];
+                // Persist the (possibly rotated) refresh token; Google echoes the same one.
+                if (!empty($refreshTokens['refresh_token'])) {
+                    $tokens['refresh_token'] = $refreshTokens['refresh_token'];
+                }
                 //not necessary but for the flow of verification configs
                 $tokens['api_key']     = '';
                 $tokens['access_code'] = '';
-                update_option($this->optionKey, $tokens, 'no');
+                update_option($this->optionKey, $protector->maybe_encrypt_tokens($tokens, YoutubeFeed::TOKEN_CONFIG_KEYS), 'no');
             } else {
                 return false;
             }
@@ -102,22 +111,7 @@ class OAuth
 
     private function refreshToken($tokens)
     {
-        $clientId = $this->clientId;
-        $clientSecret = $this->clientSecret;
-
-        //To support previous Google Authentication Process we must use the Previous App
-        if( !isset($tokens['version']) ){
-            $clientId = '324795500171-71lpnb3qr9qlk2jbijkpfivi3q9tgtlk.apps.googleusercontent.com';
-            $clientSecret = 'vzJCAiQq5hrRH2y-KzzZ3YQb';
-        }
-
-        $args = [
-            'client_id'     => $clientId,
-            'client_secret' => $clientSecret,
-            'refresh_token' => Arr::get($tokens, 'refresh_token'),
-            'grant_type'    => 'refresh_token'
-        ];
-
-        return $this->makeRequest($this->api, $args, 'POST');
+        // Refresh through the wpsn-auth bridge — the OAuth client secret now lives only there.
+        return RemoteAuth::refreshAuth('google', 'youtube', Arr::get($tokens, 'refresh_token'));
     }
 }

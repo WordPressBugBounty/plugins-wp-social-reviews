@@ -3,7 +3,7 @@
 namespace WPSocialReviews\App\Http\Policies;
 
 use WPSocialReviews\Framework\Foundation\Policy;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Services\PermissionManager;
 
 
@@ -19,7 +19,7 @@ class BasePolicy extends Policy
 
     /**
      * Check user permission for any method
-     * @param  \WPSocialReviews\Framework\Request\Request $request
+     * @param  \WPSocialReviews\Framework\Http\Request\Request $request
      * @return Boolean
      */
     public function verifyRequest(Request $request)

@@ -4,7 +4,7 @@ namespace WPSocialReviews\App\Http\Controllers\Platforms\Reviews;
 
 use WPSocialReviews\App\Http\Controllers\Controller;
 use WPSocialReviews\App\Models\Review;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Http\Requests\ReviewRequest;
 use WPSocialReviews\Framework\Support\Arr;
 
@@ -22,8 +22,12 @@ class RecommendationsController extends Controller
         $search  = sanitize_text_field(wp_unslash((string) $request->get('search', '')));
         $filterRaw = wp_unslash((string) $request->get('filter', ''));
         $filter  = $filterRaw === 'all' ? '' : sanitize_text_field($filterRaw);
-        $order_by_raw = wp_unslash((string) $request->get('order_by', ''));
-        $orderBy = sanitize_sql_orderby($order_by_raw) ?: '';
+        // order_by carries the sort direction (asc/desc). Whitelist it so an
+        // unexpected value (column name, status, empty) can't reach orderBy(),
+        // which now rejects any direction other than "asc"/"desc".
+        $order_by_raw = strtolower(wp_unslash((string) $request->get('order_by', '')));
+        $orderBy = in_array($order_by_raw, ['asc', 'desc'], true) ? $order_by_raw : 'desc';
+
         $statusFilterRaw = wp_unslash((string) $request->get('status_filter', 'all'));
         $statusFilter = sanitize_text_field($statusFilterRaw);
 
@@ -93,6 +97,12 @@ class RecommendationsController extends Controller
                 // wpsr_available_valid_platforms, so add it explicitly
                 if (!in_array('native_form', $allowedPlatforms, true)) {
                     $allowedPlatforms[] = 'native_form';
+                }
+                // Every Fluent Forms source shares the single "fluent_forms" platform name, so
+                // deleting one source used to unregister the key for all of them. Add it
+                // explicitly so the listing does not depend on the option holding the key.
+                if (!in_array('fluent_forms', $allowedPlatforms, true)) {
+                    $allowedPlatforms[] = 'fluent_forms';
                 }
                 $reviews = $reviews->whereIn('platform_name', $allowedPlatforms)
                     ->where('platform_name', '!=', 'testimonial');

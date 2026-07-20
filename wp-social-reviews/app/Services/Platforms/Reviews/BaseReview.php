@@ -6,6 +6,7 @@ use WPSocialReviews\App\Models\Review;
 use WPSocialReviews\App\Services\ReviewApprovalService;
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Platforms\Feeds\CacheHandler;
+use WPSocialReviews\App\Services\Platforms\RemoteAuth;
 use WPSocialReviews\Database\Migrations\ReviewsMigrator;
 use WPSocialReviews\App\Services\Helper as ServicesHelper;
 
@@ -14,6 +15,8 @@ abstract class BaseReview
     public $platform = '';
     protected $optionKey = '';
     protected $cronScheduleName = '';
+    protected $authProvider = '';
+    protected $authFlow = 'reviews';
 	protected $cacheHandler;
 
     public function __construct($platform = '', $optionKey = '', $cronScheduleName = '')
@@ -28,7 +31,7 @@ abstract class BaseReview
     {
         add_action('wpsocialreviews/verify_review_credential_' . $this->platform, array($this, 'handleCredentialSave'));
         add_filter('wpsocialreviews/api_credential_' . $this->platform, array($this, 'getApiSettings'));
-        add_filter('wpsocialreviews/business_info_' . $this->platform, array($this, 'getBusinessInfo'));
+        add_filter('wpsocialreviews/business_info_' . $this->platform, array($this, 'getBusinessInfo'), 10, 3);
         add_filter('wpsocialreviews/additional_info_' . $this->platform, array($this, 'getAdditionalInfo'));
         add_filter('wpsocialreviews/available_valid_reviews_platforms', array($this, 'pushValidPlatform'));
         add_action('wpsocialreviews/save_configs' . $this->platform, array($this, 'saveConfigs'));
@@ -39,11 +42,55 @@ abstract class BaseReview
         // clear verification configs
         add_action('wpsocialreviews/clear_reviews_verification_configs_' . $this->platform, array($this, 'clearVerificationConfigs'));
 
+        if ($this->authProvider) {
+            add_action('wpsocialreviews/prepare_review_auth_' . $this->platform, array($this, 'prepareAuth'));
+            add_action('wpsocialreviews/consume_review_auth_' . $this->platform, array($this, 'consumeAuth'));
+        }
+
         //activate cron job
         add_action('wpsr_' . $this->platform . '_reviews_update', array($this, 'doCronEvent'));
 
         //manually update reviews
         add_action('wpsocialreviews/'.$this->platform . '_manually_sync_reviews', array($this, 'manuallySyncReviews'));
+    }
+
+    public function prepareAuth($settings = [])
+    {
+        if (!$this->authProvider) {
+            wp_send_json_error([
+                'message' => __('Authentication is not supported for this platform.', 'wp-social-reviews')
+            ], 423);
+        }
+        RemoteAuth::prepareAuth($this->platform, $this->authProvider, $this->authFlow, $settings);
+    }
+
+    public function consumeAuth($settings = [])
+    {
+        if (!$this->authProvider) {
+            wp_send_json_error([
+                'message' => __('Authentication is not supported for this platform.', 'wp-social-reviews')
+            ], 423);
+        }
+        RemoteAuth::consumeAuth(
+            $this->platform,
+            $settings,
+            function ($result) { return $this->persistAuthResult($result); },
+            function ($result) { return $this->formatAuthResultForResponse($result); }
+        );
+    }
+
+    protected function persistAuthResult($result)
+    {
+        throw new \RuntimeException(esc_html__('Authentication is not supported for this platform.', 'wp-social-reviews'));
+    }
+
+    protected function formatAuthResultForResponse($result)
+    {
+        return [
+            'ok'       => (bool) Arr::get($result, 'ok'),
+            'platform' => $this->platform,
+            'account'  => Arr::get($result, 'account', []),
+        ];
     }
 
     //Remove database reviews that don't match platforms reviews

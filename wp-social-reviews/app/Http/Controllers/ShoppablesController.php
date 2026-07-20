@@ -2,7 +2,7 @@
 
 namespace WPSocialReviews\App\Http\Controllers;
 
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Services\Helper as GlobalHelper;
 use WPSocialReviews\Framework\Support\Arr;
 

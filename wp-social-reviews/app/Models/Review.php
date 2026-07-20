@@ -200,7 +200,8 @@ class Review extends Model
                 $reviews = $reviews->inRandomOrder('1234');
             }
         } else {
-	        $reviews = $reviews->orderBy('review_time', $order);
+	        $direction = in_array(strtolower((string) $order), ['asc', 'desc'], true) ? strtolower((string) $order) : 'desc';
+	        $reviews = $reviews->orderBy('review_time', $direction);
         }
 
         //filter by star rating
@@ -545,7 +546,7 @@ class Review extends Model
 
 	public static function getCategories()
 	{
-		$categories = static::select('category')->whereNotNull('category')->groupBy('category')->lists('category')->toArray();
+		$categories = static::select('category')->whereNotNull('category')->groupBy('category')->pluck('category')->toArray();
 
 		return array_filter($categories);
 	}

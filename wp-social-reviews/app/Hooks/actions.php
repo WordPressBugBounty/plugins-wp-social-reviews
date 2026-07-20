@@ -114,11 +114,10 @@ add_action('widgets_init', function () {
  * Gutenberg blocks register
  */
 add_action('enqueue_block_editor_assets', function () {
-    $dependencies = array('wp-blocks', 'wp-i18n', 'wp-polyfill', 'wp-element', 'wp-components' );
+    // wp-block-editor is required for useBlockProps (Block API v3 / iframe editor support).
+    $dependencies = array('wp-blocks', 'wp-i18n', 'wp-polyfill', 'wp-element', 'wp-components', 'wp-block-editor' );
 
-    if ( version_compare( get_bloginfo('version'), '5.8', '>=' ) ) {
-        $dependencies[] = 'wp-block-editor';
-    } else {
+    if ( version_compare( get_bloginfo('version'), '5.8', '<' ) ) {
         $dependencies[] = 'wp-editor';
     }
 

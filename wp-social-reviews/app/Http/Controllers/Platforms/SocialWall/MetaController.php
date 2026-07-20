@@ -5,7 +5,7 @@ namespace WPSocialReviews\App\Http\Controllers\Platforms\SocialWall;
 use WPSocialReviews\App\Http\Controllers\Controller;
 use WPSocialReviews\App\Services\Platforms\Feeds\Config;
 use WPSocialReviews\App\Services\Widgets\Helper;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\Framework\Support\Arr;
 
 class MetaController extends Controller

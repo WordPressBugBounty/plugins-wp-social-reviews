@@ -178,6 +178,34 @@ if (! function_exists('wpsr_sanitize_boolean')) {
     }
 }
 
+// Add global opaque-token sanitizer helper
+if (! function_exists('wpsr_sanitize_opaque_token')) {
+    /**
+     * Strict charset validation for opaque OAuth-bridge tokens (payload, result_id, flow_id).
+     *
+     * These are machine values, not human text — the payload is standard base64
+     * (base64_encode of iv+ciphertext, i.e. A-Za-z0-9+/=), result_id is base64url,
+     * and flow_id is a UUID4. Their contract is "matches this charset", not "is safe
+     * HTML", so validate them for what they are instead of running an HTML sanitizer
+     * over them. Anything outside the allowed set is rejected to an empty string so a
+     * malformed value fails loudly downstream rather than being silently mangled.
+     *
+     * @param mixed $value
+     * @return string sanitized value, or '' if it contains any disallowed character
+     */
+    function wpsr_sanitize_opaque_token($value)
+    {
+        $value = (string) $value;
+
+        if ($value === '') {
+            return '';
+        }
+
+        // Union of standard base64 (+ /), base64url (- _), padding (=), and UUID (-).
+        return preg_match('/^[A-Za-z0-9+\/=_-]+$/', $value) ? $value : '';
+    }
+}
+
 // Add global recipients sanitizer helper
 if (! function_exists('wpsr_sanitize_recipients')) {
     /**

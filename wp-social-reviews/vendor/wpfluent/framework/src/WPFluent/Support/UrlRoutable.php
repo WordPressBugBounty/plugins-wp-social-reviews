@@ -17,4 +17,13 @@ interface UrlRoutable
      * @return string
      */
     public function getRouteKeyName();
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \WPSocialReviews\Framework\Database\Orm\Model|null
+     */
+    public function resolveRouteBinding($value, $field = null);
 }

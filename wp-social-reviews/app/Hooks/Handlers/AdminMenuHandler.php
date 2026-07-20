@@ -8,6 +8,7 @@ use WPSocialReviews\App\Services\Helper;
 use WPSocialReviews\App\Services\Onboarding\OnboardingService;
 use WPSocialReviews\App\Services\PermissionManager;
 use WPSocialReviews\App\Services\TranslationString;
+use WPSocialReviews\App\Services\UpgradeUrl;
 use WPSocialReviews\Framework\Support\Arr;
 
 /**
@@ -130,13 +131,10 @@ class AdminMenuHandler
         }
 
         if (!defined('WPSOCIALREVIEWS_PRO')) {
-            $upgradeButtonConfig = (new DashboardNotices())->getUpgradeButtonConfig();
+            $notices = new DashboardNotices();
+            $upgradeButtonConfig = $notices->getUpgradeButtonConfig();
             $upgradeButtonText = Arr::get($upgradeButtonConfig, 'text', __('Upgrade To Pro', 'wp-social-reviews'));
-            $upgradeButtonUrl = Arr::get(
-                $upgradeButtonConfig,
-                'pro_purchase_url',
-                'https://wpsocialninja.com/?utm_source=wp_site&utm_medium=plugin&utm_campaign=upgrade'
-            );
+            $upgradeButtonUrl = $notices->getProUrl(UpgradeUrl::PLACEMENT_SIDEBAR_CTA);
 
             $submenu['wpsocialninja.php']['upgrade_to_pro'] = array(
                 '<span style="color: #f9e112;">' . esc_html($upgradeButtonText) . '</span>',
@@ -311,6 +309,7 @@ class AdminMenuHandler
                 'ajaxurl'                 => admin_url('admin-ajax.php'),
                 'custom_image_upload_url' => admin_url('admin-ajax.php?action=wpsr_upload_image'),
                 'twitter_authorize_url'   => 'https://wpsocialninja.com/api/twitter/process.php?return_url=' . admin_url('admin.php?page=wpsocialninja.php'),
+                'auth_service_url'        => apply_filters('wpsocialreviews/auth_service_url', WPSN_AUTH_BASE_URL),
                 'admin_page_url'          => admin_url('admin.php?page=wpsocialninja.php'),
                 'admin_url'               => admin_url('admin.php'),
                 'slug'                    => $slug = $app->config->get('app.slug'),
@@ -333,8 +332,14 @@ class AdminMenuHandler
             $wpsocialreviewsAdminVars['platforms_cards'] = $this->getPlatformsInfo();
             $wpsocialreviewsAdminVars['reviews_settings_platforms'] = $this->getReviewsSettingsMenu();
 
+            $notices = new DashboardNotices();
+
+            // Every upgrade URL is assembled in PHP so the wpsocialreviews/link
+            // affiliate filter is never bypassed. The SPA only swaps utm_content
+            // onto this base to name the placement that was actually clicked.
+            $wpsocialreviewsAdminVars['upgrade_url_base'] = $notices->getProUrl(UpgradeUrl::PLACEMENT_UPGRADE_PAGE);
+
             if(!defined('WPSOCIALREVIEWS_PRO')) {
-                $notices = new \WPSocialReviews\App\Services\DashboardNotices();
                 $wpsocialreviewsAdminVars['active_offer'] = $notices->getActiveOffer();
                 $wpsocialreviewsAdminVars['upgrade_btn_config'] = $notices->getUpgradeButtonConfig();
                 $wpsocialreviewsAdminVars['specific_feature_popup_config'] = $notices->getSpecificFeaturePopupConfig();
@@ -444,7 +449,6 @@ class AdminMenuHandler
                     'title' => __('Airbnb Reviews', 'wp-social-reviews'),
                     'description' => __('Display Airbnb reviews & engage with your customers post purchasing to hook your site visitors instantly.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'airbnb.png',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -469,7 +473,6 @@ class AdminMenuHandler
                     'title' => __('Yelp Reviews', 'wp-social-reviews'),
                     'description' => __('Display Yelp reviews on your website & take on board your potential customers to kickstart your business.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'upgrade-to-pro.png',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -493,7 +496,6 @@ class AdminMenuHandler
                     'title' => __('Tripadvisor Reviews', 'wp-social-reviews'),
                     'description' => __('Add Tripadvisor reviews any where on your website to improve your brand’s social media marketing.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'tripadvisor.png',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -518,7 +520,6 @@ class AdminMenuHandler
                     'title' => __('Amazon Reviews', 'wp-social-reviews'),
                     'description' => __('Fetch & exhibit Amazon reviews on your website & reach out to larger audiences for better brand exposure.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'amazon.png',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -542,7 +543,6 @@ class AdminMenuHandler
                     'title' => __('AliExpress Reviews', 'wp-social-reviews'),
                     'description' => __('Show the best AliExpress reviews on your website to promote your brand with a detailed customization option.', 'wp-social-reviews'),
                     'video' => 'https://www.youtube.com/embed/uWeALyqO42I',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -566,7 +566,6 @@ class AdminMenuHandler
                     'title' => __('Booking.com Reviews', 'wp-social-reviews'),
                     'description' => __('Fetch & display your Booking.com reviews to connect with your audiences without wasting any time.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'booking.png',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -592,7 +591,6 @@ class AdminMenuHandler
                     'title' => __('Facebook Reviews', 'wp-social-reviews'),
                     'description' => __('Showcase Facebook reviews on your WordPress website & prove your business credibility to another level.', 'wp-social-reviews'),
                     'video' => 'https://www.youtube.com/embed/88yM4eACxLU',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -616,7 +614,6 @@ class AdminMenuHandler
                     'title' => __('WooCommerce Reviews', 'wp-social-reviews'),
                     'description' => __('Fetch & display your WooCommerce reviews to connect with your audiences without wasting any time.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'woocommerce.png',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -640,7 +637,6 @@ class AdminMenuHandler
                     'title' => __('Fluent Cart Reviews', 'wp-social-reviews'),
                     'description' => __('Fetch & display your Fluent Cart reviews to connect with your audiences without wasting any time.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'fluent-cart.png',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],
@@ -665,7 +661,6 @@ class AdminMenuHandler
                     'description' => __('Store & display your Custom reviews to connect with your audiences without wasting any time.', 'wp-social-reviews'),
                     'img' => $promoteBase . 'icon-custom-platform.svg',
                     'video' => 'https://www.youtube.com/embed/K94shMHULe0',
-                    'proPurchaseUrl' => 'https://wpsocialninja.com/?utm_source=wp_site&amp;utm_medium=plugin&amp;utm_campaign=upgrade',
                     'features' => $this->reviewsFeatureList()
                 ]
             ],

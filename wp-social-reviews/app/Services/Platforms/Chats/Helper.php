@@ -205,6 +205,242 @@ class Helper
         return static::sanitizeChannelUrl($url, $channelName);
     }
 
+    public static function getWooCommerceProductContext()
+    {
+        static $productContext = null;
+
+        if ($productContext !== null) {
+            return $productContext;
+        }
+
+        $productContext = [];
+
+        if (!function_exists('is_product') || !function_exists('wc_get_product') || !is_product()) {
+            return $productContext;
+        }
+
+        $product = wc_get_product(get_queried_object_id());
+
+        if (!$product) {
+            return $productContext;
+        }
+
+        $stockStatus = $product->is_on_backorder()
+            ? __('Available on backorder', 'wp-social-reviews')
+            : ($product->is_in_stock() ? __('In stock', 'wp-social-reviews') : __('Out of stock', 'wp-social-reviews'));
+
+        $productContext = array_filter([
+            'title' => wp_strip_all_tags($product->get_name()),
+            'price' => wp_strip_all_tags(html_entity_decode($product->get_price_html(), ENT_QUOTES, get_bloginfo('charset'))),
+            'sku'   => $product->get_sku(),
+            'stock' => $stockStatus,
+            'url'   => get_permalink($product->get_id()),
+        ], function ($value) {
+            return $value !== '' && $value !== null && $value !== false;
+        });
+
+        return $productContext;
+    }
+
+    public static function getFluentCartProductContext()
+    {
+        static $productContext = null;
+
+        if ($productContext !== null) {
+            return $productContext;
+        }
+
+        $productContext = [];
+
+        if (
+            !defined('FLUENTCART_VERSION') ||
+            !class_exists('\FluentCart\App\CPT\FluentProducts') ||
+            !class_exists('\FluentCart\App\Models\Product') ||
+            !class_exists('\FluentCart\App\Models\ProductVariation')
+        ) {
+            return $productContext;
+        }
+
+        $postId = absint(get_queried_object_id());
+
+        if (!$postId || get_post_type($postId) !== \FluentCart\App\CPT\FluentProducts::CPT_NAME) {
+            return $productContext;
+        }
+
+        try {
+            $product = \FluentCart\App\Models\Product::query()->find($postId);
+        } catch (\Throwable $exception) {
+            return $productContext;
+        }
+
+        if (!$product) {
+            return $productContext;
+        }
+
+        $detail = !empty($product->detail) ? $product->detail : null;
+        $variation = static::getFluentCartProductVariation($postId, $detail);
+
+        $productContext = array_filter([
+            'title' => wp_strip_all_tags($product->post_title),
+            'price' => static::getFluentCartProductPrice($detail, $variation),
+            'sku'   => isset($variation->sku) ? sanitize_text_field($variation->sku) : '',
+            'stock' => static::getFluentCartProductStock($detail, $variation),
+            'url'   => get_permalink($postId),
+        ], function ($value) {
+            return $value !== '' && $value !== null && $value !== false;
+        });
+
+        return $productContext;
+    }
+
+    protected static function getFluentCartProductVariation($postId, $detail = null)
+    {
+        try {
+            if (!empty($detail->default_variation_id)) {
+                $variation = \FluentCart\App\Models\ProductVariation::query()->find(absint($detail->default_variation_id));
+
+                if ($variation) {
+                    return $variation;
+                }
+            }
+
+            return \FluentCart\App\Models\ProductVariation::query()
+                ->where('post_id', $postId)
+                ->orderBy('serial_index', 'asc')
+                ->first();
+        } catch (\Throwable $exception) {
+            return null;
+        }
+    }
+
+    protected static function getFluentCartProductPrice($detail = null, $variation = null)
+    {
+        if ($detail) {
+            $minPrice = isset($detail->formatted_min_price) ? (string) $detail->formatted_min_price : '';
+            $maxPrice = isset($detail->formatted_max_price) ? (string) $detail->formatted_max_price : '';
+
+            if ($minPrice !== '' && $maxPrice !== '' && $minPrice !== $maxPrice) {
+                return wp_strip_all_tags($minPrice . ' - ' . $maxPrice);
+            }
+
+            if ($minPrice !== '') {
+                return wp_strip_all_tags($minPrice);
+            }
+
+            if ($maxPrice !== '') {
+                return wp_strip_all_tags($maxPrice);
+            }
+        }
+
+        return isset($variation->formatted_total) ? wp_strip_all_tags((string) $variation->formatted_total) : '';
+    }
+
+    protected static function getFluentCartProductStock($detail = null, $variation = null)
+    {
+        if ($detail && method_exists($detail, 'getStockAvailability')) {
+            try {
+                $stock = $detail->getStockAvailability(!empty($variation->id) ? $variation->id : null);
+
+                if (!empty($stock['availability'])) {
+                    return wp_strip_all_tags($stock['availability']);
+                }
+            } catch (\Throwable $exception) {
+                return '';
+            }
+        }
+
+        if (!empty($variation->stock_status) && class_exists('\FluentCart\App\Helpers\Helper')) {
+            $statuses = \FluentCart\App\Helpers\Helper::getStockStatuses();
+
+            return !empty($statuses[$variation->stock_status]) ? wp_strip_all_tags($statuses[$variation->stock_status]) : '';
+        }
+
+        return '';
+    }
+
+    public static function getDefaultPageMessageFormat()
+    {
+        return sprintf(
+            "%s: {page_title}\n%s: {page_url}",
+            __('Page', 'wp-social-reviews'),
+            __('Link', 'wp-social-reviews')
+        );
+    }
+
+    public static function getDefaultProductMessageFormat()
+    {
+        return sprintf(
+            "%s: {product_title}\n%s: {product_price}\n%s: {product_sku}\n%s: {product_stock}\n%s: {product_url}",
+            __('Product', 'wp-social-reviews'),
+            __('Price', 'wp-social-reviews'),
+            __('SKU', 'wp-social-reviews'),
+            __('Stock', 'wp-social-reviews'),
+            __('Link', 'wp-social-reviews')
+        );
+    }
+
+    public static function getDefaultWooCommerceMessageFormat()
+    {
+        return static::getDefaultProductMessageFormat();
+    }
+
+    public static function getDefaultFluentCartMessageFormat()
+    {
+        return static::getDefaultProductMessageFormat();
+    }
+
+    public static function getMessageContextData($settings)
+    {
+        $messageContext = Arr::get($settings, 'chat_button.message_context', 'none');
+        $allowedContexts = ['none', 'page', 'woocommerce_product', 'fluentcart_product', 'custom'];
+
+        if (!defined('WPSOCIALREVIEWS_PRO') || !in_array($messageContext, $allowedContexts, true)) {
+            $messageContext = 'none';
+        }
+
+        $customFormat = Arr::get($settings, 'chat_button.custom_message_format', '');
+        $pageFormat = Arr::get($settings, 'chat_button.page_message_format', static::getDefaultPageMessageFormat());
+        $woocommerceFormat = Arr::get($settings, 'chat_button.woocommerce_message_format', static::getDefaultWooCommerceMessageFormat());
+        $fluentCartFormat = Arr::get($settings, 'chat_button.fluentcart_message_format', static::getDefaultFluentCartMessageFormat());
+
+        if ($messageContext === 'none') {
+            return [
+                'context'      => $messageContext,
+                'format'       => '',
+                'page_format'  => '',
+                'product_json' => '',
+            ];
+        }
+
+        if ($messageContext === 'custom') {
+            $contextFormat = $customFormat;
+        } elseif ($messageContext === 'woocommerce_product') {
+            $contextFormat = $woocommerceFormat;
+        } elseif ($messageContext === 'fluentcart_product') {
+            $contextFormat = $fluentCartFormat;
+        } else {
+            $contextFormat = $pageFormat;
+        }
+
+        if ($messageContext === 'woocommerce_product') {
+            $productInfo = static::getWooCommerceProductContext();
+        } elseif ($messageContext === 'fluentcart_product') {
+            $productInfo = static::getFluentCartProductContext();
+        } elseif ($messageContext === 'custom') {
+            $productInfo = static::getWooCommerceProductContext();
+            $productInfo = !empty($productInfo) ? $productInfo : static::getFluentCartProductContext();
+        } else {
+            $productInfo = [];
+        }
+
+        return [
+            'context'      => $messageContext,
+            'format'       => $contextFormat,
+            'page_format'  => $pageFormat,
+            'product_json' => !empty($productInfo) ? wp_json_encode($productInfo) : '',
+        ];
+    }
+
     public static function getFluentFormsShortcode($credential)
     {
         $credential = trim((string) $credential);

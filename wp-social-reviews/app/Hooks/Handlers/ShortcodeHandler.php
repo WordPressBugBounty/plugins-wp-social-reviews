@@ -28,6 +28,7 @@ class ShortcodeHandler
     public $platform = '';
     public $imageSettings = [];
     public $productId = null;
+    private static $localizeScriptLoaded = false;
 
     public function addShortcode()
     {
@@ -35,6 +36,7 @@ class ShortcodeHandler
         // add_shortcode('wp_social_ninja_wall_feed', array($this, 'makeSocialWallFeedShortcode'));
         add_action('wp_enqueue_scripts', array($this, 'registerScripts'), 999);
         add_action('wp_social_ninja_add_layout_script', array($this, 'enqueueScripts'));
+        add_filter('script_loader_tag', array($this, 'addFrontendVarsBeforeScript'), 10, 3);
     }
 
     public function makeShortcode($args = [], $content = null, $tag = '')
@@ -761,11 +763,11 @@ class ShortcodeHandler
             $hasMulti = false;
             foreach ($feeds as $index => $feed) {
                 /* translators: %s: Human-readable time difference. */
-                $feeds[$index]['time_ago'] = sprintf(__('%s ago', 'wp-social-reviews'), human_time_diff(strtotime(Arr::get($feed, 'timestamp'))));
+                $feeds[$index]['time_ago'] = sprintf(__('%s ago', 'wp-social-reviews'), human_time_diff(strtotime(Arr::get($feed, 'timestamp', ''))));
                 if (isset($feed['comments'])) {
                     foreach ($feed['comments'] as $commentIndex => $comment) {
                         // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
-                        $feeds[$index]['comments'][$commentIndex]['time_ago'] = sprintf(__('%s ago', 'wp-social-reviews'), human_time_diff(strtotime($comment['timestamp'])));
+                        $feeds[$index]['comments'][$commentIndex]['time_ago'] = sprintf(__('%s ago', 'wp-social-reviews'), human_time_diff(strtotime(Arr::get($comment, 'timestamp', ''))));
                     }
                 }
 
@@ -996,7 +998,6 @@ class ShortcodeHandler
 
         wp_register_script('wp-social-review', WPSOCIALREVIEWS_URL . 'assets/js/wp-social-review.js',
             array('jquery'), WPSOCIALREVIEWS_VERSION, true);
-        wp_add_inline_script('wp-social-review', $this->buildLocalizeJs(true), 'before');
 
         wp_register_script('social-ninja-modal', WPSOCIALREVIEWS_URL . 'assets/js/social-ninja-modal.js',
             array('jquery'), WPSOCIALREVIEWS_VERSION, true);
@@ -1162,23 +1163,16 @@ class ShortcodeHandler
     /**
      * Build the inline JS string that defines window.wpsr_ajax_params.
      *
-     * @param bool $fallback Only define the params if another render path has not already set them.
      * @return string
      */
-    private function buildLocalizeJs($fallback = false)
+    private function buildLocalizeJs()
     {
         $params = $this->buildLocalizeParams();
-        $json = wp_json_encode($params);
-
-        if ($fallback) {
-            return 'window.wpsr_ajax_params = window.wpsr_ajax_params || ' . $json . ';';
-        }
-
-        return 'window.wpsr_ajax_params = ' . $json . ';';
+        return 'window.wpsr_ajax_params = ' . wp_json_encode($params) . ';';
     }
 
     /**
-     * @deprecated Use wp_add_inline_script in registerScripts() instead.
+     * @deprecated Use enqueueScripts() instead.
      * Kept public for backward compatibility with Oxygen widget integrations.
      */
     public function loadLocalizeScripts()
@@ -1202,14 +1196,26 @@ class ShortcodeHandler
     {
         static $jsLoaded;
 
-        wp_add_inline_script('wp-social-review', $this->buildLocalizeJs(), 'before');
-
         if ($jsLoaded) {
             return;
         }
 
         wp_enqueue_script('wp-social-review');
         $jsLoaded = true;
+    }
+
+    public function addFrontendVarsBeforeScript($tag, $handle, $src)
+    {
+        if ($handle !== 'wp-social-review' || self::$localizeScriptLoaded) {
+            return $tag;
+        }
+
+        self::$localizeScriptLoaded = true;
+
+        return wp_get_inline_script_tag(
+            $this->buildLocalizeJs(),
+            array('id' => 'wp-social-review-js-before')
+        ) . $tag;
     }
 
     public function enqueueNotificationScripts()

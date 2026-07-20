@@ -3,7 +3,7 @@
 namespace WPSocialReviews\App\Http\Controllers;
 
 use WPSocialReviews\App\Services\Onboarding\OnboardingService;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\Framework\Support\Arr;
 
 class OnboardingController extends Controller

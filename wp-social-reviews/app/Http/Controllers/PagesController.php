@@ -3,7 +3,7 @@
 namespace WPSocialReviews\App\Http\Controllers;
 
 use WPSocialReviews\App\Services\Helper;
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 
 class PagesController extends Controller
 {

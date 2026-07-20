@@ -3,8 +3,10 @@
 namespace WPSocialReviews\App\Services\Platforms\Reviews;
 
 use WPSocialReviews\App\Services\Platforms\Reviews\Helper;
+use WPSocialReviews\App\Services\DataProtector;
 use WPSocialReviews\App\Services\Helper as GlobalHelper;
 use WPSocialReviews\App\Services\Platforms\Feeds\CacheHandler;
+use WPSocialReviews\App\Services\Platforms\RemoteAuth;
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Platforms\ReviewImageOptimizationHandler;
 
@@ -20,9 +22,11 @@ class GoogleMyBusiness extends BaseReview
 {
     private $remoteBaseUrl = 'https://mybusiness.googleapis.com/v4/';
     private $redirect = 'https://wpsocialninja.com/gapi/';
-    private $clientId = '1066221839285-b63ib6vnhv9aed2euhtecbp2nojvq9rp.apps.googleusercontent.com';
-    private $clientSecret = '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';
+    private $clientId = '';
+    private $clientSecret = '';
     private $placeId;
+    protected $authProvider = 'google';
+    protected $authFlow = 'reviews';
     public $nextPageToken = '';
     public $locationNextPageToken = '';
 
@@ -93,7 +97,7 @@ class GoogleMyBusiness extends BaseReview
 
     public function getAccessToken()
     {
-        $tokens = get_option('wpsr_reviews_google_verification_configs');
+        $tokens = $this->decryptTokenConfig(get_option('wpsr_reviews_google_verification_configs'));
         if (!$tokens) {
             return false;
         }
@@ -102,10 +106,15 @@ class GoogleMyBusiness extends BaseReview
             $refreshTokens = $this->refreshToken($tokens);
 
             if (!is_wp_error($refreshTokens)) {
-                $tokens['access_token'] = $refreshTokens['access_token'];
-                $tokens['expires_in']   = $refreshTokens['expires_in'];
-                $tokens['created_at']   = time();
-                update_option('wpsr_reviews_google_verification_configs', $tokens, 'no');
+                $tokens['access_token'] = Arr::get($refreshTokens, 'access_token', $tokens['access_token']);
+                $tokens['expires_in']   = Arr::get($refreshTokens, 'expires_in', $tokens['expires_in']);
+                // created_at is the bridge's clock (issued-at for expiry math).
+                $tokens['created_at']   = Arr::get($refreshTokens, 'created_at', time());
+                // Persist the (possibly rotated) refresh token; Google echoes the same one.
+                if (!empty($refreshTokens['refresh_token'])) {
+                    $tokens['refresh_token'] = $refreshTokens['refresh_token'];
+                }
+                update_option('wpsr_reviews_google_verification_configs', $this->encryptTokenConfig($tokens), 'no');
             } else {
                 return false;
             }
@@ -116,24 +125,8 @@ class GoogleMyBusiness extends BaseReview
 
     private function refreshToken($tokens)
     {
-
-        $clientId = $this->clientId;
-        $clientSecret = $this->clientSecret;
-
-        //To support previous Google Authentication Process we must use the Previous App
-        if( !isset($tokens['version']) ){
-            $clientId = '1066221839285-ckecknkno31o1ma3ti37lv4fb3vlidhi.apps.googleusercontent.com';
-            $clientSecret = 'mkhMmZ-0T2VEYuwEkfn5umqm';
-        }
-
-        $args = [
-            'client_id'     => $clientId,
-            'client_secret' => $clientSecret,
-            'refresh_token' => Arr::get($tokens, 'refresh_token'),
-            'grant_type'    => 'refresh_token'
-        ];
-
-        return $this->makeRequest('https://accounts.google.com/o/oauth2/token', $args, 'POST');
+        // Refresh through the wpsn-auth bridge — the OAuth client secret now lives only there.
+        return RemoteAuth::refreshAuth('google', 'reviews', Arr::get($tokens, 'refresh_token'));
     }
 
     public function handleCredentialSave($settings = array())
@@ -410,7 +403,7 @@ class GoogleMyBusiness extends BaseReview
     public function getApiSettings()
     {
         $settings = get_option($this->optionKey);
-        $apiSettings          = get_option('wpsr_reviews_google_verification_configs');
+        $apiSettings = $this->decryptTokenConfig(get_option('wpsr_reviews_google_verification_configs'));
 
         if (!$settings) {
             $settings = [
@@ -428,6 +421,14 @@ class GoogleMyBusiness extends BaseReview
         }
 
         $settings['version'] = Arr::get($apiSettings, 'version', $version);
+        $settings['api_key'] = '';
+
+        foreach ($settings as $settingKey => $setting) {
+            if (is_array($setting) && isset($setting['api_key'])) {
+                $settings[$settingKey]['api_key'] = '';
+            }
+        }
+
         return $settings;
     }
 
@@ -456,7 +457,7 @@ class GoogleMyBusiness extends BaseReview
             $locationsLists = $this->getBusinessAccountId($headers);
             $body['access_token'] = $accessToken;
             $body['refresh_token'] = Arr::get($body, 'refresh_token');
-            update_option('wpsr_reviews_google_verification_configs', $body, 'no');
+            update_option('wpsr_reviews_google_verification_configs', $this->encryptTokenConfig($body), 'no');
             wp_send_json_success(
                 [
                     'message'      => __('You are Successfully Verified', 'wp-social-reviews'),
@@ -472,14 +473,73 @@ class GoogleMyBusiness extends BaseReview
         }
     }
 
+    protected function persistAuthResult($result)
+    {
+        if (!Arr::get($result, 'ok')) {
+            return $result;
+        }
+
+        $platform = Arr::get($result, 'platform', '');
+        if ($platform !== $this->platform) {
+            throw new \RuntimeException(esc_html__('Invalid auth platform response.', 'wp-social-reviews'));
+        }
+
+        $token = Arr::get($result, 'token', []);
+        $accessToken = Arr::get($token, 'access_token', '');
+
+        if (!$accessToken) {
+            throw new \RuntimeException(esc_html__('Missing Google access token.', 'wp-social-reviews'));
+        }
+
+        $token['created_at'] = Arr::get($token, 'created_at', time());
+        $token['version'] = 'latest';
+
+        update_option('wpsr_reviews_google_verification_configs', $this->encryptTokenConfig($token), 'no');
+
+        try {
+            $locationsLists = $this->getBusinessAccountId([
+                'Authorization' => 'Bearer ' . $accessToken,
+            ]);
+        } catch (\RuntimeException $e) {
+            $locationsLists = [];
+        }
+        $locationsLists = is_array($locationsLists) ? $locationsLists : [];
+
+        $result['platform'] = $this->platform;
+        $result['token'] = $token;
+        $result['locations'] = $locationsLists;
+
+        return $result;
+    }
+
+    protected function formatAuthResultForResponse($result)
+    {
+        return [
+            'ok'        => (bool) Arr::get($result, 'ok'),
+            'platform'  => $this->platform,
+            'account'   => Arr::get($result, 'account', []),
+            'locations'     => Arr::get($result, 'locations', []),
+            'load_existing' => (bool) Arr::get($result, 'load_existing', false),
+        ];
+    }
+
+    private function encryptTokenConfig($token)
+    {
+        return (new DataProtector())->maybe_encrypt_tokens($token);
+    }
+
+    private function decryptTokenConfig($token)
+    {
+        return (new DataProtector())->maybe_decrypt_tokens($token);
+    }
+
     public function getAdditionalInfo()
     {
         $locationLists      = get_option('wpsr_reviews_google_locations_list');
-        $connected_accounts = get_option('wpsr_reviews_google_connected_accounts');
+        // $connected_accounts = get_option('wpsr_reviews_google_connected_accounts');
 
         return [
-            'location_lists'     => $locationLists,
-            //'connected_accounts' => $connected_accounts ? $connected_accounts : []
+            'location_lists' => $locationLists,
         ];
     }
 
@@ -491,7 +551,7 @@ class GoogleMyBusiness extends BaseReview
         $total = apply_filters('wpsocialreviews/gmb_reviews_accounts_limit', 60);
         $pageSize = 20;
         $pages = ceil($total/$pageSize);
-        $x = 0;
+        $x = 1;
 
         while(!empty($this->nextPageToken) && $x < $pages) {
             $x++;
@@ -510,10 +570,7 @@ class GoogleMyBusiness extends BaseReview
         $accountsData = $this->makeRequest($fetchUrl, false, 'GET', $headers);
 
         if (is_wp_error($accountsData)) {
-            $message = $accountsData->get_error_message();
-            wp_send_json_error([
-                'message' => $message
-            ], 423);
+            throw new \RuntimeException(esc_html($accountsData->get_error_message()));
         }
 
         if(Arr::get($accountsData, 'nextPageToken')){
@@ -536,14 +593,14 @@ class GoogleMyBusiness extends BaseReview
         }
 
         if (empty($locationsLists)) {
-            wp_send_json_error([
-                'message' => __('We don\'t find any business location from this email address', 'wp-social-reviews')
-            ], 423);
+            throw new \RuntimeException(
+                esc_html__('We didn\'t find any business location from this email address', 'wp-social-reviews')
+            );
         }
 
         update_option('wpsr_reviews_google_locations_list', $locationsLists, 'no');
 
-        return get_option('wpsr_reviews_google_locations_list');
+        return $locationsLists;
     }
 
     public function getLocationsList($accountData, $headers)
@@ -571,7 +628,7 @@ class GoogleMyBusiness extends BaseReview
         $total = $total > 200 ? 200 : $total;
         $pageSize = 100;
         $pages = ceil($total/$pageSize);
-        $x = 0;
+        $x = 1;
         while(!empty($this->locationNextPageToken) && $x < $pages) {
             $x++;
             $fetchUrl = "https://mybusinessbusinessinformation.googleapis.com/v1/".$accountName."/locations?pageSize=100&readMask=name,latlng,metadata,profile,serviceItems,title,openInfo&pageToken=".$this->locationNextPageToken;
@@ -693,6 +750,5 @@ class GoogleMyBusiness extends BaseReview
 
     public function clearVerificationConfigs($userId)
     {
-        
     }
 }

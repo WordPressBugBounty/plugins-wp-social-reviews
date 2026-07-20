@@ -33,6 +33,14 @@ class Config
     public static function formatConfig($settings = [], $empty = false, $pageId = '')
     {
         $template = Arr::get($settings, 'chat_settings.template', 'template1');
+        $messageContext = Arr::get($settings, 'chat_settings.chat_button.message_context', '');
+
+        if ($messageContext === '') {
+            $messageContext = Arr::get($settings, 'chat_settings.chat_button.append_woocommerce_product_info', 'false') === 'true'
+                ? 'woocommerce_product'
+                : (Arr::get($settings, 'chat_settings.chat_button.append_page_info', 'false') === 'true' ? 'page' : 'none');
+        }
+
         return array(
             'chat_settings' => array(
                 'template'  => $template,
@@ -43,6 +51,11 @@ class Config
                     'button_text'     => Arr::get($settings, 'chat_settings.chat_button.button_text', __('Start Chat with:', 'wp-social-reviews')),
                     'display_icon'    => Arr::get($settings, 'chat_settings.chat_button.display_icon', 'true'),
                     'prefilled_message'    => Arr::get($settings, 'chat_settings.chat_button.prefilled_message', 'false'),
+                    'message_context' => $messageContext,
+                    'custom_message_format' => Arr::get($settings, 'chat_settings.chat_button.custom_message_format', ''),
+                    'page_message_format' => Arr::get($settings, 'chat_settings.chat_button.page_message_format', Helper::getDefaultPageMessageFormat()),
+                    'woocommerce_message_format' => Arr::get($settings, 'chat_settings.chat_button.woocommerce_message_format', Helper::getDefaultWooCommerceMessageFormat()),
+                    'fluentcart_message_format' => Arr::get($settings, 'chat_settings.chat_button.fluentcart_message_format', Helper::getDefaultFluentCartMessageFormat()),
                     'prefilled_placeholder_text'    => Arr::get($settings, 'chat_settings.chat_button.prefilled_placeholder_text', __('Type a message', 'wp-social-reviews')),
                 ),
                 'settings' => array(

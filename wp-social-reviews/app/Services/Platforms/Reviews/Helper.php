@@ -47,8 +47,13 @@ class Helper
         $downloadedReviews = Arr::get($businessInfo, 'total_fetched_reviews');
         $platform_name = Arr::get($businessInfo, $key . '.platform_name');
         $businessName = Arr::get($businessInfo, $key . '.name');
-        $message = $platform_name === 'woocommerce' || $platform_name === 'fluent-cart' ? __('Product connected successfully!!', 'wp-social-reviews') : __('Reviews fetched successfully!!', 'wp-social-reviews');
-        if ($platform_name === 'fluent-cart' || ($platform_name === 'woocommerce' && (empty($downloadedReviews)))) {
+        if ($platform_name === 'fluent-cart') {
+            // FluentCart has no native review data to import; reviews only arrive later via a WPSR review form.
+            return __('Product connected! It will start showing reviews once customers submit them through a review form.', 'wp-social-reviews');
+        }
+
+        $message = $platform_name === 'woocommerce' ? __('Product connected successfully!!', 'wp-social-reviews') : __('Reviews fetched successfully!!', 'wp-social-reviews');
+        if ($platform_name === 'woocommerce' && empty($downloadedReviews)) {
             return $message;
         }
 

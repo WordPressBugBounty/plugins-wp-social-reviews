@@ -4,7 +4,7 @@ Tags: Customer Reviews, Google Reviews, Social Reviews, Social Feeds,  Instagram
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 4.2.2
+Stable tag: 4.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -334,6 +334,33 @@ If you like this plugin, please give us [5 stars](https://wordpress.org/plugins/
 8. Make templates your own way, and all will look perfect on any screen
 
 == Changelog ==
+
+4.3.0 ( Date: July 20, 2026 )
+- Introduced a centralized OAuth bridge connection flow for Google Reviews, YouTube, Instagram, Facebook, and TikTok, replacing legacy per-platform OAuth redirects
+- Added WhatsApp message context modes to chat widgets
+- Added FluentCRM integration that tags a customer's contact when their WooCommerce or FluentCart product review is approved, enabling review-based follow-up automations (Pro)
+- Added Quick Setup for WooCommerce and FluentCart, creating a review form, display template, and enabling WP Social Ninja as the main review hub in a single step (Pro)
+- Updated the core WPFluent framework to v2.12.3
+- Added PHP 8.4 compatibility
+- Added a resizable and collapsible settings sidebar with a keyboard-accessible drag handle to the Reviews, Chats, and Feed template editors
+- Added scroll-based pagination to the WooCommerce/FluentCart connected-products list so large catalogs load incrementally
+- Optimized WooCommerce and FluentCart connected-product loading by removing per-product N+1 queries and fixing list ordering during pagination (Pro)
+- Added encryption at rest for stored YouTube API keys (Security)
+- Added a "Sync All Reviews" button to the WooCommerce connect modal, matching FluentCart's existing bulk sync action
+- Added a per-product override indicator for FluentCart and WooCommerce products, flagging when a conflicting setting elsewhere overrides WP Social Ninja's own display configuration, with a direct link to resolve it (Pro)
+- Added plain-PHP mb_* fallbacks so the plugin no longer fatals on hosts missing the mbstring PHP extension
+- Added a generic affiliate-link filter for partner attribution on Pro upgrade links
+- Added Block API v3 support for the Social Ninja block, enabling the Gutenberg iframe editor
+- Improved the FluentCart/WooCommerce "not connected" alert to distinguish between the plugin being inactive and the store having no products yet
+- Improved WooCommerce review sync to report accurate cumulative success/skip totals across multi-batch imports instead of only the most recent batch (Pro)
+- Fixed custom source review imports so exported reviews can be imported into a different target custom source, with correct handling for Fluent Forms and native review form sources and clearer errors on empty imports (Pro)
+- Fixed reviews connection modal reopening unexpectedly when switching admin tabs after connecting a platform
+- Fixed relative date-range Facebook feeds (e.g. Event feeds) freezing at the time the cache was first created instead of continuously tracking the current time
+- Fixed future events leaking into "past" date-range Facebook event feeds
+- Fixed frontend review script failing to load on page builders with late script enqueueing, such as Elementor and Oxygen
+- Fixed WooCommerce bulk-sync completion message showing the total review count instead of the number of newly imported reviews
+- Fixed YouTube video duration display showing a missing leading zero
+- Added a hard limit to Facebook Graph pagination requests to prevent unbounded page-fetch loops on accounts with many managed pages
 
 4.2.2 ( Date: May 22, 2026 )
 - Improved translation coverage for admin UI strings

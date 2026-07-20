@@ -2,7 +2,7 @@
 
 namespace WPSocialReviews\App\Http\Policies;
 
-use WPSocialReviews\Framework\Request\Request;
+use WPSocialReviews\Framework\Http\Request\Request;
 
 class PagesPolicy extends BasePolicy
 {
@@ -11,7 +11,7 @@ class PagesPolicy extends BasePolicy
      * Used by: Chat Widgets, Templates (Reviews/Feeds editors),
      * Notifications, Shoppable, and Platforms (WooCommerce).
      *
-     * @param  \WPSocialReviews\Framework\Request\Request $request
+     * @param  \WPSocialReviews\Framework\Http\Request\Request $request
      * @return Boolean
      */
     public function verifyRequest(Request $request)

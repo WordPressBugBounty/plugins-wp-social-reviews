@@ -17,6 +17,180 @@ class Helper
         return apply_filters('wpsr_admin_permission', 'manage_options');
     }
 
+    public static function base64UrlEncode($value)
+    {
+        return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+    }
+
+    public static function createAuthVerifier()
+    {
+        try {
+            return self::base64UrlEncode(random_bytes(32));
+        } catch (\Exception $exception) {
+            return wp_generate_password(64, false, false);
+        }
+    }
+
+    public static function authBaseUrl()
+    {
+        $baseUrl = WPSN_AUTH_BASE_URL;
+        $baseUrl = apply_filters('wpsocialreviews/auth_service_url', $baseUrl);
+
+        return rtrim(esc_url_raw($baseUrl), '/');
+    }
+
+    public static function decryptAuthPayload($payload, $resultKey)
+    {
+        $json = self::authPayloadProtector($resultKey)->decrypt($payload);
+
+        if ($json) {
+            return $json;
+        }
+
+        throw new \RuntimeException(esc_html__('Invalid auth payload.', 'wp-social-reviews'));
+    }
+
+    public static function authPayloadProtector($resultKey)
+    {
+        return new DataProtector(
+            hash('sha256', 'result-encryption:' . $resultKey, true),
+            hash('sha256', 'result-authentication:' . $resultKey, true)
+        );
+    }
+
+    public static function verifyAuthConsumeChallenge($result, $verifier)
+    {
+        $challenge         = Arr::get($result, 'consume_challenge');
+        $expectedChallenge = self::base64UrlEncode(hash('sha256', $verifier, true));
+
+        if (!$challenge || !hash_equals($challenge, $expectedChallenge)) {
+            throw new \RuntimeException(esc_html__('Invalid auth verifier.', 'wp-social-reviews'));
+        }
+
+        unset($result['consume_challenge']);
+
+        return $result;
+    }
+
+    /**
+     * Issue a single Facebook Graph GET request and return the raw response paired
+     * with its JSON-decoded body. Centralises the transport shared by the managed-pages
+     * and feed pagination loops (timeout, wp_error handling, body decoding) so each
+     * caller only keeps its own error-reporting contract.
+     *
+     * @param string $url      Fully-formed Graph endpoint (including access token / paging cursor).
+     * @param string $platform Optional platform slug (e.g. 'facebook', 'facebook_feed'). When given,
+     *                         fires wpsocialreviews/{$platform}_api_connect_response with the raw
+     *                         response so PlatformData can track API connectivity.
+     * @return array{response: array|\WP_Error, body: array} Raw WP response and decoded body
+     *               (empty array on transport error or non-array payload).
+     */
+    public static function requestFacebookGraph($url, $platform = 'facebook')
+    {
+        $response = wp_remote_get($url, ['timeout' => 60]);
+
+        do_action('wpsocialreviews/' . $platform . '_api_connect_response', $response);
+
+        $body = is_wp_error($response)
+            ? []
+            : json_decode(wp_remote_retrieve_body($response), true);
+
+        return [
+            'response' => $response,
+            'body'     => is_array($body) ? $body : [],
+        ];
+    }
+
+    /**
+     * Fetch every Facebook page (account) the user manages for the given access token,
+     * resolving pagination. Shared by the Facebook feed (free) and Facebook reviews (pro),
+     * which both exchange a user access token for the managed pages list — only their
+     * downstream formatting and storage differ.
+     *
+     * @param string $accessToken Facebook user access token.
+     * @param int    $limit       Pages requested per Graph call.
+     * @param string $platform    Optional platform slug forwarded to requestFacebookGraph so each
+     *                            Graph call fires wpsocialreviews/{$platform}_api_connect_response.
+     * @return array{account_id: string|null, pages: array<int, array>} The user/account id
+     *               and a flat list of raw page objects (each with id, name, access_token).
+     * @throws \Exception When the access token is missing or the Graph request errors.
+     */
+    public static function fetchFacebookManagedPages($accessToken, $limit = 500, $platform = '')
+    {
+        if (empty($accessToken)) {
+            throw new \Exception(esc_html__('Facebook access token is missing.', 'wp-social-reviews'));
+        }
+
+        $limit = absint($limit) ?: 500;
+        $url   = 'https://graph.facebook.com/me?fields=accounts.limit(' . $limit . '),id,name&access_token=' . $accessToken;
+
+        $accountId = null;
+        $pages     = [];
+        $nextUrl   = null;
+        $isFirst   = true;
+
+        // Hard ceiling on pagination so a large account or a repeating `next` cursor can never
+        // make the connect/consume request hang or grow $pages without bound. 20 requests at the
+        // 500-page default covers ~10k managed pages — far beyond any real account.
+        $maxRequests = 20;
+        $requests    = 0;
+
+        do {
+            if (++$requests > $maxRequests) {
+                throw new \Exception(esc_html__(
+                    'This account manages too many Facebook pages to load automatically. Please reconnect and select pages manually.',
+                    'wp-social-reviews'
+                ));
+            }
+
+            $result   = static::requestFacebookGraph($nextUrl ?: $url, $platform);
+            $response = $result['response'];
+
+            if (is_wp_error($response)) {
+                throw new \Exception(esc_html($response->get_error_message()));
+            }
+
+            $body = $result['body'];
+
+            if (!empty(Arr::get($body, 'error'))) {
+                throw new \Exception(esc_html(
+                    Arr::get($body, 'error.message', __('Unable to fetch Facebook pages.', 'wp-social-reviews'))
+                ));
+            }
+
+            // The first call returns { id, name, accounts: { data, paging } };
+            // each paging.next URL returns the accounts payload ({ data, paging }) directly.
+            if ($isFirst) {
+                $accountId = Arr::get($body, 'id');
+                $accounts  = Arr::get($body, 'accounts', []);
+                $isFirst   = false;
+            } else {
+                $accounts = is_array($body) ? $body : [];
+            }
+
+            $data = Arr::get($accounts, 'data', []);
+            if (is_array($data)) {
+                foreach ($data as $page) {
+                    if (Arr::get($page, 'id') && Arr::get($page, 'name')) {
+                        $pages[] = $page;
+                    }
+                }
+            }
+
+            // Defense-in-depth: only follow the paging cursor when it stays on Facebook's Graph
+            // host, so a manipulated `paging.next` can never redirect the loop to another host.
+            $nextUrl = Arr::get($accounts, 'paging.next');
+            if ($nextUrl && strtolower((string) wp_parse_url($nextUrl, PHP_URL_HOST)) !== 'graph.facebook.com') {
+                $nextUrl = null;
+            }
+        } while ($nextUrl);
+
+        return [
+            'account_id' => $accountId,
+            'pages'      => $pages,
+        ];
+    }
+
     /**
      * Get allowed HTML tags for wp_kses sanitization
      * This defines what HTML is safe to display in review content
@@ -183,9 +357,10 @@ class Helper
         $hour = '';
         if ($di->h > 0) {
             $hour .= $di->h . ':';
+            return $hour . sprintf('%02d', $di->i) . ':' . sprintf('%02d', $di->s);
         }
 
-        return $hour . $di->i . ':' . sprintf('%02s', $di->s);
+        return $di->i . ':' . sprintf('%02d', $di->s);
     }
 
     public static function numberWithCommas($number)
