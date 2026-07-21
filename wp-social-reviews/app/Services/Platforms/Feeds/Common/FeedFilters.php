@@ -79,10 +79,14 @@ class FeedFilters
                 $globalSettings = $imageHandlerObj->getGlobalSettings();
                 if(Arr::get($globalSettings, 'optimized_images') === 'true') {
                     $resizedImages = $imageHandlerObj->getResizeNeededImageLists($feeds,  $feed_settings);
-                    $account_to_show = Arr::get($feed_settings, 'header_settings.account_to_show');
-                    $header['account_id'] = $account_to_show;
-                    $header['avatar'] = $imageHandlerObj->formattedData($header,'avatars');
-                    $header['covers']  = $imageHandlerObj->formattedData($header,'covers');
+                    // Some feed types (e.g. youtube single video) return an empty string
+                    // as header, so only decorate it when there is an actual header array.
+                    if (is_array($header) && !empty($header)) {
+                        $account_to_show = Arr::get($feed_settings, 'header_settings.account_to_show');
+                        $header['account_id'] = $account_to_show;
+                        $header['avatar'] = $imageHandlerObj->formattedData($header, 'avatars');
+                        $header['covers'] = $imageHandlerObj->formattedData($header, 'covers');
+                    }
                 }
             }
 

@@ -43,6 +43,15 @@ class ReviewImageOptimizationHandler extends BaseImageOptimizationHandler
         $templateId = absint(Arr::get($_REQUEST, 'id', -1));
         $resize_data = isset($_REQUEST['resize_data']) ? array_map('sanitize_text_field', (array) wp_unslash($_REQUEST['resize_data'])) : [];
         $platforms = isset($_REQUEST['platforms']) ? array_map('sanitize_text_field', (array) wp_unslash($_REQUEST['platforms'])) : [];
+
+        // The nonce is localized for logged-out visitors, so it authenticates nothing.
+        // Gate on the template being publicly renderable before reading its meta, otherwise
+        // an anonymous request could fetch a draft/private template's reviews and
+        // materialize their images into the uploads directory.
+        if (!(new \WPSocialReviews\App\Hooks\Handlers\ShortcodeHandler())->isPublicRenderableTemplate($templateId)) {
+            wp_send_json_error(['message' => __('Invalid template.', 'wp-social-reviews')], 403);
+        }
+
         if ($templateId > 0) {
             $templateMeta       = get_post_meta($templateId, '_wpsr_template_config', true);
             $formattedMeta = json_decode($templateMeta, true);

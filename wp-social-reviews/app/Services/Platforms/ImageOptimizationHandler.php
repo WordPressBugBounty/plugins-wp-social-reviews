@@ -54,6 +54,14 @@ class ImageOptimizationHandler extends BaseImageOptimizationHandler
         $platform = isset($_REQUEST['platform']) ? sanitize_text_field(wp_unslash($_REQUEST['platform'])) : '';
         $feed_type = isset($_REQUEST['feed_type']) ? sanitize_text_field(wp_unslash($_REQUEST['feed_type'])) : '';
 
+        // The nonce is localized for logged-out visitors, so it authenticates nothing.
+        // Gate on the template being publicly renderable before reading its meta, otherwise
+        // an anonymous request could fetch a draft/private feed with the site's token and
+        // materialize its private images into the uploads directory.
+        if (!(new \WPSocialReviews\App\Hooks\Handlers\ShortcodeHandler())->isPublicRenderableTemplate($id)) {
+            wp_send_json_error(['message' => __('Invalid template.', 'wp-social-reviews')], 403);
+        }
+
         if($id > 0 && $this->platform == $platform) {
             $encodedMeta   = get_post_meta($id, '_wpsr_template_config', true);
             $decodedMeta   = json_decode($encodedMeta, true);

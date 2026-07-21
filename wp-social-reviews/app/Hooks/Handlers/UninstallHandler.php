@@ -6,19 +6,38 @@ use WPSocialReviews\Framework\Support\Arr;
 class UninstallHandler
 {
     public $isTableDelete = true;
+
+    /**
+     * Uninstall entry point. Removes all plugin data unless the user opted to keep it.
+     *
+     * The "preserve plugin data" guard lives here rather than in deleteAllPlatformsData()
+     * because that method serves two callers with opposite intent: this one, where the
+     * user's stored preference must win, and SettingsController::deleteAllData(), where
+     * the user has explicitly clicked "Delete All Data" and the preference must be
+     * ignored. Guarding the shared method would turn that button into a silent no-op,
+     * since preserve_plugin_data defaults to 'true'.
+     *
+     * The preference is read straight from the wpsr_global_settings option rather than
+     * through the GlobalSettings service, to keep the uninstall path free of service
+     * instantiation. Defaults to preserving, so an unreadable or missing option can
+     * never cause data loss.
+     *
+     * @return void
+     */
     public function handle()
     {
+        $settings = get_option('wpsr_global_settings', []);
+        $advanceSettings = Arr::get($settings, 'global_settings.advance_settings', []);
+        if (Arr::get($advanceSettings, 'preserve_plugin_data', 'true') === 'true') {
+            return;
+        }
+
         $this->deleteAllPlatformsData($this->isTableDelete);
     }
 
     public function deleteAllPlatformsData($isDeleteTable)
     {
         if (!current_user_can('manage_options')) {
-            return;
-        }
-
-        $advanceSettings = get_option('advance_settings');
-        if (Arr::get($advanceSettings, 'preserve_plugin_data') === 'true') {
             return;
         }
 

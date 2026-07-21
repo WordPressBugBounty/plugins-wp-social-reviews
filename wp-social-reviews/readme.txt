@@ -4,7 +4,7 @@ Tags: Customer Reviews, Google Reviews, Social Reviews, Social Feeds,  Instagram
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 4.3.0
+Stable tag: 4.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -334,6 +334,14 @@ If you like this plugin, please give us [5 stars](https://wordpress.org/plugins/
 8. Make templates your own way, and all will look perfect on any screen
 
 == Changelog ==
+
+4.3.1 ( Date: July 21, 2026 )
+- Fixed: Security through ongoing audits and hardening.
+- Improved template and chat widget settings saving to validate the target post, so settings can no longer be written to arbitrary post IDs (Security)
+- Fixed Airbnb business URL validation and Airbnb reviews showing a generic location label instead of the actual listing title
+- Fixed a PHP notice when a feed header renders before its image decoration data is available
+- Fixed the "preserve plugin data" setting being ignored on uninstall, so plugin data is now kept when the option is enabled
+- Improved OAuth connect button labels and auth bridge redirect messaging for clearer platform connection steps
 
 4.3.0 ( Date: July 20, 2026 )
 - Introduced a centralized OAuth bridge connection flow for Google Reviews, YouTube, Instagram, Facebook, and TikTok, replacing legacy per-platform OAuth redirects

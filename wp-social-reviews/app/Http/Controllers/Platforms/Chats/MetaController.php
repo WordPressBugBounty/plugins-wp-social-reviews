@@ -8,15 +8,49 @@ use WPSocialReviews\Framework\Http\Request\Request;
 
 class MetaController extends Controller
 {
+    /**
+     * The only post type these endpoints may read from or write to.
+     *
+     * absint() casts the ID but does not validate what it points at. Downstream,
+     * SocialChat::updateSettings() runs a raw `menu_order` UPDATE and an
+     * update_post_meta() on whatever ID it is handed, and neither performs a
+     * capability check of its own — so without this guard a low-privilege
+     * wpsn_* capability holder could write to any post on the site.
+     */
+    const CHAT_POST_TYPE = 'wpsr_social_chats';
+
+    /**
+     * @param int $postId
+     * @return bool Whether the ID resolves to a chat widget.
+     */
+    private function isChatWidget($postId)
+    {
+        return $postId && get_post_type($postId) === self::CHAT_POST_TYPE;
+    }
+
     public function index(Request $request, $postId)
     {
         $postId = absint($postId);
+
+        if (!$this->isChatWidget($postId)) {
+            return $this->sendError([
+                'message' => __('Chat widget not found.', 'wp-social-reviews')
+            ], 404);
+        }
+
         do_action('wpsocialreviews/get_chat_settings', $postId);
     }
 
     public function update(Request $request, $postId)
     {
         $postId = absint($postId);
+
+        if (!$this->isChatWidget($postId)) {
+            return $this->sendError([
+                'message' => __('Chat widget not found.', 'wp-social-reviews')
+            ], 404);
+        }
+
         $settings = json_decode($request->get('args'), true);
         $settings = wp_unslash($settings);
         $settings = $this->sanitizeChatSettings($settings);
@@ -26,6 +60,13 @@ class MetaController extends Controller
     public function delete(Request $request, $postId)
     {
         $postId = absint($postId);
+
+        if (!$this->isChatWidget($postId)) {
+            return $this->sendError([
+                'message' => __('Chat widget not found.', 'wp-social-reviews')
+            ], 404);
+        }
+
         do_action('wpsocialreviews/delete_chat_settings', $postId);
     }
 

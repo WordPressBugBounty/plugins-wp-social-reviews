@@ -540,7 +540,7 @@ class Airbnb extends BaseReview
             'staysBookingMigrationEnabled' => false,
             'translateUgc' => null,
             'useNewSectionWrapperApi' => false,
-            'sectionIds' => ['POLICIES_DEFAULT', 'BOOK_IT_SIDEBAR', 'URGENCY_COMMITMENT_SIDEBAR', 'BOOK_IT_NAV', 'BOOK_IT_FLOATING_FOOTER', 'URGENCY_COMMITMENT', 'BOOK_IT_CALENDAR_SHEET', 'CANCELLATION_POLICY_PICKER_MODAL'],
+            'sectionIds' => ['TITLE_DEFAULT', 'POLICIES_DEFAULT', 'BOOK_IT_SIDEBAR', 'URGENCY_COMMITMENT_SIDEBAR', 'BOOK_IT_NAV', 'BOOK_IT_FLOATING_FOOTER', 'URGENCY_COMMITMENT', 'BOOK_IT_CALENDAR_SHEET', 'CANCELLATION_POLICY_PICKER_MODAL'],
             'p3ImpressionId' => $p3ImpressionId,
         ];
 
@@ -584,13 +584,54 @@ class Airbnb extends BaseReview
 
         // Extract sharingConfig from the API response
         $sharingConfig = Arr::get($data, 'data.presentation.stayProductDetailPage.sections.metadata.sharingConfig', []);
-        
+
         // Validate and return the sharingConfig if it has the correct structure
         if (!empty($sharingConfig) && is_array($sharingConfig) && isset($sharingConfig['__typename']) && $sharingConfig['__typename'] === 'PdpSharingConfig') {
+            // The host's actual listing title lives in the title section, not in
+            // sharingConfig.title (which is a generated "Home in {location}" label).
+            // Attach it so saveBusinessInfo() can prefer it over the generic label.
+            $listingTitle = $this->extractListingTitle($data);
+            if (!empty($listingTitle)) {
+                $sharingConfig['listingTitle'] = $listingTitle;
+            }
+
             return $sharingConfig;
         }
 
         return [];
+    }
+
+    /**
+     * Extract the host's actual listing title from the PDP title section.
+     *
+     * Airbnb's sharingConfig.title is a generated SEO/share label (e.g.
+     * "Home in Gloucestershire · ★4.95 · 2 bedrooms"), which is identical across
+     * many of a host's listings. The custom, human-readable title the host set
+     * lives in the TITLE_DEFAULT section instead.
+     *
+     * @param array $data Decoded StaysPdpSections GraphQL response.
+     * @return string The listing title, or '' when unavailable.
+     */
+    private function extractListingTitle($data)
+    {
+        $sections = Arr::get($data, 'data.presentation.stayProductDetailPage.sections.sections', []);
+        if (empty($sections) || !is_array($sections)) {
+            return '';
+        }
+
+        foreach ($sections as $section) {
+            $sectionId = Arr::get($section, 'sectionId');
+            $typename  = Arr::get($section, 'section.__typename');
+
+            if ($sectionId === 'TITLE_DEFAULT' || $typename === 'PdpTitleSection') {
+                $title = Arr::get($section, 'section.title');
+                if (!empty($title) && is_string($title)) {
+                    return trim($title);
+                }
+            }
+        }
+
+        return '';
     }
 
     public function formatData($review, $index)
@@ -704,10 +745,18 @@ class Airbnb extends BaseReview
 
             // Handle GraphQL sharingConfig format (rooms)
             if (isset($data['__typename']) && $data['__typename'] === 'PdpSharingConfig') {
-                $title = Arr::get($data, 'title');
-                // Split the string by the delimiter " · "
-                $title = explode(" · ", $title);
-                $businessInfo['name']             = Arr::get($title, '0');
+                // Prefer the host's actual listing title when available; otherwise
+                // fall back to the generated sharingConfig.title label, taking the
+                // segment before the " · " delimiter.
+                $listingTitle = Arr::get($data, 'listingTitle');
+                if (!empty($listingTitle)) {
+                    $businessInfo['name']         = $listingTitle;
+                } else {
+                    $title = Arr::get($data, 'title');
+                    // Split the string by the delimiter " · "
+                    $title = explode(" · ", $title);
+                    $businessInfo['name']         = Arr::get($title, '0');
+                }
                 $businessInfo['average_rating']   = Arr::get($data, 'starRating');
                 $businessInfo['total_rating']     = Arr::get($data, 'reviewCount');
             } else if (isset($data['__typename']) && $data['__typename'] === 'PageInfoWithCount') {
@@ -987,7 +1036,8 @@ class Airbnb extends BaseReview
 
     private function isAllowedAirbnbHost($host)
     {
-        return (bool) preg_match('/(^|\.)airbnb\.com(\.[a-z]{2})?$/i', $host);
+        // Localized domains: airbnb.com, airbnb.com.au, airbnb.co.uk, airbnb.fr, airbnb.cat
+        return (bool) preg_match('/(^|\.)airbnb\.(?:com|cat|[a-z]{2}|(?:co|com)\.[a-z]{2})$/i', $host);
     }
 
     private function isAllowedAirbnbPort($port)

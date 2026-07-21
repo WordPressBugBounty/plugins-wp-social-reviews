@@ -124,6 +124,10 @@ class YoutubeTemplateHandler
         $app = App::getInstance();
         $shortcodeHandler = new ShortcodeHandler();
 
+        if (!$shortcodeHandler->isPublicRenderableTemplate($templateId)) {
+            wp_send_json_error(['message' => __('Invalid template.', 'wp-social-reviews')], 403);
+        }
+
         $template_meta = $shortcodeHandler->templateMeta($templateId, 'youtube');
         $feeds = (new YoutubeFeed())->getTemplateMeta($template_meta, $templateId);
         $settings = $shortcodeHandler->formatFeedSettings($feeds);

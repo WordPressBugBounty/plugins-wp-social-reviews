@@ -71,6 +71,13 @@ class ShortcodeHandler
             return __('Provided platform name is not valid.', 'wp-social-reviews');
         }
 
+        // Same visibility policy as the AJAX renderers: never render a draft, private,
+        // password-protected, or wrong-post-type template on a public page. Users who
+        // can edit the template still get admin previews via the edit_post fallback.
+        if (!$this->isPublicRenderableTemplate($templateId)) {
+            return '';
+        }
+
         $this->platform = $platform;
         $this->productId = $product_id;
 
@@ -91,6 +98,55 @@ class ShortcodeHandler
             return $this->{$methodName}($templateId, $platform);
         }
 
+    }
+
+    /**
+     * Check whether a template id may be rendered on a public (unauthenticated) request.
+     *
+     * Template configs live in post meta, so the public AJAX renderers would otherwise
+     * accept any post id — including unpublished/draft/private templates and posts
+     * belonging to other plugin post types that share the `_wpsr_template_config`
+     * meta key (notifications, chat widgets). The `wpsr-ajax-nonce` used by those
+     * endpoints is printed for logged-out visitors, so it authenticates nothing here.
+     *
+     * Users who can edit the template keep access, so admin-side previews still work.
+     *
+     * @param int $wpsr_template_id
+     *
+     * @return bool
+     * @since 4.3.1
+     */
+    public function isPublicRenderableTemplate($wpsr_template_id)
+    {
+        $wpsr_template_id = absint($wpsr_template_id);
+
+        if (empty($wpsr_template_id)) {
+            return false;
+        }
+
+        $wpsr_template_post = get_post($wpsr_template_id);
+
+        if (empty($wpsr_template_post)) {
+            return false;
+        }
+
+        $wpsr_allowed_post_types = apply_filters(
+            'wpsocialreviews/public_renderable_template_post_types',
+            ['wp_social_reviews']
+        );
+
+        if (!in_array($wpsr_template_post->post_type, $wpsr_allowed_post_types, true)) {
+            return false;
+        }
+
+        // A published but password-protected template must still satisfy the post
+        // password challenge; anonymous AJAX callers never do, so fall through to the
+        // edit_post capability check (admin previews) rather than exposing its feed.
+        if ($wpsr_template_post->post_status === 'publish' && !post_password_required($wpsr_template_post)) {
+            return true;
+        }
+
+        return current_user_can('edit_post', $wpsr_template_id);
     }
 
     public function templateMeta($templateId, $platform)
@@ -1262,6 +1318,13 @@ class ShortcodeHandler
         }
 
         $templateId = absint(Arr::get($_REQUEST, 'template_id'));
+
+        if (!$this->isPublicRenderableTemplate($templateId)) {
+            wp_send_json_error([
+                'message' => __('Invalid template.', 'wp-social-reviews')
+            ], 403);
+        }
+
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading AJAX parameters for pagination, not processing sensitive form data
         $platform = sanitize_text_field(Arr::get($_REQUEST, 'platform'));
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading AJAX parameters for pagination, not processing sensitive form data
@@ -1305,6 +1368,12 @@ class ShortcodeHandler
         }
 
         $templateId = absint($args['id']);
+
+        // Same visibility policy as the primary shortcode / AJAX renderers.
+        if (!$this->isPublicRenderableTemplate($templateId)) {
+            return '';
+        }
+
         $feed_meta       = get_post_meta($templateId, '_wpsr_template_config', true);
         $decodedMeta     = json_decode($feed_meta, true);
         $feed_settings   = Arr::get($decodedMeta, 'social_wall_settings', array());

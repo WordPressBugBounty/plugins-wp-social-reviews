@@ -643,14 +643,20 @@ class YoutubeFeed extends BaseFeed
     public function getPublishVideos($videoList)
     {
         $videos = Arr::get($videoList, 'items' , []);
-        foreach($videos as $index => $video)
+        $publicVideos = [];
+        foreach($videos as $video)
         {
-            $videoStatus = Arr::get($video['status'], 'privacyStatus', '');
-            if($videoStatus == 'unlisted')
+            // Allow only 'public' videos through. The feed is fetched with the site
+            // owner's OAuth token, so 'private' and 'unlisted' videos come back in the
+            // API response and must not be rendered on the front end.
+            $videoStatus = Arr::get($video, 'status.privacyStatus', '');
+            if($videoStatus === 'public')
             {
-                unset($videoList['items'][$index]);
+                $publicVideos[] = $video;
             }
         }
+
+        $videoList['items'] = $publicVideos;
 
         return $videoList;
     }
@@ -768,7 +774,10 @@ class YoutubeFeed extends BaseFeed
         }
 
         $videoLists = [];
-        $parts      = 'id,snippet';
+        // Request 'status' so getPublishVideos() can drop private/unlisted videos; the
+        // single-video feed is fetched with the site owner's token and would otherwise
+        // expose non-public videos configured by id on a published template.
+        $parts      = 'id,snippet,status';
         $parts      = apply_filters('wpsocialreviews/youtube_api_parts', $parts, 'single_video');
 
 	    $videoLists = $this->cacheHandler->getFeedCache($feedCacheName);
@@ -1075,6 +1084,11 @@ class YoutubeFeed extends BaseFeed
 
                 return ['error_message' => isset($wpsr_error_check_complete[1]) ? $wpsr_error_check_complete[1] : __('Problem in api key or access token setting!!', 'wp-social-reviews')];
             } elseif (!$this->cacheHandler->getFeedCache($cacheName)) {
+                if ($feedType === 'single_video') {
+                    // Fetched with the site owner's token, so private/unlisted videos come
+                    // back in the response — filter to public-only before caching or returning.
+                    $feedData = $this->getPublishVideos($feedData);
+                }
                 $this->cacheHandler->createCache($cacheName, $feedData);
                 return $feedData;
             }

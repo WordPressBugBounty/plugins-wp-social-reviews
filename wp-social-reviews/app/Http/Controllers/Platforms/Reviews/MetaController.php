@@ -196,9 +196,45 @@ class MetaController extends Controller
         ]);
     }
 
+    /**
+     * Post types this controller is allowed to read from and write to.
+     *
+     * Without this guard the meta endpoints accept any post ID, and neither
+     * wp_update_post() nor update_post_meta() performs a capability check of
+     * its own, so a low-privilege capability holder could overwrite arbitrary
+     * pages, posts or products.
+     */
+    const ALLOWED_POST_TYPES = ['wp_social_reviews', 'wpsr_reviews_notify'];
+
+    /**
+     * @param int $templateId
+     * @return \WP_Post|null The template post, or null if it is not one of ours.
+     */
+    private function getTemplatePost($templateId)
+    {
+        if (!$templateId) {
+            return null;
+        }
+
+        $templateDetails = get_post($templateId);
+
+        if (!$templateDetails || !in_array($templateDetails->post_type, self::ALLOWED_POST_TYPES, true)) {
+            return null;
+        }
+
+        return $templateDetails;
+    }
+
     public function update(Request $request, $templateId)
     {
         $templateId = absint($templateId);
+
+        if (!$this->getTemplatePost($templateId)) {
+            return $this->sendError([
+                'message' => __('Template not found.', 'wp-social-reviews')
+            ], 404);
+        }
+
         $templateMeta = wp_unslash($request->get('template_meta'));
         $templateMeta = json_decode($templateMeta, true);
         $templateMeta = $this->sanitizeTemplateMeta($templateMeta);
@@ -240,7 +276,10 @@ class MetaController extends Controller
                 $menuOrder = $formattedMeta['notification_settings']['notification_priority'];
                 $db = App::getInstance('db');
 
+                // post_type is re-asserted here: this bypasses wp_update_post(), so it
+                // must not rely on the caller's guard alone.
                 $db->table('posts')->where('ID', $templateId)
+                    ->whereIn('post_type', self::ALLOWED_POST_TYPES)
                     ->update([
                         'menu_order' => absint($menuOrder)
                     ]);
@@ -410,8 +449,8 @@ class MetaController extends Controller
     public function loadMore(Request $request, $templateId)
     {
         $templateId = absint($templateId);
-        $templateDetails = get_post($templateId);
-        if (!$templateDetails || !in_array($templateDetails->post_type, ['wp_social_reviews', 'wpsr_reviews_notify'], true)) {
+
+        if (!$this->getTemplatePost($templateId)) {
             return $this->sendError(['message' => __('Template not found.', 'wp-social-reviews')], 404);
         }
 

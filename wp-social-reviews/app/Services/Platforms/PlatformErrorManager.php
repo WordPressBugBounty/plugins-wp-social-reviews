@@ -221,7 +221,7 @@ class PlatformErrorManager
                 // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
                 $return_message['error_message']       = sprintf( __( 'Account(%1$s): Error: Connected account for the user %2$s does not have permission to use this feed type.', 'wp-social-reviews' ), $userName, $userName );
                 // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
-                $return_message['admin_only']          = sprintf(__( 'Simply tap on the "Continue with Instagram/Facebook" button on the "%s Configuration" modal to reconnect your account and update its permissions.', 'wp-social-reviews' ), $platformWithType);
+                $return_message['admin_only']          = sprintf(__( 'Simply tap on the "Connect Instagram Account" or "Connect Facebook Account" button on the "%s Configuration" modal to reconnect your account and update its permissions.', 'wp-social-reviews' ), $platformWithType);
             } elseif ( (int) Arr::get($errors, 'error.code') === 24 ){
                 $return_message['error_message']       = __( 'Error: Cannot retrieve posts for this hashtag.', 'wp-social-reviews' );
                 $return_message['admin_only']          = $errors['error']['error_user_msg'];
@@ -229,13 +229,13 @@ class PlatformErrorManager
                 // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
                 $return_message['error_message']       = sprintf( __( 'API error %s:', 'wp-social-reviews' ), $errors['error']['code'] ) . ' ' . str_replace( '"', '', $errors['error']['message']);
                 // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
-                $return_message['admin_only']          = sprintf(__( 'Simply tap on the "Continue with Instagram/Facebook" button on the "%s Configuration" modal to reconnect your account and update its permissions.', 'wp-social-reviews' ), $platformWithType);
+                $return_message['admin_only']          = sprintf(__( 'Simply tap on the "Connect Instagram Account" or "Connect Facebook Account" button on the "%s Configuration" modal to reconnect your account and update its permissions.', 'wp-social-reviews' ), $platformWithType);
             } elseif ((int) Arr::get($errors, 'error.code') == 'invalid_grant' && str_contains($errors['error']['message'] ?? '', 'Refresh token is invalid or expired.')) {
                 // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
                 $return_message['error_message'] = sprintf(__('API error %s:', 'wp-social-reviews'), $errors['error']['code']) . ' ' . str_replace('"', '', $errors['error']['message']);
                 $return_message['admin_only'] = sprintf(
                 // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
-                __('The connection to TikTok has expired or is no longer valid. This usually happens if the refresh token is outdated or the app’s permissions have been changed. To restore the connection, please tap on the "Continue with TikTok" button on the "%s Configuration" modal. This will guide you through reconnecting your account and updating its permissions.', 'wp-social-reviews'),
+                __('The connection to TikTok has expired or is no longer valid. This usually happens if the refresh token is outdated or the app’s permissions have been changed. To restore the connection, please tap on the "Connect TikTok Account" button on the "%s Configuration" modal. This will guide you through reconnecting your account and updating its permissions.', 'wp-social-reviews'),
                     $platformWithType
                 );
             } else {
