@@ -3,7 +3,7 @@
 Plugin Name:  WP Social Ninja
 Plugin URI:   https://wpsocialninja.com/
 Description:  Display your social feeds, reviews and chat widgets automatically and easily on your website with the all-in-one social media plugin.
-Version:      4.3.1
+Version:      4.3.2
 Author:       WPManageNinja LLC
 Author URI:   https://wpsocialninja.com/
 License:      GPLv2 or later
@@ -13,7 +13,7 @@ Domain Path:  /language
 
 defined('ABSPATH') or die;
 
-define('WPSOCIALREVIEWS_VERSION', '4.3.1');
+define('WPSOCIALREVIEWS_VERSION', '4.3.2');
 define('WPSOCIALREVIEWS_DB_VERSION', 121);
 define('WPSOCIALREVIEWS_PRO_MIN_VERSION', '4.3.1');
 define('WPSOCIALREVIEWS_MAIN_FILE', __FILE__);

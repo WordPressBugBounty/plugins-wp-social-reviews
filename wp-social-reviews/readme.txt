@@ -4,7 +4,7 @@ Tags: Customer Reviews, Google Reviews, Social Reviews, Social Feeds,  Instagram
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 4.3.1
+Stable tag: 4.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -334,6 +334,9 @@ If you like this plugin, please give us [5 stars](https://wordpress.org/plugins/
 8. Make templates your own way, and all will look perfect on any screen
 
 == Changelog ==
+
+4.3.2 ( Date: July 26, 2026 )
+- Fixed database errors being displayed on the site when WordPress debug mode is off.
 
 4.3.1 ( Date: July 21, 2026 )
 - Fixed: Security through ongoing audits and hardening.

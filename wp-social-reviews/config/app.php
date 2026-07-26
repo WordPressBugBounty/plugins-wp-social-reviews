@@ -9,5 +9,5 @@ return [
     'hook_prefix'    => 'wpsocialreviews/',
     'rest_namespace' => 'wpsocialreviews',
     'rest_version'   => 'v2',
-    'env'            => 'dev'
+    'env'            => 'production'
 ];
