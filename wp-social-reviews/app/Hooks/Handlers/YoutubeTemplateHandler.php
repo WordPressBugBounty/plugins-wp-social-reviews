@@ -6,6 +6,7 @@ use WPSocialReviews\Framework\Foundation\App;
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Platforms\Feeds\Youtube\YoutubeFeed;
 use WPSocialReviews\App\Services\Platforms\Feeds\Youtube\Helper as YoutubeHelper;
+use WPSocialReviews\App\Services\Integrations\FluentPlayer\FluentPlayerEmbed;
 
 class YoutubeTemplateHandler
 {
@@ -149,6 +150,50 @@ class YoutubeTemplateHandler
             'image_settings' => $gdpr_settings
         ));
         die();
+    }
+
+    /**
+     * Render a feed video as a Fluent Player instance
+     *
+     * The inline and gallery play modes build the player in the browser, and
+     * only the server can run Fluent Player's shortcode.
+     *
+     * @since 4.4.0
+     */
+    public function renderFluentPlayer()
+    {
+        if (!check_ajax_referer('wpsr-ajax-nonce', 'security', false)) {
+            wp_send_json_error(['message' => __('Security validation failed.', 'wp-social-reviews')], 403);
+        }
+
+        $templateId = absint(Arr::get($_REQUEST, 'templateId')); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified above
+        $videoId    = sanitize_text_field(Arr::get($_REQUEST, 'videoId', '')); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified above
+        $duration   = absint(Arr::get($_REQUEST, 'duration', 0)); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified above
+
+        $shortcodeHandler = new ShortcodeHandler();
+
+        if (!$shortcodeHandler->isPublicRenderableTemplate($templateId)) {
+            wp_send_json_error(['message' => __('Invalid template.', 'wp-social-reviews')], 403);
+        }
+
+        $template_meta = $shortcodeHandler->templateMeta($templateId, 'youtube');
+        $feed_settings = Arr::get($template_meta, 'feed_settings', []);
+
+        $html = FluentPlayerEmbed::render($videoId, $feed_settings, [
+            'autoplay' => true,
+            // The length comes from the feed the browser already rendered, so no
+            // per-click feed lookup is needed. Only re-anchored layers use it, and
+            // a spoofed value would only shift that visitor's own layer timing.
+            'duration' => Arr::get($feed_settings, 'video_settings.fluent_player_layers_at_end') === 'true'
+                ? $duration
+                : 0
+        ]);
+
+        if ($html === '') {
+            wp_send_json_error(['message' => __('Fluent Player is not available for this feed.', 'wp-social-reviews')], 404);
+        }
+
+        wp_send_json_success(['html' => $html]);
     }
 
     public function getPaginatedFeedHtml($templateId, $page)

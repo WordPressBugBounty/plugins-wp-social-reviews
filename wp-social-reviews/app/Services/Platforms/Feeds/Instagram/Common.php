@@ -17,7 +17,7 @@ class Common
      *
      * @param string $url
      *
-     * @return array
+     * @return array|\WP_Error
      * @since 1.3.0
      */
     public function makeRequest($url)
@@ -111,7 +111,7 @@ class Common
     /**
      * Weather Response Has Error or Not
      *
-     * @param array $response
+     * @param array|\WP_Error $response
      *
      * @return boolean
      * @since 1.3.0

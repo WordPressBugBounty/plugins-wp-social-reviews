@@ -51,8 +51,12 @@ class MetaController extends Controller
             ], 404);
         }
 
-        $settings = json_decode($request->get('args'), true);
-        $settings = wp_unslash($settings);
+        $settings = $this->decodeJsonParam($request->get('args'));
+
+        if (null === $settings) {
+            return $this->invalidJsonPayload();
+        }
+
         $settings = $this->sanitizeChatSettings($settings);
         do_action('wpsocialreviews/update_chat_settings', $postId, $settings);
     }

@@ -1,6 +1,6 @@
 <?php defined('ABSPATH') or die;
 
-if ($caption && isset($template_meta['template']) && $template_meta['template'] === 'template2') { ?>
+if ($caption) { ?>
     <div class="wpsr-ig-post-caption">
         <p class="wpsr-ig-post-caption-text">
             <?php
@@ -11,12 +11,6 @@ if ($caption && isset($template_meta['template']) && $template_meta['template'] 
             );
             echo wp_kses_post($wpsr_caption);
             ?>
-        </p>
-    </div>
-<?php } elseif ($caption) { ?>
-    <div class="wpsr-ig-post-caption">
-        <p class="wpsr-ig-post-caption-text">
-            <?php echo isset($feed['caption']) ? wp_kses_post(nl2br($caption)) : ''; ?>
         </p>
     </div>
 <?php }

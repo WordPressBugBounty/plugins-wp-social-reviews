@@ -925,6 +925,7 @@ class FacebookFeed extends BaseFeed
 
                 if(!empty($feeds)) {
                     // Use extended cache duration for date ranges
+                    $extendedCacheTime = 0;
                     if ($this->extendedCacheTime) {
                         $settings = get_option('wpsr_' . $this->platform . '_global_settings', false);
                         $defaultCacheTime = Arr::get($settings, 'global_settings.expiration', 86400);
@@ -992,7 +993,7 @@ class FacebookFeed extends BaseFeed
             unset($feed);
         }
 
-        if(!$feeds || empty($feeds)) {
+        if(empty($feeds)) {
             return [];
         }
 

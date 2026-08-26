@@ -12,8 +12,7 @@ defined('ABSPATH') or die;
  */
 
 /**
- * $app
- * @var WPFluent\Foundation\Application
+ * @var \WPSocialReviews\Framework\Foundation\Application $app
  */
 
 add_filter('cron_schedules', function ($schedules) {

@@ -272,7 +272,24 @@ if(! function_exists('wpsr_sanitize_color')) {
         }
 
         // 2. Allow rgba(), rgb(), hsla(), hsl()
-        if (preg_match('/^(rgba?|hsla?)\(\s*(\d{1,3}%?\s*,\s*){2}\d{1,3}%?\s*(,\s*[0-9.]+)?\s*\)$/', $color)) {
+        if (preg_match('/^(rgba?|hsla?)\(\s*(\d{1,3}%?\s*,\s*){2}\d{1,3}%?\s*(,\s*[0-9.]+)?\s*\)$/', $color, $wpsr_match)) {
+            $wpsr_fn = strtolower($wpsr_match[1]);
+            $wpsr_parts = array_map('trim', explode(',', trim(substr($color, strpos($color, '(') + 1), ' )')));
+            $wpsr_alpha = count($wpsr_parts) === 4 ? array_pop($wpsr_parts) : null;
+
+            // The pattern checks shape only, so rgb(999,0,0) and rgba(0,0,0,1.5) passed.
+            $wpsr_limits = ($wpsr_fn === 'hsl' || $wpsr_fn === 'hsla') ? [360, 100, 100] : [255, 255, 255];
+            foreach ($wpsr_parts as $wpsr_index => $wpsr_part) {
+                $wpsr_limit = substr($wpsr_part, -1) === '%' ? 100 : $wpsr_limits[$wpsr_index];
+                if ((float) rtrim($wpsr_part, '%') > $wpsr_limit) {
+                    return '';
+                }
+            }
+
+            if ($wpsr_alpha !== null && (float) $wpsr_alpha > 1) {
+                return '';
+            }
+
             return $color;
         }
 
@@ -410,5 +427,119 @@ if(! function_exists('wpsr_sanitize_style_data')) {
             }
         }
         return $sanitized;
+    }
+}
+
+if (!function_exists('wpsr_trim_url')) {
+    /**
+     * Trim a URL the way JavaScript's String.prototype.trim() does.
+     *
+     * The character set is mirrored by WPSR_TRIM_SET in utils/videoUrl.js.
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    function wpsr_trim_url($value)
+    {
+        if (!is_string($value)) {
+            return '';
+        }
+
+        $set = '[\s\x{00A0}\x{FEFF}\x{2000}-\x{200D}\x{2028}\x{2029}\x{3000}]+';
+        $trimmed = preg_replace('/^' . $set . '|' . $set . '$/u', '', $value);
+
+        return $trimmed === null ? trim($value) : $trimmed;
+    }
+}
+
+if (!function_exists('wpsr_is_http_url')) {
+    /**
+     * One http(s) URL rule, shared by the form, the REST validator and every renderer.
+     *
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    function wpsr_is_http_url($value)
+    {
+        return wpsr_sanitize_http_url($value) !== '';
+    }
+}
+
+if (!function_exists('wpsr_sanitize_http_url')) {
+    /**
+     * Validate one http(s) URL, host included.
+     *
+     * Tested before esc_url_raw(), which turns a bare word into a URL. IDN must
+     * arrive as punycode; a non-ASCII path is fine and preserved.
+     *
+     * @param mixed $value
+     *
+     * @return string the normalized URL, or '' when it is not a usable http(s) URL
+     */
+    function wpsr_sanitize_http_url($value)
+    {
+        $raw = wpsr_trim_url($value);
+
+        if (!preg_match('#^https?://#i', $raw)) {
+            return '';
+        }
+
+        $raw_host = wp_parse_url($raw, PHP_URL_HOST);
+        if (!is_string($raw_host) || $raw_host === '') {
+            return '';
+        }
+
+        if (preg_match('/[^\x21-\x7E]/', $raw_host)) {
+            return '';
+        }
+
+        $url = esc_url_raw($raw);
+        if (!preg_match('#^https?://#i', $url)) {
+            return '';
+        }
+
+        $host = wp_parse_url($url, PHP_URL_HOST);
+        if (!is_string($host) || $host === '') {
+            return '';
+        }
+
+        return preg_match('/[\p{L}\p{N}]/u', $host) ? $url : '';
+    }
+}
+
+if (!function_exists('wpsr_sanitize_media_url')) {
+    /**
+     * Gate for a URL the server itself will fetch later.
+     *
+     * wp_http_validate_url() is the rule: it settles scheme, credentials, port,
+     * the site's own host, and the private/reserved address list that WordPress
+     * keeps current. Only the http(s) shape check is ours.
+     *
+     * @param mixed $value
+     *
+     * @return string the normalized URL, or '' when it is not safe to fetch
+     */
+    function wpsr_sanitize_media_url($value)
+    {
+        $url = wpsr_sanitize_http_url($value);
+        if ($url === '') {
+            return '';
+        }
+
+        return wp_http_validate_url($url) ? $url : '';
+    }
+}
+
+if (!function_exists('wpsr_is_media_url')) {
+    /**
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    function wpsr_is_media_url($value)
+    {
+        return wpsr_sanitize_media_url($value) !== '';
     }
 }

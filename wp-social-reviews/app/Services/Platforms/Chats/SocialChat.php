@@ -21,7 +21,7 @@ class SocialChat extends BaseChat
      *
      * Get Credential
      *
-     * @return json response
+     * @return void
      * @since 1.0.0
      */
     public function getSettings($postId = null)
@@ -50,7 +50,7 @@ class SocialChat extends BaseChat
      *
      * Update Credential
      *
-     * @return json response
+     * @return void
      * @since 1.0.0
      */
     public function updateSettings($postId = null, $args = [])

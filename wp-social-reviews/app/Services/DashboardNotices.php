@@ -287,7 +287,7 @@ class DashboardNotices
      */
     private function getOffers()
     {
-        $currentYear = gmdate('Y');
+        $currentYear = (int) gmdate('Y');
         $nextYear = $currentYear + 1;
 
         return [
@@ -464,7 +464,6 @@ class DashboardNotices
     /**
      * Get extensions popup configuration for a feature
      *
-     * @param string $feature
      * @return array
      */
     public function getSpecificFeaturePopupConfig()
@@ -493,7 +492,6 @@ class DashboardNotices
     /**
      * Get default extensions configuration by feature
      *
-     * @param string $feature
      * @return array
      */
     private function getDefaultExtensionsConfig()
@@ -746,7 +744,6 @@ class DashboardNotices
     /**
      * Get base platform promotion data
      *
-     * @param string $platform
      * @return array
      */
     private function getBasePlatformPromotionData()

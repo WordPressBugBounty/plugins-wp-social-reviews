@@ -89,7 +89,7 @@ class RefreshToken
                         'user_avatar'  => isset($connected_account['user_avatar']) ? $connected_account['user_avatar'] : '',
                         'name'         => isset($connected_account['name']) ? $connected_account['name'] : ''
                     );
-                    update_option($this->optionKey, array('connected_accounts' => $connected_accounts, 'no'));
+                    update_option($this->optionKey, array('connected_accounts' => $connected_accounts), 'no');
 
                     foreach ($connected_accounts as $connected_account) {
 						if ($connected_account['api_type'] == 'personal' || $connected_account['api_type'] == 'business_basic') {

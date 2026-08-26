@@ -340,8 +340,16 @@ class Helper
         }
 
         $units = ['', 'K', 'M', 'B', 'T'];
-        for ($i = 0; $number >= 1000; $i++) {
+        $last = count($units) - 1;
+        for ($i = 0; $number >= 1000 && $i < $last; $i++) {
             $number /= 1000;
+        }
+
+        // Rounding happens after the unit is chosen, so a value just under the next
+        // threshold rounds back up to 1000 ("999,999" became "1,000K"). Carry it.
+        if (round($number, 1) >= 1000 && $i < $last) {
+            $number /= 1000;
+            $i++;
         }
 
         $formatted = number_format($number, 1);
@@ -415,7 +423,7 @@ class Helper
         $post_types = array_diff_key($post_types, ['attachment']);
 
         $post_types_list = [];
-        if (!empty($post_types) && !is_wp_error($post_types)) {
+        if (!empty($post_types)) {
             foreach ($post_types as $key => $post_type) {
                 if($formatted) {
                     $post_types_list[] = array(
@@ -448,7 +456,7 @@ class Helper
         ]);
 
         $page_list = array(array('id' => '-1', 'title' => __('Everywhere', 'wp-social-reviews')));
-        if (!empty($pages) && !is_wp_error($pages)) {
+        if (!empty($pages)) {
             $page_list = array_merge($page_list, static::formatPostResults($pages));
         }
 
@@ -498,7 +506,7 @@ class Helper
         return ['results' => $results, 'has_more' => $hasMore];
     }
 
-    private static function formatPostResults($posts)
+    protected static function formatPostResults($posts)
     {
         $results = [];
         foreach ($posts as $post) {
@@ -524,7 +532,7 @@ class Helper
         ]);
 
         $post_lists = array(array('id' => '-1', 'title' => __('Everywhere', 'wp-social-reviews')));
-        if (!empty($posts) && !is_wp_error($posts)) {
+        if (!empty($posts)) {
             foreach ($posts as $post) {
                 $post_lists[] = array(
                     'id'    => $post->ID . '',
@@ -599,9 +607,8 @@ class Helper
             $pageList = ['-1'];
         }
 
-        if(empty($postTypes) && empty($pageList) && $chat_lang && $chat_lang === get_locale()){
-            return true;
-        } else if(!empty($post) && !empty($postTypes)) {
+        // An empty page_list is normalised to ['-1'] above, so "everywhere" is matched below.
+        if(!empty($post) && !empty($postTypes)) {
             if($postTypes && in_array($post->post_type, $postTypes) && $chat_lang && $chat_lang === get_locale()){
                 return true;
             }

@@ -8,6 +8,7 @@ use WPSocialReviews\App\Models\OptimizeImage;
 use WPSocialReviews\App\Services\Platforms\Feeds\CacheHandler;
 use WPSocialReviews\Database\Migrations\ReviewsMigrator;
 use WPSocialReviews\App\Services\Helper as GlobalHelper;
+use WPSocialReviews\App\Services\Platforms\Reviews\Helper as ReviewsHelper;
 
 /**
  * Abstract class to handle platform-specific image optimization
@@ -40,6 +41,27 @@ abstract class BaseImageOptimizationHandler
 
     abstract public function savePhotos();
 
+    /**
+     * Whether this platform is allowed to store optimized copies at all.
+     *
+     * Both resizer scripts are shared by the whole page, so a template whose
+     * platform has optimization off still receives a request as soon as any
+     * other template on that page loads the script. The request carries no
+     * proof that the caller was entitled to ask, so the setting is re-read here.
+     *
+     * @param string $platform 'reviews' for review templates, else the feed platform
+     *
+     * @return bool
+     */
+    protected function imageOptimizationEnabled($platform)
+    {
+        if (empty($platform) || !is_string($platform)) {
+            return false;
+        }
+
+        return Arr::get(ReviewsHelper::getImageSettings($platform), 'optimized_images') === 'true';
+    }
+
     public function processSaveImage($feed, $platform_name)
     {
         $userName = (new PlatformManager())->getUserName($feed, $platform_name);
@@ -65,84 +87,104 @@ abstract class BaseImageOptimizationHandler
         $sizes = ['height' => 1, 'width'  => 1];
         $optimize_image_format = GlobalHelper::getOptimizeImageFormat();
 
-        foreach ($imageSizes as $suffix => $image_size) {
-            $image_source_set    = $this->getMediaSource($feed);
-            $fileName = Arr::get($image_source_set, $image_size, $this->getMediaUrl($feed));
-            if (!empty($fileName) && !empty($mediaId)) {
+        // One fetch per distinct URL; the review sizes all point at the same file.
+        $fetched = [];
+
+        try {
+            foreach ($imageSizes as $suffix => $image_size) {
+                $image_source_set    = $this->getMediaSource($feed);
+                $fileName = Arr::get($image_source_set, $image_size, $this->getMediaUrl($feed));
+                if (empty($fileName) || empty($mediaId)) {
+                    continue;
+                }
+
                 $imageFileName = $mediaId . '_'. $suffix . '.'.$optimize_image_format;
-                $headers = @get_headers($fileName, 1);
-                if (isset($headers['Content-Type'])) {
-                    if (!str_contains($headers['Content-Type'], 'image/') && $headers['Content-Type'] != 'jpeg') {
-                        // Skip non-image files
-                        continue;
-                    } else {
-                        if (!file_exists($uploadDir)) {
-                            wp_mkdir_p($uploadDir);
-                            GlobalHelper::initializeUploadDirectory($uploadDir);
-                        }
-                        $fullFileName = trailingslashit($uploadDir) . $imageFileName;
-                        if (file_exists($fullFileName)) {
-                            $isImageResized = true;
-                            continue;
-                        }
-                        $imageEditor = wp_get_image_editor($fileName);
-                        if (is_wp_error($imageEditor)) {
-                            require_once ABSPATH . 'wp-admin/includes/file.php';
+                $fullFileName = trailingslashit($uploadDir) . $imageFileName;
 
-                            $timeoutInSeconds = 5;
-                            $temp_file = download_url($fileName, $timeoutInSeconds);
-                            $imageEditor = wp_get_image_editor($temp_file);
-                        }
-                        if (!is_wp_error($imageEditor)) {
-                            $imageEditor->set_quality( 80 );
-                            $sizes = $imageEditor->get_size();
-                            $imageEditor->resize( $image_size, null );
-                            $savedImage = $imageEditor->save($fullFileName);
-                            if ($savedImage) {
-                                $isImageResized = true;
-                            }
-                        } else {
-                            $isImageResized |= $this->download($fileName, $fullFileName, $suffix);
-                            $imgSize = @getimagesize($fileName);
+                // Checked before the request, so an already-stored size costs nothing.
+                if (file_exists($fullFileName)) {
+                    $isImageResized = true;
+                    continue;
+                }
 
-                            if ($isImageResized && is_array($imgSize) && $imgSize[0] > 0 && $imgSize[1] > 0) {
-                                $sizes = [
-                                    'width' => $imgSize[0],
-                                    'height' => $imgSize[1],
-                                ];
-                            }
-                        }
+                if (!array_key_exists($fileName, $fetched)) {
+                    $fetched[$fileName] = RemoteMediaFetcher::fetch($fileName);
+                }
 
-                        if (!empty($temp_file)) {
-                            wp_delete_file($temp_file);
-                        }
+                // A rejected URL never reaches the image APIs and never makes a directory.
+                $media = $fetched[$fileName];
+                if (!$media) {
+                    continue;
+                }
+
+                if (!file_exists($uploadDir)) {
+                    wp_mkdir_p($uploadDir);
+                    GlobalHelper::initializeUploadDirectory($uploadDir);
+                }
+
+                $imageEditor = wp_get_image_editor($media['file']);
+                if (!is_wp_error($imageEditor)) {
+                    $imageEditor->set_quality( 80 );
+                    $sizes = $imageEditor->get_size();
+                    $imageEditor->resize( $image_size, null );
+                    // save() returns WP_Error on failure, and any object is truthy.
+                    $savedImage = $imageEditor->save($fullFileName);
+                    if (!is_wp_error($savedImage) && $savedImage) {
+                        $isImageResized = true;
+                    }
+                } else {
+                    $stored = $this->storeFetchedImage($media, $fullFileName, $suffix);
+                    $isImageResized |= $stored;
+
+                    if ($stored) {
+                        $sizes = [
+                            'width' => $media['width'],
+                            'height' => $media['height'],
+                        ];
                     }
                 }
             }
+        } finally {
+            foreach ($fetched as $media) {
+                RemoteMediaFetcher::release($media);
+            }
         }
+
         $this->updateImageInDb($userName, $mediaId, $isImageResized, $sizes, $platformName);
     }
 
     public function resizeImage($imageUrl, $originalImage, $old_size, $image_size)
     {
         try {
+            // This runs only when no WP_Image_Editor was available, so GD may be
+            // absent too. Calling a missing GD function raises Error, not Exception.
+            if (!function_exists('imagecreatetruecolor') || !function_exists('imagejpeg')) {
+                return false;
+            }
+
+            // Measured on the saved copy, never on $imageUrl, which would refetch it.
+            $imageInfo = @getimagesize($originalImage);
+            if (!is_array($imageInfo) || empty($imageInfo[0]) || empty($imageInfo[1])) {
+                return false;
+            }
+
+            $image = $this->createImageResource($originalImage, $imageInfo[2]);
+            if (!$image) {
+                return false;
+            }
 
             $feed_platforms = ['instagram', 'facebook_feed', 'tiktok', 'youtube'];
 
             $platform = in_array($this->platform, $feed_platforms);
 
-            // Get the image resource.
-            $image = imagecreatefromjpeg($originalImage);
-
-            // Get the width and height of the original image.
-            $originalWidth  = getimagesize($imageUrl)[0];
-            $originalHeight = getimagesize($imageUrl)[1];
+            $originalWidth  = $imageInfo[0];
+            $originalHeight = $imageInfo[1];
 
             $sizes = [
                 true => ['full' => 640, 'low' => 320, 'thumb' => 150],
                 false => ['full' => 150, 'low' => 120, 'thumb' => 80]
             ];
-            
+
             $selectedSizes = $sizes[$platform];
             $newWidth = $newHeight = $selectedSizes[$image_size] ?? $selectedSizes['full'];
 
@@ -162,17 +204,44 @@ abstract class BaseImageOptimizationHandler
             imagedestroy($image);
             imagedestroy($newImage);
             return true;
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             //$exception->getMessage();
         }
 
         return false;
     }
+
+    /**
+     * The stored file keeps whatever format it was downloaded in, whatever the
+     * configured extension says, so the reader is chosen from the real bytes.
+     *
+     * @return resource|object|false GD handle; object on PHP 8, resource on 7.4
+     */
+    private function createImageResource($file, $type)
+    {
+        $readers = [
+            IMAGETYPE_JPEG => 'imagecreatefromjpeg',
+            IMAGETYPE_PNG  => 'imagecreatefrompng',
+            IMAGETYPE_GIF  => 'imagecreatefromgif',
+            IMAGETYPE_WEBP => 'imagecreatefromwebp',
+            IMAGETYPE_BMP  => 'imagecreatefrombmp',
+        ];
+
+        if (!isset($readers[$type]) || !function_exists($readers[$type])) {
+            return false;
+        }
+
+        $reader = $readers[$type];
+
+        return @$reader($file);
+    }
     
     /**
      * Download method used as fallback when WordPress default image save methods fail
      *
-     * This method uses WordPress native HTTP API for downloading images when other WordPress methods are not available.
+     * Every byte comes through RemoteMediaFetcher, so the URL is scheme-checked,
+     * address-checked, redirect-checked and confirmed to be a real image before
+     * anything is written into the uploads tree.
      */
     public function download($url = '', $filepath = '', $image_size = '')
     {
@@ -180,83 +249,68 @@ abstract class BaseImageOptimizationHandler
             return false;
         }
 
-        // Set up request arguments
-        $args = array(
-            'timeout'     => 10,
-            'redirection' => 5,
-            'httpversion' => '1.0',
-            'user-agent'  => 'WordPress/' . get_bloginfo('version') . '; ' . get_bloginfo('url'),
-            'blocking'    => true,
-            'headers'     => array(),
-            'cookies'     => array(),
-            'body'        => null,
-            'compress'    => false,
-            'decompress'  => true,
-            'stream'      => false,
-            'filename'    => null
-        );
-
-        // Use custom user agent if available
-        if (!empty($_SERVER['HTTP_USER_AGENT'])) {
-            $args['user-agent'] = sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT']));
-        }
-
-        // Make the HTTP request
-        $response = wp_remote_get($url, $args);
-
-        // Check for errors
-        if (is_wp_error($response)) {
-            //error_log('wpsn failed to get the media data: ' . $response->get_error_message());
+        $media = RemoteMediaFetcher::fetch($url);
+        if (!$media) {
             return false;
         }
 
-        // Check response code
-        $response_code = wp_remote_retrieve_response_code($response);
-        if ($response_code !== 200) {
-            //error_log('wpsn failed to get the media data: HTTP ' . $response_code);
+        $stored = $this->storeFetchedImage($media, $filepath, $image_size);
+        RemoteMediaFetcher::release($media);
+
+        return $stored;
+    }
+
+    /**
+     * Copy an already validated temp file into the uploads tree.
+     *
+     * @param array  $media      return value of RemoteMediaFetcher::fetch()
+     * @param string $filepath   destination inside the plugin upload directory
+     * @param string $image_size 'full', 'low' or 'thumb'
+     *
+     * @return bool
+     */
+    protected function storeFetchedImage($media, $filepath, $image_size = '')
+    {
+        if (empty($media['file']) || !file_exists($media['file']) || empty($filepath)) {
             return false;
         }
 
-        // Get the response body
-        $image_data = wp_remote_retrieve_body($response);
-        if (empty($image_data)) {
-            //error_log('wpsn failed to get the media data: Empty response body');
-            return false;
-        }
-
-        // Get WordPress filesystem
         $wp_filesystem = $this->getWpFilesystem();
         if (!$wp_filesystem) {
             //error_log('wpsn was unable to initialize WordPress filesystem');
             return false;
         }
 
-        // Write the file using WordPress filesystem
-        $result = $wp_filesystem->put_contents($filepath, $image_data, FS_CHMOD_FILE);
+        // Not copy(): on the FTP and SSH transports it reads the source on the
+        // remote host, where this local temp path does not exist.
+        $bytes = @file_get_contents($media['file']);
+        if ($bytes === false) {
+            return false;
+        }
 
-        if (!$result) {
+        if (!$wp_filesystem->put_contents($filepath, $bytes, FS_CHMOD_FILE)) {
             //error_log('wpsn was unable to write the file: ' . $filepath);
             return false;
         }
 
-        $this->handleImageResizing($url, $filepath, $image_size);
+        $this->handleImageResizing($media['file'], $filepath, $image_size);
         return true;
     }
 
-    private function handleImageResizing($url, $filepath, $image_size)
+    private function handleImageResizing($sourceFile, $filepath, $image_size)
     {
         switch ($image_size) {
             case 'full':
-                $this->resizeImage($url, $filepath, 'full', 'low');
-                $this->resizeImage($url, $filepath, 'full', 'thumb');
+                $this->resizeImage($sourceFile, $filepath, 'full', 'low');
+                $this->resizeImage($sourceFile, $filepath, 'full', 'thumb');
                 break;
             case 'low':
-                $this->resizeImage($url, $filepath, 'low', 'full');
-                $this->resizeImage($url, $filepath, 'low', 'thumb');
+                $this->resizeImage($sourceFile, $filepath, 'low', 'full');
+                $this->resizeImage($sourceFile, $filepath, 'low', 'thumb');
                 break;
             case 'thumb':
-                $this->resizeImage($url, $filepath, 'thumb', 'low');
-                $this->resizeImage($url, $filepath, 'thumb', 'full');
+                $this->resizeImage($sourceFile, $filepath, 'thumb', 'low');
+                $this->resizeImage($sourceFile, $filepath, 'thumb', 'full');
                 break;
         }
     }
@@ -306,12 +360,26 @@ abstract class BaseImageOptimizationHandler
         return $url;
     }
 
+    /**
+     * How many images may be resized inside one window, and how long that
+     * window is in minutes. Both are filterable; a non-positive value falls
+     * back to the default. Raising them costs request time on the resize
+     * endpoint, which is why the ceiling exists.
+     *
+     * @return bool true when the window is full and resizing must wait
+     */
     public function maxResizingPerUnitTimePeriod()
     {
-        $fifteenMinutesAgo = gmdate('Y-m-d H:i:s', time() - 15 * 60);
-        $totalRecords = OptimizeImage::where('created_at', '>', $fifteenMinutesAgo)->count();
+        $minutes = (int) apply_filters('wpsocialreviews/max_resizing_window_minutes', 15);
+        $limit = (int) apply_filters('wpsocialreviews/max_resizing_per_window', 100);
 
-        return ($totalRecords > 100);
+        $minutes = $minutes > 0 ? $minutes : 15;
+        $limit = $limit > 0 ? $limit : 100;
+
+        $windowStart = gmdate('Y-m-d H:i:s', time() - $minutes * 60);
+        $totalRecords = OptimizeImage::where('created_at', '>', $windowStart)->count();
+
+        return ($totalRecords > $limit);
     }
 
     abstract public function maxRecordsCount($platform);
@@ -418,7 +486,7 @@ abstract class BaseImageOptimizationHandler
     /**
      * Get WordPress filesystem instance
      *
-     * @return WP_Filesystem_Base|false
+     * @return \WP_Filesystem_Base|false
      */
     protected function getWpFilesystem()
     {

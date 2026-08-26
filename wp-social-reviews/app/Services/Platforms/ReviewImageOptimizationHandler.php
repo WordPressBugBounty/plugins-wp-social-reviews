@@ -52,6 +52,14 @@ class ReviewImageOptimizationHandler extends BaseImageOptimizationHandler
             wp_send_json_error(['message' => __('Invalid template.', 'wp-social-reviews')], 403);
         }
 
+        // review_optimized_images is one site-wide switch, so every registered
+        // review platform reaches the same verdict and may answer here.
+        if (!$this->imageOptimizationEnabled('reviews')) {
+            wp_send_json_error([
+                'message' => __('Image optimization is turned off.', 'wp-social-reviews')
+            ], 403);
+        }
+
         if ($templateId > 0) {
             $templateMeta       = get_post_meta($templateId, '_wpsr_template_config', true);
             $formattedMeta = json_decode($templateMeta, true);

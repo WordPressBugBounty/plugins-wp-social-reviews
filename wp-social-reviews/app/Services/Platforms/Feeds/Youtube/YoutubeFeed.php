@@ -57,7 +57,7 @@ class YoutubeFeed extends BaseFeed
     /**
      * Save YouTube config on wp options table
      *
-     * @return json
+     * @return void
      * @since 1.2.5
      */
     public function handleCredential($settings = array())
@@ -145,7 +145,7 @@ class YoutubeFeed extends BaseFeed
      * @param string $accessToken
      *
      * @return array
-     * @throws /Exception
+     * @throws \Exception
      * @since 1.2.5
      */
     private function makeConfigAPIRequestUrl($credentialsType = '', $accessCode = '', $apiKey = '', $accessToken = '')
@@ -276,7 +276,7 @@ class YoutubeFeed extends BaseFeed
     /**
      * get verified youtube configs data from wp options table
      *
-     * @return json
+     * @return void
      * @since 1.2.5
      */
     public function getVerificationConfigs()
@@ -293,7 +293,7 @@ class YoutubeFeed extends BaseFeed
     /**
      * delete youtube configs data from wp options table
      *
-     * @return json
+     * @return void
      * @since 1.2.5
      */
     public function clearVerificationConfigs()
@@ -403,8 +403,8 @@ class YoutubeFeed extends BaseFeed
     /**
      * Show updated data if new data fetched in editor without update in db
      *
-     * @return json
-     * @throws /Exception
+     * @return void
+     * @throws \Exception
      * @since 1.2.5
      */
     public function editEditorSettings($configs = [], $postId = null)
@@ -449,7 +449,7 @@ class YoutubeFeed extends BaseFeed
     /**
      * Update template is settings is changed in editor
      *
-     * @return json
+     * @return void
      * @since 1.2.5
      */
     public function updateEditorSettings($settings = [], $postId = null)
@@ -616,17 +616,15 @@ class YoutubeFeed extends BaseFeed
             return ['error_message' => $message];
         }
 
-        if (!is_wp_error($response)) {
-            $videoLists = json_decode(wp_remote_retrieve_body($response), true);
+        $videoLists = json_decode(wp_remote_retrieve_body($response), true);
 
-            $errors     = $this->checkYoutubeError($videoLists);
-            if (is_array($errors) && (true === $errors[0] || 1 === $errors[0])) {
-                return ['error_message' => isset($errors[1]) ? $errors[1] : __('Problem in api key or access token setting!!', 'wp-social-reviews')];
-            }
-
-            // unlisted videos remove
-            $videoLists = $this->getPublishVideos($videoLists);
+        $errors     = $this->checkYoutubeError($videoLists);
+        if (is_array($errors) && (true === $errors[0] || 1 === $errors[0])) {
+            return ['error_message' => isset($errors[1]) ? $errors[1] : __('Problem in api key or access token setting!!', 'wp-social-reviews')];
         }
+
+        // unlisted videos remove
+        $videoLists = $this->getPublishVideos($videoLists);
 
         $videoLists['nextPageToken'] = $nextPageToken;
 
@@ -637,7 +635,7 @@ class YoutubeFeed extends BaseFeed
      * Retrieve 'published' status videos from different statuses videos.
      *
      * @return array
-     * @throws /Exception
+     * @throws \Exception
      * @since 1.2.5
      */
     public function getPublishVideos($videoList)
@@ -665,7 +663,7 @@ class YoutubeFeed extends BaseFeed
      * Youtube Feeds Without Single Video
      *
      * @return array
-     * @throws /Exception
+     * @throws \Exception
      * @since 1.2.5
      */
     public function getYoutubeFeed($channelId = '', $playlistId = '', $feedType = 'channel_feed', $eventType = '', $searchTerm = '', $total = 50, $hasCache = false)
@@ -764,7 +762,7 @@ class YoutubeFeed extends BaseFeed
      * @param array $videoIds video ids
      *
      * @return array
-     * @throws /Exception
+     * @throws \Exception
      * @since 1.2.5
      */
     public function getSingleVideoFeeds($videoIds, $feedCacheName)
@@ -809,11 +807,12 @@ class YoutubeFeed extends BaseFeed
     /**
      * Youtube Channel Api Url Details
      *
-     * @param string $channelId Channel ID
+     * @param string $channelIdentifier Channel ID, username or handle
      * @param integer $total total
+     * @param string $feedType feed type
      *
      * @return array
-     * @throws /Exception
+     * @throws \Exception
      * @since 1.2.5
      */
     public function getChannelApiUrlDetails($channelIdentifier, $total, $feedType = '')
@@ -875,7 +874,7 @@ class YoutubeFeed extends BaseFeed
 
         // Handle validation for YouTube handles (starting with @)
         if (strpos($identifier, '@') === 0) {
-            $handle = ltrim($identifier ?? '', '@');
+            $handle = ltrim($identifier, '@');
             // Validate: @ followed by 3–30 valid characters
             if (!preg_match('/^(?![_\-.·])[a-zA-Z0-9_\-\.·]{3,30}(?<![_\-.·])$/u', $handle)) {
                 return [
@@ -915,7 +914,7 @@ class YoutubeFeed extends BaseFeed
      * @param string $fetchUrl
      * @param array $args
      *
-     * @return json
+     * @return array|\WP_Error
      * @since 1.2.5
      */
     public function getAPIData($fetchUrl = '', $args = [])
@@ -925,9 +924,8 @@ class YoutubeFeed extends BaseFeed
         if (is_wp_error($response)) {
             return $response;
         }
-        if (!is_wp_error($response)) {
-            $response = json_decode(wp_remote_retrieve_body($response), true);
-        }
+
+        $response = json_decode(wp_remote_retrieve_body($response), true);
 
         return $response;
     }
@@ -962,17 +960,15 @@ class YoutubeFeed extends BaseFeed
                 $message = $response->get_error_message();
                 return ['error_message' => $message];
             }
-            if (!is_wp_error($response)) {
-                $channelInfo = json_decode(wp_remote_retrieve_body($response), true);
-                $errors      = $this->checkYoutubeError($channelInfo);
+            $channelInfo = json_decode(wp_remote_retrieve_body($response), true);
+            $errors      = $this->checkYoutubeError($channelInfo);
 
-                if (is_array($errors) && (true === $errors[0] || 1 === $errors[0])) {
-                    return ['error_message' => isset($errors[1]) ? $errors[1] : __('Problem in api key or access token setting!!', 'wp-social-reviews')];
-                } else {
-                    $this->cacheHandler->createCache($channelCacheName, $channelInfo);
-                    return $channelInfo;
-                }
+            if (is_array($errors) && (true === $errors[0] || 1 === $errors[0])) {
+                return ['error_message' => isset($errors[1]) ? $errors[1] : __('Problem in api key or access token setting!!', 'wp-social-reviews')];
             }
+
+            $this->cacheHandler->createCache($channelCacheName, $channelInfo);
+            return $channelInfo;
         }
     }
 
@@ -998,8 +994,8 @@ class YoutubeFeed extends BaseFeed
      *
      * @param array $feedData feed data
      *
-     * @return array
-     * @throws /Exception
+     * @return array|null [true, message] when the payload carries an API error, null otherwise
+     * @throws \Exception
      * @since 1.2.5
      */
     public function checkYoutubeError($feedData)
@@ -1021,6 +1017,8 @@ class YoutubeFeed extends BaseFeed
         } catch (\Exception $e) {
             return [true, $e->getMessage()];
         }
+
+        return null;
     }
 
     /**
@@ -1029,8 +1027,8 @@ class YoutubeFeed extends BaseFeed
      * @param string $youtubeUrl youtube url
      * @param string $cacheName cache name
      *
-     * @return array|string
-     * @throws /Exception
+     * @return array|string|null null when there is neither fresh data nor a cache to fall back on
+     * @throws \Exception
      * @since 1.2.5
      */
     public function checkYoutubeCache($youtubeUrl, $cacheName, $feedType = '')
@@ -1061,7 +1059,6 @@ class YoutubeFeed extends BaseFeed
 	        return ['error_message' => $youtubeApiKeyOrToken['error_message']];
         }
 
-        $feedData = [];
         $response = wp_remote_get($youtubeUrl . $youtubeApiKeyOrToken);
 
         if (is_wp_error($response)) {
@@ -1070,9 +1067,7 @@ class YoutubeFeed extends BaseFeed
             return ['error_message' => $message];
         }
 
-        if (!is_wp_error($response)) {
-            $feedData = json_decode(wp_remote_retrieve_body($response), true);
-        }
+        $feedData = json_decode(wp_remote_retrieve_body($response), true);
 
         if (!empty($feedData) && !empty($cacheName)) {
             $wpsr_error_check_complete = $this->checkYoutubeError($feedData);
@@ -1096,10 +1091,12 @@ class YoutubeFeed extends BaseFeed
             if (!empty($cacheName) && empty($feedData)) {
 	            $feedCache = $this->cacheHandler->getFeedCache($cacheName);
                 if ($feedCache) {
-                    return $this->cacheHandler->getFeedCache($cacheName, true);
+                    return $feedCache;
                 }
             }
         }
+
+        return null;
     }
 
     public function updateCachedFeeds($caches)

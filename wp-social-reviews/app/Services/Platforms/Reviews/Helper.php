@@ -4,6 +4,8 @@ namespace WPSocialReviews\App\Services\Platforms\Reviews;
 
 use Exception;
 use WPSocialReviews\App\Models\Review;
+use WPSocialReviews\App\Models\ReviewCategory;
+use WPSocialReviews\Database\Migrations\ReviewCategoriesMigrator;
 use WPSocialReviews\Framework\Database\Orm\Collection;
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Helper as GlobalHelper;
@@ -86,12 +88,28 @@ class Helper
             $filterByTitle = 'all';
         }
 
+        // The category filter is keyed by id so a rename cannot strand it; the names stay
+        // as the display copy and the fallback for the legacy `category` column. Stored
+        // ids win — after a rename the stored names are the old ones, and re-resolving
+        // them would throw the working reference away.
+        $selectedCategories  = Arr::get($settings, 'selectedCategories', []);
+        $selectedCategoryIds = array_values(array_filter(array_map('intval', (array) Arr::get($settings, 'selectedCategoryIds', []))));
+
+        if (empty($selectedCategoryIds) && !empty($selectedCategories) && ReviewCategoriesMigrator::tablesExist()) {
+            $selectedCategoryIds = ReviewCategory::idsForNames($selectedCategories);
+        }
+
         // support old minimum rating values 11/6
         if ((Arr::get($settings, 'starFilterVal') === 11) || (!in_array('booking.com', $platform) && Arr::get($settings, 'starFilterVal') >= 6)) {
             $settings['starFilterVal'] = -1;
         }
 
-        extract(static::getCarouselSettings($settings));
+        $carouselDefaults = static::getCarouselSettings($settings);
+        $autoplay         = Arr::get($carouselDefaults, 'autoplay', 'false');
+        $autoplay_speed   = Arr::get($carouselDefaults, 'autoplay_speed', 3000);
+        $slides_to_show   = Arr::get($carouselDefaults, 'slides_to_show', 3);
+        $slides_to_scroll = Arr::get($carouselDefaults, 'slides_to_scroll', 3);
+        $navigation       = Arr::get($carouselDefaults, 'navigation', 'dot');
 
         //notification and badge old settings compatible for new version
         $notification_settings = Arr::get($settings, 'notification_settings');
@@ -124,6 +142,9 @@ class Helper
             'author_position' => Arr::get($settings, 'author_position', 'true'),
             'author_company_name' => Arr::get($settings, 'author_company_name', 'false'),
             'website_logo' => Arr::get($settings, 'website_logo', 'true'),
+            'show_review_video' => Arr::get($settings, 'show_review_video', 'true'),
+            'use_fluent_player' => Arr::get($settings, 'use_fluent_player', 'false'),
+            'fluent_player_media' => Arr::get($settings, 'fluent_player_media', 0),
             'rating_style' => Arr::get($settings, 'rating_style', 'default'),
             'reviewer_image' => Arr::get($settings, 'reviewer_image', 'true'),
             'timestamp' => Arr::get($settings, 'timestamp', $timestamp),
@@ -180,9 +201,12 @@ class Helper
             'includes_inputs' => Arr::get($settings, 'includes_inputs', ''),
             'excludes_inputs' => Arr::get($settings, 'excludes_inputs', ''),
             'order' => Arr::get($settings, 'order', 'desc'),
+            // Lets visitors search, re-sort and rating-filter the feed. Off unless the owner turns it on.
+            'enable_visitor_sorting' => Arr::get($settings, 'enable_visitor_sorting', 'false'),
             'hide_empty_reviews' => Arr::get($settings, 'hide_empty_reviews', false),
             'selectedBusinesses' => Arr::get($settings, 'selectedBusinesses', []),
-            'selectedCategories' => Arr::get($settings, 'selectedCategories', []),
+            'selectedCategories' => $selectedCategories,
+            'selectedCategoryIds' => $selectedCategoryIds,
 
             //header
             'show_header' => Arr::get($settings, 'show_header', 'true'),
@@ -442,6 +466,9 @@ class Helper
         $total_platforms = Arr::get($multi_business_info, 'total_platforms', 0);
 
         if (!empty($selectedBusinesses) && !empty($multi_business_info['platforms'])) {
+            // The loop below counts the selected businesses, so it must start from zero
+            // rather than from the all-business total read above.
+            $cnt = 0;
             $multi_business_info['average_rating'] = 0;
             $multi_business_info['total_rating'] = 0;
             $avg_rating = 0;
@@ -656,6 +683,358 @@ class Helper
         return $has_column;
     }
 
+    // Literal-only column/direction pairs, so a visitor sort key never reaches ORDER BY.
+    public static function sortMap()
+    {
+        return [
+            'newest'      => ['column' => 'review_time', 'direction' => 'desc'],
+            'oldest'      => ['column' => 'review_time', 'direction' => 'asc'],
+            'rating_desc' => ['column' => 'rating',      'direction' => 'desc'],
+            'rating_asc'  => ['column' => 'rating',      'direction' => 'asc'],
+        ];
+    }
+
+    // Map the admin Order dropdown's saved 'desc'/'asc' onto the canonical keys.
+    private static function normalizeOrderKey($order)
+    {
+        $order  = strtolower((string) $order);
+        $legacy = ['desc' => 'newest', 'asc' => 'oldest'];
+        return isset($legacy[$order]) ? $legacy[$order] : $order;
+    }
+
+    // booking.com stores 1-10 ratings, which the 1-5 star dropdown cannot describe.
+    public static function supportsVisitorSorting($platforms)
+    {
+        return !in_array('booking.com', (array) $platforms, true);
+    }
+
+    // Will a sort toolbar render on this feed? Pro decides; asked before the header view runs.
+    public static function visitorSortToolbarEnabled($template_meta, $templateId, $templateType, $platforms)
+    {
+        if (!defined('WPSOCIALREVIEWS_PRO') || !static::supportsVisitorSorting($platforms)) {
+            return false;
+        }
+
+        return (bool) apply_filters('wpsocialreviews/reviews_sort_toolbar_enabled', false,
+            $template_meta, $templateId, $templateType, $platforms);
+    }
+
+    // Per-render seed so every re-fetch of a random feed repeats the same shuffle; 0 on every other feed.
+    public static function randomFeedSeed($template_meta)
+    {
+        if (static::resolveOrderKey(Arr::get($template_meta, 'order', 'desc')) !== 'random'
+            || Arr::get($template_meta, 'pagination_type') !== 'none') {
+            return 0;
+        }
+
+        // Signed int range, starting at 1 because 0 is the "no seed" sentinel.
+        return wp_rand(1, 2147483647);
+    }
+
+    // Bound a search term. Never lowercased: it is echoed back, and the SQL layer lowercases anyway.
+    public static function sanitizeVisitorSearch($term)
+    {
+        if (!is_scalar($term)) {
+            return '';
+        }
+
+        // Drop invalid byte sequences first, or they survive the fallback paths
+        // below and reach the caller as a string that is not valid UTF-8. The
+        // substitution character is then removed rather than searched for, so the
+        // characters the visitor did type can still match.
+        if (function_exists('wp_check_invalid_utf8')) {
+            $term = str_replace("\xEF\xBF\xBD", '', wp_check_invalid_utf8((string) $term, true));
+        }
+
+        // Collapse whitespace runs so "a     b" costs the same as "a b".
+        $collapsed = preg_replace('/\s+/u', ' ', (string) $term);
+        if (!is_string($collapsed)) {
+            // preg_replace returns null on invalid UTF-8; retry without the unicode modifier.
+            $collapsed = preg_replace('/\s+/', ' ', (string) $term);
+        }
+
+        $term = is_string($collapsed) ? trim($collapsed) : '';
+
+        // Cut by character, not byte, or the cut lands mid-character and the browser can never match it back.
+        if (function_exists('mb_substr')) {
+            $term = mb_substr($term, 0, 100, 'UTF-8');
+        } elseif (preg_match('/^.{0,100}/us', $term, $wpsr_cut)) {
+            $term = $wpsr_cut[0];
+        } else {
+            $term = substr($term, 0, 100);
+        }
+
+        $term = trim($term);
+
+        $length = function_exists('mb_strlen')
+            ? mb_strlen($term, 'UTF-8')
+            : strlen($term);
+
+        // One character matches nearly every review, so it is not a search.
+        return $length < 2 ? '' : $term;
+    }
+
+    // Words for the search predicate. Sanitizes first, so no caller can skip the bounds above.
+    public static function visitorSearchWords($term)
+    {
+        $term = static::sanitizeVisitorSearch($term);
+        if ($term === '') {
+            return [];
+        }
+
+        $words = preg_split('/\s+/u', $term);
+        if (!is_array($words)) {
+            $words = explode(' ', $term);
+        }
+
+        $kept = [];
+        foreach ($words as $word) {
+            $length = function_exists('mb_strlen')
+                ? mb_strlen($word, 'UTF-8')
+                : strlen($word);
+
+            if ($length < 2) {
+                continue;
+            }
+
+            $kept[] = $word;
+
+            // Each word adds one LIKE per searched column, so 6 is the ceiling.
+            if (count($kept) === 6) {
+                break;
+            }
+        }
+
+        // The floor emptied the list ("a b"), so match the term itself rather than dropping the search.
+        return empty($kept) ? [$term] : $kept;
+    }
+
+    // The order filteredReviewsQuery() will apply: a sortMap() key, or 'random' (never accepted from a client).
+    public static function resolveOrderKey($order)
+    {
+        if ($order === 'random') {
+            return 'random';
+        }
+
+        $key = self::normalizeOrderKey($order);
+
+        return isset(static::sortMap()[$key]) ? $key : 'newest';
+    }
+
+    /**
+     * The tags wp_kses() may keep in the visitor sort toolbar.
+     *
+     * The toolbar comes from a filter, so a callback added by other code decides its markup. This bounds what
+     * that markup may be: no script, no event handlers, no javascript: URLs, whatever the callback returns.
+     *
+     * Every data-* attribute is listed one by one because wp_kses() has no wildcard for them, and an attribute
+     * left out here is dropped silently — which for these means the toolbar JS stops reading it. Filterable, so
+     * an extension that legitimately needs another tag can add it instead of having its markup stripped.
+     *
+     * @return array
+     */
+    public static function sortToolbarAllowedHtml()
+    {
+        $wpsr_allowed = array(
+            'div'    => array(
+                'class'            => array(),
+                'role'             => array(),
+                'aria-live'        => array(),
+                // Read back by the toolbar JS; see Pro's sort-toolbar.php for the contract.
+                'data-template_id' => array(),
+                'data-order'       => array(),
+                'data-rating'      => array(),
+                'data-search'      => array(),
+                'data-product_id'  => array(),
+                'data-seed'        => array(),
+            ),
+            'label'  => array(
+                'class' => array(),
+            ),
+            'span'   => array(
+                'class' => array(),
+            ),
+            'input'  => array(
+                'class'        => array(),
+                'type'         => array(),
+                'value'        => array(),
+                'placeholder'  => array(),
+                'autocomplete' => array(),
+                'aria-label'   => array(),
+            ),
+            'select' => array(
+                'class'      => array(),
+                'aria-label' => array(),
+            ),
+            'option' => array(
+                'value'    => array(),
+                'selected' => array(),
+            ),
+            // The search icon. wp_kses() lowercases names, and the parser maps viewbox back for inline SVG.
+            'svg'    => array(
+                'class'       => array(),
+                'viewbox'     => array(),
+                'fill'        => array(),
+                'xmlns'       => array(),
+                'aria-hidden' => array(),
+                'focusable'   => array(),
+            ),
+            'circle' => array(
+                'cx'           => array(),
+                'cy'           => array(),
+                'r'            => array(),
+                'fill'         => array(),
+                'stroke'       => array(),
+                'stroke-width' => array(),
+            ),
+            'path'   => array(
+                'd'                => array(),
+                'fill'             => array(),
+                'stroke'           => array(),
+                'stroke-width'     => array(),
+                'stroke-linecap'   => array(),
+                'stroke-linejoin'  => array(),
+            ),
+        );
+
+        return apply_filters('wpsocialreviews/sort_toolbar_allowed_html', $wpsr_allowed);
+    }
+
+    /**
+     * May this caller ask the reviews feed endpoint for another page right now?
+     *
+     * A budget guard, not a security control. Read-then-write is not atomic, so it undercounts under concurrency.
+     *
+     * Two windows, both must pass: the short one allows normal use, the long one stops a caller who keeps going.
+     * Every number is filterable, and returning 0 for a limit or a window drops that budget.
+     *
+     * @param bool $wpsr_is_search Whether this request carries a search term.
+     *
+     * @return bool
+     */
+    public static function allowVisitorFeedRequest($wpsr_is_search)
+    {
+        $wpsr_caller = self::visitorFeedRateKey();
+
+        if ($wpsr_caller === '') {
+            return true;
+        }
+
+        $wpsr_budgets = array(
+            array(
+                'slot'   => 'b',
+                'window' => (int) apply_filters('wpsocialreviews/visitor_search_rate_window', 60, $wpsr_is_search),
+                'limit'  => (int) apply_filters(
+                    'wpsocialreviews/visitor_search_rate_limit', $wpsr_is_search ? 30 : 120, $wpsr_is_search
+                ),
+            ),
+            array(
+                'slot'   => 'h',
+                'window' => (int) apply_filters(
+                    'wpsocialreviews/visitor_search_hourly_window', HOUR_IN_SECONDS, $wpsr_is_search
+                ),
+                'limit'  => (int) apply_filters(
+                    'wpsocialreviews/visitor_search_hourly_limit', $wpsr_is_search ? 200 : 1200, $wpsr_is_search
+                ),
+            ),
+        );
+
+        // Searched and unsearched requests count separately, or load-more clicks would spend the search budget.
+        $wpsr_scope   = $wpsr_is_search ? 's' : 'f';
+        $wpsr_pending = array();
+
+        foreach ($wpsr_budgets as $wpsr_budget) {
+            if ($wpsr_budget['window'] < 1 || $wpsr_budget['limit'] < 1) {
+                continue;
+            }
+
+            // Transients, so a site with a persistent object cache never touches the database for this.
+            $wpsr_key   = 'wpsr_rl_' . $wpsr_scope . $wpsr_budget['slot'] . '_' . md5($wpsr_caller);
+            $wpsr_count = (int) get_transient($wpsr_key);
+
+            if ($wpsr_count >= $wpsr_budget['limit']) {
+                return false;
+            }
+
+            $wpsr_pending[] = array($wpsr_key, $wpsr_count + 1, $wpsr_budget['window']);
+        }
+
+        // Charged once both windows have room. set_transient() slides the expiry, until the limit skips it.
+        foreach ($wpsr_pending as $wpsr_write) {
+            set_transient($wpsr_write[0], $wpsr_write[1], $wpsr_write[2]);
+        }
+
+        return true;
+    }
+
+    /**
+     * Who is asking.
+     *
+     * REMOTE_ADDR, which behind a CDN is the proxy's, so every visitor shares one bucket. Forwarded-for headers
+     * are client-set without a proxy, so trusting one is the owner's call and only where a proxy overwrites it:
+     *
+     *     add_filter('wpsocialreviews/visitor_rate_client_ip_header', fn() => 'HTTP_CF_CONNECTING_IP');
+     *
+     * Bucketed by network: an IPv6 /64 is one allocation, so the full address would be 2^64 budgets.
+     *
+     * @return string
+     */
+    private static function visitorFeedRateKey()
+    {
+        $wpsr_ip     = '';
+        $wpsr_header = (string) apply_filters('wpsocialreviews/visitor_rate_client_ip_header', '');
+
+        if ($wpsr_header !== '' && isset($_SERVER[$wpsr_header])) {
+            // X-Forwarded-For is a chain, "client, proxy1, proxy2"; the client is first.
+            $wpsr_forwarded = explode(',', sanitize_text_field(wp_unslash($_SERVER[$wpsr_header])));
+            $wpsr_candidate = trim($wpsr_forwarded[0]);
+
+            // Junk in the header is a spoof or a misconfig; fall through, or it is a fresh bucket per request.
+            if (filter_var($wpsr_candidate, FILTER_VALIDATE_IP)) {
+                $wpsr_ip = $wpsr_candidate;
+            }
+        }
+
+        if ($wpsr_ip === '' && isset($_SERVER['REMOTE_ADDR'])) {
+            $wpsr_ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']));
+        }
+
+        $wpsr_ip = self::visitorRateIpNetwork($wpsr_ip);
+
+        // Logged-in visitors get their own bucket, so one office behind a single address does not share a limit.
+        $wpsr_user_id = get_current_user_id();
+
+        if ($wpsr_user_id) {
+            $wpsr_ip .= '|u' . $wpsr_user_id;
+        }
+
+        return (string) apply_filters('wpsocialreviews/visitor_search_rate_key', $wpsr_ip);
+    }
+
+    /**
+     * The network an address belongs to: the IPv6 /64, or the IPv4 address whole (a /24 is unrelated homes).
+     *
+     * @param string $wpsr_ip
+     *
+     * @return string Unchanged when it is not an address the limiter can parse.
+     */
+    private static function visitorRateIpNetwork($wpsr_ip)
+    {
+        if ($wpsr_ip === '' || !filter_var($wpsr_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return $wpsr_ip;
+        }
+
+        $wpsr_packed = @inet_pton($wpsr_ip);
+
+        // 16 bytes, or bucket by the whole string instead.
+        if (!is_string($wpsr_packed) || strlen($wpsr_packed) !== 16) {
+            return $wpsr_ip;
+        }
+
+        // First 8 bytes = the /64, zero-filled so the key stays a valid address.
+        return inet_ntop(substr($wpsr_packed, 0, 8) . str_repeat("\0", 8)) . '/64';
+    }
+
     public static function is_tp($platform_name)
     {
         $trust = substr($platform_name, 0, 5);
@@ -787,13 +1166,13 @@ class Helper
                     break;
 
                 case 'first-name-last-initial':
-                    $lastInitial = $lastName ? strtoupper(substr($lastName, 0, 1)) . '.' : '';
+                    $lastInitial = self::nameInitial($lastName);
                     $review['reviewer_name'] = trim("{$firstName} {$lastInitial}");
                     break;
 
                 case 'initials-only':
-                    $firstInitial = $firstName ? strtoupper(substr($firstName, 0, 1)) . '.' : '';
-                    $lastInitial = $lastName ? strtoupper(substr($lastName, 0, 1)) . '.' : '';
+                    $firstInitial = self::nameInitial($firstName);
+                    $lastInitial = self::nameInitial($lastName);
                     $review['reviewer_name'] = trim("{$firstInitial} {$lastInitial}");
                     break;
 
@@ -806,6 +1185,35 @@ class Helper
         unset($review);
 
         return $reviews;
+    }
+
+    /**
+     * Uppercase first character of a name, followed by a period.
+     *
+     * Cuts by character rather than byte, or a name like "Élodie" loses half of
+     * its first character and renders as a broken sequence.
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    private static function nameInitial($name)
+    {
+        if ($name === '' || $name === null) {
+            return '';
+        }
+
+        if (function_exists('mb_substr')) {
+            $first = mb_substr($name, 0, 1, 'UTF-8');
+
+            return (function_exists('mb_strtoupper')
+                ? mb_strtoupper($first, 'UTF-8')
+                : strtoupper($first)) . '.';
+        }
+
+        $first = preg_match('/^./us', $name, $wpsr_match) ? $wpsr_match[0] : substr($name, 0, 1);
+
+        return strtoupper($first) . '.';
     }
 
     /**
@@ -925,7 +1333,12 @@ class Helper
         $values = [];
 
         foreach ($platformSources as $platformName => $sourceIds) {
-            $uniqueIds = array_values(array_unique(array_map('strval', $sourceIds)));
+            $uniqueIds = array_values(array_unique(array_filter(
+                array_map('strval', $sourceIds),
+                function ($sourceId) {
+                    return $sourceId !== '';
+                }
+            )));
             if (empty($uniqueIds)) {
                 continue;
             }
@@ -1000,7 +1413,7 @@ class Helper
      *
      * @return array Default breakdown with zero counts
      */
-    private static function getDefaultRatingBreakdown()
+    protected static function getDefaultRatingBreakdown()
     {
         $breakdown = [];
         for ($star = 5; $star >= 0; $star--) {

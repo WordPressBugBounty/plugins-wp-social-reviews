@@ -62,6 +62,15 @@ class ImageOptimizationHandler extends BaseImageOptimizationHandler
             wp_send_json_error(['message' => __('Invalid template.', 'wp-social-reviews')], 403);
         }
 
+        // Every feed platform registers this same action and wp_send_json_error()
+        // ends the request, so only the handler being addressed may answer. Its
+        // own optimization setting decides, not whichever template loaded the script.
+        if ($this->platform === $platform && !$this->imageOptimizationEnabled($platform)) {
+            wp_send_json_error([
+                'message' => __('Image optimization is turned off.', 'wp-social-reviews')
+            ], 403);
+        }
+
         if($id > 0 && $this->platform == $platform) {
             $encodedMeta   = get_post_meta($id, '_wpsr_template_config', true);
             $decodedMeta   = json_decode($encodedMeta, true);
@@ -565,6 +574,8 @@ class ImageOptimizationHandler extends BaseImageOptimizationHandler
     public function getResizeNeededImageLists($feeds = [], $feed_settings = [])
     {
         $ids = array_column($feeds , 'id');
+        // Platforms without a per-item owner column fall through every branch below.
+        $userNames = [];
         if($this->platform == 'instagram'){
             $userNames = array_column($feeds , 'username');
         }else if($this->platform == 'facebook_feed'){
@@ -720,20 +731,11 @@ class ImageOptimizationHandler extends BaseImageOptimizationHandler
             return false;
         }
 
-        $imageEditor   = wp_get_image_editor($fileName);
-        if(is_wp_error($imageEditor)) {
-            if (!function_exists('download_url' )) {
-                include_once ABSPATH . 'wp-admin/includes/file.php';
-            }
-
-            $timeoutInSeconds = 5;
-            $temp_file = download_url($fileName, $timeoutInSeconds);
-            if(!is_wp_error($temp_file)){
-                $imageEditor = wp_get_image_editor($temp_file);
-                if (!empty($temp_file)) {
-                    wp_delete_file($temp_file);
-                }
-            }
+        // The URL comes from a platform response, so it is fetched the same
+        // guarded way as any other stored media instead of being opened directly.
+        $media = RemoteMediaFetcher::fetch($fileName);
+        if (!$media) {
+            return false;
         }
 
         if($headerMeta == 'avatars'){
@@ -742,17 +744,45 @@ class ImageOptimizationHandler extends BaseImageOptimizationHandler
             $fullFileName = $this->getUploadDir($this->platform) . '/' . $userName . '_cover.'. $this->image_format;
         }
 
-        if (!is_wp_error($imageEditor)) {
-            $resize = $headerMeta == 'avatars' ? 150 : 600;
-            $imageEditor->set_quality(80);
-            $imageEditor->resize($resize, null);
-            $saved_image = $imageEditor->save($fullFileName);
-            if ($saved_image) {
-                return true;
+        try {
+            $imageEditor = wp_get_image_editor($media['file']);
+            if (!is_wp_error($imageEditor)) {
+                $resize = $this->getHeaderImageSize($headerMeta);
+                $imageEditor->set_quality(80);
+                $imageEditor->resize($resize, null);
+                // save() returns WP_Error on failure, and any object is truthy,
+                // so testing it directly would skip the fallback below.
+                $saved_image = $imageEditor->save($fullFileName);
+                if (!is_wp_error($saved_image) && $saved_image) {
+                    return true;
+                }
             }
-        }
 
-        return $this->download($fileName, $fullFileName);
+            return $this->storeFetchedImage($media, $fullFileName);
+        } finally {
+            RemoteMediaFetcher::release($media);
+        }
+    }
+
+    /**
+     * Resize width for a header image. Filterable; a non-positive value keeps
+     * the default.
+     *
+     * @param string $headerMeta 'avatars' or anything else, meaning the cover
+     *
+     * @return int
+     */
+    public function getHeaderImageSize($headerMeta)
+    {
+        $default = $headerMeta === 'avatars' ? 150 : 600;
+        $size = (int) apply_filters(
+            'wpsocialreviews/optimized_header_image_size',
+            $default,
+            $headerMeta,
+            $this->platform
+        );
+
+        return $size > 0 ? $size : $default;
     }
 
     public function maxRecordsCount($platform)
@@ -773,13 +803,27 @@ class ImageOptimizationHandler extends BaseImageOptimizationHandler
             return false;
         }
 
-        $headers = @get_headers($url, 1);
-        if ($headers === false || !isset($headers["Content-Type"])) {
+        // get_headers() opens whatever the URL points at, including the loopback
+        // interface, so the address is cleared before any request goes out.
+        if (!RemoteMediaFetcher::isSafeUrl($url)) {
             return false;
         }
 
-        $contentType = $headers["Content-Type"];
-        return strpos($contentType, 'image') !== false;
+        $response = wp_safe_remote_head($url, [
+            'timeout'     => RemoteMediaFetcher::timeout(),
+            'redirection' => 0,
+        ]);
+
+        if (is_wp_error($response) || (int) wp_remote_retrieve_response_code($response) !== 200) {
+            return false;
+        }
+
+        $contentType = wp_remote_retrieve_header($response, 'content-type');
+        if (is_array($contentType)) {
+            $contentType = reset($contentType);
+        }
+
+        return is_string($contentType) && strpos($contentType, 'image') !== false;
     }
 
 }

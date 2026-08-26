@@ -11,12 +11,102 @@ use WPSocialReviews\App\Services\GlobalSettings;
 use WPSocialReviews\App\Services\Platforms\PlatformManager;
 use WPSocialReviews\App\Hooks\Handlers\UninstallHandler;
 use WPSocialReviews\App\Services\DataProtector;
+use WPSocialReviews\App\Services\PermissionManager;
 
 class SettingsController extends Controller
 {
+    // SettingsPolicy gates the whole group on any one settings capability, which
+    // is wider than any single screen. Each action names the capabilities whose
+    // screens actually call it, so holding one screen's capability reaches only
+    // that screen's routes.
+    protected $screenCapabilities = [
+        'twitter_cards'    => ['wpsn_feeds_platforms_settings'],
+        'advance_settings' => ['wpsn_feeds_advance_settings', 'wpsn_reviews_platforms_settings'],
+        'translations'     => ['wpsn_translation_settings'],
+        'license'          => ['wpsn_license_settings'],
+        'delete_all_data'  => ['wpsn_full_access'],
+        'qr_codes'         => ['wpsn_manage_qr_codes'],
+    ];
+
+    /**
+     * Refuse the request unless the user holds one of the given capabilities.
+     * Returns an error response to return early with, or null when allowed.
+     */
+    protected function denyUnlessAllowed($capabilities)
+    {
+        foreach ((array) $capabilities as $capability) {
+            if (PermissionManager::currentUserCan($capability)) {
+                return null;
+            }
+        }
+
+        return $this->sendError([
+            'message' => __('You do not have permission to manage these settings.', 'wp-social-reviews')
+        ], 403);
+    }
+
+    protected function denyUnlessScreenAllowed($screen)
+    {
+        return $this->denyUnlessAllowed($this->screenCapabilities[$screen]);
+    }
+
+    /**
+     * Capabilities owning a settings platform. Empty for anything this install does
+     * not serve, so a hook name is never built from an unrecognised identifier.
+     */
+    protected function platformCapabilities($platform)
+    {
+        if ($platform === '') {
+            return [];
+        }
+
+        $manager = new PlatformManager();
+        $map = [];
+
+        foreach ($manager->feedPlatforms() as $feedPlatform) {
+            $map[$feedPlatform] = ['wpsn_feeds_platforms_settings'];
+        }
+
+        $reviewPlatforms = array_merge(
+            $manager->reviewsPlatforms(),
+            array_keys((array) get_option('wpsr_available_valid_platforms', []))
+        );
+
+        foreach ($reviewPlatforms as $reviewPlatform) {
+            $map[$reviewPlatform] = ['wpsn_reviews_platforms_settings'];
+        }
+
+        // resetData() treats 'reviews' as the aggregate over every review platform.
+        $map['reviews'] = ['wpsn_reviews_platforms_settings'];
+
+        $map = apply_filters('wpsocialreviews/settings_platform_capabilities', $map);
+
+        return isset($map[$platform]) ? (array) $map[$platform] : [];
+    }
+
+    /**
+     * Refuse unless the user holds a capability owning this request's platform.
+     */
+    protected function denyUnlessPlatformAllowed($platform)
+    {
+        $capabilities = $this->platformCapabilities($platform);
+
+        if (empty($capabilities)) {
+            return $this->sendError([
+                'message' => __('Invalid platform.', 'wp-social-reviews')
+            ], 403);
+        }
+
+        return $this->denyUnlessAllowed($capabilities);
+    }
+
     public function index(Request $request)
     {
         $platform = sanitize_text_field($request->get('platform', ''));
+
+        if ($denied = $this->denyUnlessPlatformAllowed($platform)) {
+            return $denied;
+        }
 
         if((!defined('WC_VERSION') && $platform === 'woocommerce') || (!defined('CUSTOM_FEED_FOR_TIKTOK') && $platform === 'tiktok')){
            return false;
@@ -29,11 +119,13 @@ class SettingsController extends Controller
     {
         $platform = sanitize_text_field($request->get('platform', ''));
 
+        if ($denied = $this->denyUnlessPlatformAllowed($platform)) {
+            return $denied;
+        }
+
         $settings = $request->get('settings');
         if (is_string($settings)) {
-            $settings = wp_unslash($settings);
-            $decoded = json_decode($settings, true);
-            $settings = is_array($decoded) ? $decoded : [];
+            $settings = $this->decodeJsonParam($settings) ?: [];
         }
 
         $sanitizeMap = [
@@ -60,6 +152,11 @@ class SettingsController extends Controller
     public function delete(Request $request)
     {
         $platform = sanitize_text_field($request->get('platform', ''));
+
+        if ($denied = $this->denyUnlessPlatformAllowed($platform)) {
+            return $denied;
+        }
+
         $cacheType = sanitize_text_field($request->get('cacheType', ''));
         $templateId = intval($request->get('templateId'));
 
@@ -72,6 +169,10 @@ class SettingsController extends Controller
 
     public function deleteTwitterCard()
     {
+        if ($denied = $this->denyUnlessScreenAllowed('twitter_cards')) {
+            return $denied;
+        }
+
         delete_option('wpsr_twitter_cards_data');
 
         return [
@@ -82,6 +183,10 @@ class SettingsController extends Controller
 
     public function getLicense(Request $request)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('license')) {
+            return $denied;
+        }
+
         $response = apply_filters('wpsr_get_license', false, $request);
 
         if(is_wp_error($response)) {
@@ -101,6 +206,10 @@ class SettingsController extends Controller
 
     public function removeLicense(Request $request)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('license')) {
+            return $denied;
+        }
+
         $response = apply_filters('wpsr_deactivate_license', false, $request);
 
         if(is_wp_error($response)) {
@@ -120,6 +229,10 @@ class SettingsController extends Controller
 
     public function addLicense(Request $request)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('license')) {
+            return $denied;
+        }
+
         $response = apply_filters('wpsr_activate_license', false, $request);
 
         if(is_wp_error($response)) {
@@ -139,6 +252,10 @@ class SettingsController extends Controller
 
     public function getTranslations()
     {
+        if ($denied = $this->denyUnlessScreenAllowed('translations')) {
+            return $denied;
+        }
+
         $translationsSettings = TranslationString::getStrings();
 
         return [
@@ -149,12 +266,14 @@ class SettingsController extends Controller
 
     public function saveTranslations(Request $request)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('translations')) {
+            return $denied;
+        }
+
         $translationsSettings = $request->get('translations_settings');
 
         if (is_string($translationsSettings)) {
-            $translationsSettings = wp_unslash($translationsSettings);
-            $decoded = json_decode($translationsSettings, true);
-            $translationsSettings = is_array($decoded) ? $decoded : [];
+            $translationsSettings = $this->decodeJsonParam($translationsSettings) ?: [];
         }
 
         $sanitizeMap = [
@@ -203,7 +322,15 @@ class SettingsController extends Controller
 
     public function getAdvanceSettings(DataProtector $protector)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('advance_settings')) {
+            return $denied;
+        }
+
         $advanceSettings = (new GlobalSettings())->getGlobalSettings('advance_settings');
+
+        if (is_array($advanceSettings) && !PermissionManager::currentUserCan('wpsn_manage_qr_codes')) {
+            unset($advanceSettings['qr_codes']);
+        }
 
         return [
             'message'           => 'success',
@@ -218,12 +345,14 @@ class SettingsController extends Controller
 
     public function saveAdvanceSettings(Request $request, DataProtector $protector)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('advance_settings')) {
+            return $denied;
+        }
+
         $advanceSettings = $request->get('advance_settings');
 
         if (is_string($advanceSettings)) {
-            $advanceSettings = wp_unslash($advanceSettings);
-            $decoded = json_decode($advanceSettings, true);
-            $advanceSettings = is_array($decoded) ? $decoded : [];
+            $advanceSettings = $this->decodeJsonParam($advanceSettings) ?: [];
         }
 
         $qrCodeEntryMap = [
@@ -259,6 +388,12 @@ class SettingsController extends Controller
                 // Apply the simple map to each entry in the array
                 $advanceSettings['qr_codes'][$index] = wpsr_backend_sanitizer($qrCodeEntry, $qrCodeEntryMap);
             }
+        }
+
+        // qr_codes rides along in this payload but belongs to the QR screen, so keep
+        // the stored list for anyone who cannot manage it on its own routes.
+        if (!PermissionManager::currentUserCan('wpsn_manage_qr_codes')) {
+            $advanceSettings['qr_codes'] = (new GlobalSettings())->getGlobalSettings('advance_settings.qr_codes');
         }
 
         $settings = get_option('wpsr_global_settings', []);
@@ -298,9 +433,21 @@ class SettingsController extends Controller
         $manager = new PlatformManager();
         $platforms = $manager->getPlatformsListWithReviewAlias();
         foreach ($platforms as $platform) {
-            $platformRequest = clone $request;
-            $platformRequest->merge(['platform' => $platform]);
-            $this->resetData($platformRequest);
+            $this->performResetData($platform);
+        }
+    }
+
+    /**
+     * Reset one platform's images. Callers are responsible for authorization —
+     * saveAdvanceSettings() reaches this after its own capability check.
+     */
+    protected function performResetData($platform)
+    {
+        if($platform == 'reviews'){
+            $platforms = apply_filters('wpsocialreviews/available_valid_reviews_platforms', []);
+            do_action('wpsocialreviews/review_reset_data', $platforms);
+        }else{
+            do_action('wpsocialreviews/reset_data', $platform);
         }
     }
 
@@ -308,12 +455,11 @@ class SettingsController extends Controller
     {
         $platform = sanitize_text_field($request->get('platform', ''));
 
-        if($platform == 'reviews'){
-            $platforms = apply_filters('wpsocialreviews/available_valid_reviews_platforms', []);
-            do_action('wpsocialreviews/review_reset_data', $platforms);
-        }else{
-            do_action('wpsocialreviews/reset_data', $platform);
+        if ($denied = $this->denyUnlessPlatformAllowed($platform)) {
+            return $denied;
         }
+
+        $this->performResetData($platform);
 
         return [
             'message'   =>  __('Images reset successfully!', 'wp-social-reviews')
@@ -330,6 +476,10 @@ class SettingsController extends Controller
 
     public function deleteAllData()
     {
+        if ($denied = $this->denyUnlessScreenAllowed('delete_all_data')) {
+            return $denied;
+        }
+
         (new UninstallHandler())->deleteAllPlatformsData(false);
         return [
             'message'   =>  __('Successfully deleted all data!', 'wp-social-reviews')
@@ -337,6 +487,10 @@ class SettingsController extends Controller
     }
 
     public function getReviewCollectionQrCodes(Request $request){
+        if ($denied = $this->denyUnlessScreenAllowed('qr_codes')) {
+            return $denied;
+        }
+
         $qrCodes = (new GlobalSettings())->getGlobalSettings('advance_settings.qr_codes');
         if(is_array($qrCodes)){
             // qrcodes is an associative array convert it to a regular array
@@ -387,6 +541,10 @@ class SettingsController extends Controller
 
     public function createReviewCollectionQrCode(Request $request)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('qr_codes')) {
+            return $denied;
+        }
+
         $qrCodes = (new GlobalSettings())->getGlobalSettings('advance_settings.qr_codes');
         $id = $qrCodes ? (max(array_keys($qrCodes)) + 1) : 1;
 
@@ -416,6 +574,10 @@ class SettingsController extends Controller
 
     public function updateReviewCollectionQrCode(Request $request, $id)
     {
+        if ($denied = $this->denyUnlessScreenAllowed('qr_codes')) {
+            return $denied;
+        }
+
         $id = intval($id);
         $qrCodes = (new GlobalSettings())->getGlobalSettings('advance_settings.qr_codes');
 
@@ -454,6 +616,9 @@ class SettingsController extends Controller
     }
 
     public function deleteReviewCollectionQrCode(Request $request, $id){
+        if ($denied = $this->denyUnlessScreenAllowed('qr_codes')) {
+            return $denied;
+        }
 
         $id = intval($id);
         $qrCodes = (new GlobalSettings())->getGlobalSettings('advance_settings.qr_codes');
@@ -471,6 +636,10 @@ class SettingsController extends Controller
     }
 
     public function getReviewCollectionPlatforms(Request $request){
+        if ($denied = $this->denyUnlessScreenAllowed('qr_codes')) {
+            return $denied;
+        }
+
         $reviewsPlatforms   = apply_filters('wpsocialreviews/available_valid_reviews_platforms', []);
         $allBusinessInfo    = Helper::getBusinessInfoByPlatforms($reviewsPlatforms);
 

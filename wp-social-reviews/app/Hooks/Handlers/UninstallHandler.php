@@ -75,6 +75,11 @@ class UninstallHandler
             'wpsr_global_shoppable_settings',
             'wpsr_review_form_captcha_settings',
             'wpsr_fluentcrm_integration_settings',
+            // Must go with the tables: left behind, a reinstall would skip the
+            // legacy category backfill entirely. See ReviewCategoriesMigrator.
+            'wpsr_review_categories_backfilled',
+            'wpsr_review_categories_backfill_cursor',
+            'wpsr_review_categories_orphan_sweep_pending',
         ];
 
         foreach ($optionsToDelete as $option) {
@@ -82,7 +87,14 @@ class UninstallHandler
         }
 
         global $wpdb;
-        $tablesToDelete = ['wpsr_caches', 'wpsr_reviews', 'wpsr_optimize_images'];
+        // Pivot before the table it points at.
+        $tablesToDelete = [
+            'wpsr_caches',
+            'wpsr_review_category_relationships',
+            'wpsr_review_categories',
+            'wpsr_reviews',
+            'wpsr_optimize_images'
+        ];
 
         // Remove all reviews and caches
         foreach ($tablesToDelete as $table) {

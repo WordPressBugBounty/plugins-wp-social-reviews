@@ -170,7 +170,7 @@ class InstagramFeed extends BaseFeed
     /**
      * Manual access token handler
      *
-     * @return json
+     * @return void
      * @since 1.3.0
      */
     public function handleCredential($args = [])
@@ -296,6 +296,8 @@ class InstagramFeed extends BaseFeed
             }
             return $apiUrl;
         }
+
+        return '';
     }
 
     public function setAuthorizedBusinessAccount($response = [])
@@ -394,7 +396,7 @@ class InstagramFeed extends BaseFeed
     /**
      * Instagram Api Error Message
      *
-     * @param array $response
+     * @param array|\WP_Error $response
      *
      * @return string
      * @since 1.3.0
@@ -420,7 +422,7 @@ class InstagramFeed extends BaseFeed
 
     /**
      * Get All Verified Accounts
-     * @return json
+     * @return void
      * @since 1.3.0
      */
     public function getVerificationConfigs()
@@ -452,9 +454,9 @@ class InstagramFeed extends BaseFeed
     /**
      * Update Verification Configs
      *
-     * @param array $args
+     * @param array $accountArgs
      *
-     * @return array
+     * @return void
      * @since 1.3.0
      */
     public function updateVerificationConfigs($accountArgs)
@@ -499,7 +501,7 @@ class InstagramFeed extends BaseFeed
 
     /**
      * Disconnect Verification Configs
-     * @return json
+     * @return void
      * @since 1.3.0
      */
     public function clearVerificationConfigs($userId)
@@ -611,7 +613,7 @@ class InstagramFeed extends BaseFeed
     /**
      * Get Feed Settings
      *
-     * @return json
+     * @return void
      * @since 1.3.0
      */
     public function getEditorSettings($args = [])
@@ -654,8 +656,8 @@ class InstagramFeed extends BaseFeed
     /**
      * Show updated data if new data fetched in editor without update in db
      *
-     * @return json
-     * @throws /Exception
+     * @return void
+     * @throws \Exception
      * @since 1.3.0
      */
     public function editEditorSettings($settings = array(), $postId = null)
@@ -680,7 +682,7 @@ class InstagramFeed extends BaseFeed
     /**
      * Update template is settings is changed in editor
      *
-     * @return json
+     * @return void
      * @since 1.3.0
      */
     public function updateEditorSettings($settings = array(), $postId = null)
@@ -727,13 +729,14 @@ class InstagramFeed extends BaseFeed
         $hash_tags = explode(',', $hash_tags);
         $hash_tag_text = '';
 
-        if( !empty($hash_tags) ) {
-            foreach ($hash_tags as $hash_tag) {
-                if($hash_tag[0] !== '#') {
-                    $hash_tag = '#'.$hash_tag;
-                }
-                $hash_tag_text .= $hash_tag.',';
+        foreach ($hash_tags as $hash_tag) {
+            if($hash_tag === '') {
+                continue;
             }
+            if($hash_tag[0] !== '#') {
+                $hash_tag = '#'.$hash_tag;
+            }
+            $hash_tag_text .= $hash_tag.',';
         }
 
         $hash_tags = rtrim($hash_tag_text, ',');
@@ -785,7 +788,7 @@ class InstagramFeed extends BaseFeed
                 $hashtagType = isset($apiSettings['hashtag_type']) ? $apiSettings['hashtag_type'] : 'recent_media ';
                 $hashtags    = isset($apiSettings['hash_tags']) ? $apiSettings['hash_tags'] : '';
 
-                if ($hashtags && !empty($hashtags)) {
+                if (!empty($hashtags)) {
                     if (defined('WPSOCIALREVIEWS_PRO') && class_exists('\WPSocialReviewsPro\App\Services\Platforms\Feeds\Instagram\HashtagFeed')) {
                         $response = (new \WPSocialReviewsPro\App\Services\Platforms\Feeds\Instagram\HashtagFeed())->getMultipleHashtagResponse($accountIds, $hashtags, $hashtagType);
                     } else {
@@ -805,6 +808,8 @@ class InstagramFeed extends BaseFeed
                 'items'         => Arr::get($response, 'feeds', []),
             ];
         }
+
+        return [];
     }
 
     public function getHeaderDetails($accountIds, $feed_settings)

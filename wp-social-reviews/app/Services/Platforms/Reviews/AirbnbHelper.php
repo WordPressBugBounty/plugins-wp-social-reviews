@@ -50,21 +50,16 @@ class AirbnbHelper
             );
         }
 
-        $businessinfo = [];
-        if(!empty($container)) {
-            if($container->find('a.l4a2xp4', 0)) {
-                $businessName = $container->find('a.l4a2xp4', 0)->{'aria-label'};
-            }
-
-            $businessinfo = [
-                'business_url'  => $this->getBusinessUrl($container),
-                'business_name' => $businessName,
-                'avg_rating'    => $this->getAvgRating($container),
-                'total_rating'  => $this->getTotalRating($container)
-            ];
+        if($container->find('a.l4a2xp4', 0)) {
+            $businessName = $container->find('a.l4a2xp4', 0)->{'aria-label'};
         }
 
-        return $businessinfo;
+        return [
+            'business_url'  => $this->getBusinessUrl($container),
+            'business_name' => $businessName,
+            'avg_rating'    => $this->getAvgRating($container),
+            'total_rating'  => $this->getTotalRating($container)
+        ];
     }
 
     public function getRoomsBusinessDetails($searchName)

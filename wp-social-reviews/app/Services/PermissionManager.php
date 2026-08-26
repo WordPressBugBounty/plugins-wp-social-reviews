@@ -85,6 +85,12 @@ class PermissionManager
 				'group'   => 'dashboard',
 				'slug'    => 'wpsn_license_settings'
 			],
+			'wpsn_feeds_advance_settings' => [
+				'title'   => __('Manage Advanced Settings', 'wp-social-reviews'),
+				'depends' => [],
+				'group'   => 'dashboard',
+				'slug'    => 'wpsn_feeds_advance_settings'
+			],
 		]);
 	}
 
@@ -187,5 +193,19 @@ class PermissionManager
 
 		// Check the exact requested capability
 		return in_array($permission, $permissions);
+	}
+
+	/**
+	 * True when the user may access the plugin admin at all — i.e. holds at least one
+	 * plugin capability (admins and full-access users included). For endpoints that
+	 * back shared, non-feature-specific UI, such as the global dashboard notices.
+	 */
+	public static function currentUserCanAny()
+	{
+		if (current_user_can('manage_options')) {
+			return true;
+		}
+
+		return !empty(self::currentUserPermissions());
 	}
 }

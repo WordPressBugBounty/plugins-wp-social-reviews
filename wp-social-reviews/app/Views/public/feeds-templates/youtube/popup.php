@@ -3,33 +3,46 @@ defined('ABSPATH') or die;
 
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Platforms\Feeds\Youtube\Helper as YoutubeHelper;
+use WPSocialReviews\App\Services\Integrations\FluentPlayer\FluentPlayerEmbed;
 
 if (empty($feed)) {
     return;
 }
+
+$wpsr_video_id    = YoutubeHelper::getVideoId($feed);
+$wpsr_autoplay    = Arr::get($template_meta, 'popup_settings.autoplay') === 'true';
+$wpsr_loop        = Arr::get($template_meta, 'popup_settings.video_loop') === 'true';
+$wpsr_player_html = ($image_settings['has_gdpr'] !== 'true')
+    ? FluentPlayerEmbed::render($wpsr_video_id, $template_meta, [
+        'autoplay' => $wpsr_autoplay,
+        'loop'     => $wpsr_loop,
+        'duration' => FluentPlayerEmbed::videoDuration($feed)
+    ])
+    : '';
 ?>
 <div class="wpsr-yt-popup-overlay wpsr-yt-popup-open wpsrm-overlay wpsr_content">
     <div class="wpsr-yt-popup-box-wraper">
         <div class="wpsr-yt-popup-box-wraper-inner wpsrm_inner">
-            <?php if ($image_settings['has_gdpr'] !== 'true'){ ?>
+            <?php if ($image_settings['has_gdpr'] !== 'true' && $wpsr_player_html === ''){ ?>
             <div class="wpsr-yt-popup-loader">
                 <div class="wpsr-spinner-animation"></div>
             </div>
             <?php } ?>
             <div class="wpsr-yt-popup-close-btn wpsrm_close"></div>
             <?php if ($image_settings['has_gdpr'] !== 'true'){ ?>
-                <div class="wpsr-yt-popup-video-player">
+                <div class="wpsr-yt-popup-video-player<?php echo $wpsr_player_html !== '' ? ' ' . esc_attr(FluentPlayerEmbed::SLOT_CLASS) : ''; ?>">
                     <?php
-                    $wpsr_playlist = '';
-                    $wpsr_video_id  = YoutubeHelper::getVideoId($feed);
-                    if (Arr::get($template_meta, 'popup_settings.video_loop') === 'true') {
-                        $wpsr_playlist = '&playlist=' . $wpsr_video_id;
+                    if ($wpsr_player_html !== '') {
+                        echo $wpsr_player_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- rendered by Fluent Player's own shortcode handler.
+                    } else {
+                        $wpsr_playlist = $wpsr_loop ? '&playlist=' . $wpsr_video_id : '';
+                        $wpsr_url = 'https://www.youtube.com/embed/' . $wpsr_video_id . '?loop=1&rel=0&autoplay=' . ($wpsr_autoplay ? 1 : 0) . '' . $wpsr_playlist . '';
+                        ?>
+                        <iframe id="wpsr-yt-popup-video-iframe" src="<?php echo esc_url($wpsr_url); ?>" frameborder="0"
+                                allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                        <?php
                     }
-                    $wpsr_autoplay = Arr::get($template_meta, 'popup_settings.autoplay') === 'true' ? 1 : 0;
-                    $wpsr_url      = 'https://www.youtube.com/embed/' . $wpsr_video_id . '?loop=1&rel=0&autoplay=' . $wpsr_autoplay . '' . $wpsr_playlist . '';
                     ?>
-                    <iframe id="wpsr-yt-popup-video-iframe" src="<?php echo esc_url($wpsr_url); ?>" frameborder="0"
-                            allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                 </div>
             <?php } else { ?>
                 <div class="wpsr-yt-popup-video-preview">

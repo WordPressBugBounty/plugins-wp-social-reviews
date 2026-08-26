@@ -28,6 +28,27 @@ class Config
 	                'selector'  => 'true',
                 ),
                 array(
+                    'title'     => __('Profile Photo', 'wp-social-reviews'),
+                    'key'      => 'profile_photo',
+                    'divider' => true,
+                    'typography' => false,
+                    'padding' => false,
+                    'border' => false,
+                    'condition' => array(
+                        'key' => 'header_settings.header_layout',
+                        'selector'  => 'minimal',
+                    ),
+                    'styles' => array(
+                        array(
+                            'title'      => __('Border Color:', 'wp-social-reviews'),
+                            'fieldKey'  => 'border_color',
+                            'type'      => 'color_picker',
+                            'flex'      => true,
+                            'disabled' => !$has_pro,
+                        )
+                    )
+                ),
+                array(
                     'title'     => __('User Name', 'wp-social-reviews'),
                     'key'      => 'user_name',
                     'divider' => true,
@@ -566,6 +587,13 @@ class Config
         $popupPrefix = '.wpsr-ig-feed-popup-box-'.$postId;
         return [
             'styles' => array(
+                'profile_photo' => array(
+                    // Scoped to the minimal layout — that is the only header that rings the avatar.
+                    'selector' => $prefix . ' .wpsr-ig-header.wpsr-ig-header-layout-minimal .wpsr-ig-header-inner .wpsr-ig-header-logo a img',
+                    'color'  => array(
+                        'border_color' => Arr::get($settings,'styles.profile_photo.color.border_color', '')
+                    )
+                ),
                 'user_name' => array(
                     'selector' => $prefix . ' .wpsr-ig-header .wpsr-ig-header-inner .wpsr-ig-header-info .wpsr-ig-header-name a',
                     'color'  => array(
@@ -888,7 +916,9 @@ class Config
                     ),
                 ),
                 'content' => array(
-                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-caption p',
+                    // Template 4's public markup ships in the Pro plugin, so both its pre- and
+                    // post-rebuild caption structures are listed; the unused one simply matches nothing.
+                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-caption p, ' . $prefix . ' .wpsr-ig-post-pin-card .wpsr-ig-post-pin-hover .wpsr-ig-post-pin-hover-content .wpsr-ig-post-caption p, ' . $prefix . ' .wpsr-ig-post-pin-card .wpsr-ig-post-pin-caption .wpsr-ig-post-caption p, ' . $prefix . ' .wpsr-ig-post-overlay-card .wpsr-ig-post-overlay-hover .wpsr-ig-post-overlay-hover-content .wpsr-ig-post-caption p',
                     'color'  => array(
                         'text_color' => Arr::get($settings,'styles.content.color.text_color', ''),
                     ),
@@ -938,13 +968,15 @@ class Config
                     ),
                 ),
                 'hashtag' => array(
-                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-caption p a',
+                    // Template 4's public markup ships in the Pro plugin, so both its pre- and
+                    // post-rebuild caption structures are listed; the unused one simply matches nothing.
+                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-caption p a, ' . $prefix . ' .wpsr-ig-post-pin-card .wpsr-ig-post-pin-hover .wpsr-ig-post-pin-hover-content .wpsr-ig-post-caption p a, ' . $prefix . ' .wpsr-ig-post-pin-card .wpsr-ig-post-pin-caption .wpsr-ig-post-caption p a, ' . $prefix . ' .wpsr-ig-post-overlay-card .wpsr-ig-post-overlay-hover .wpsr-ig-post-overlay-hover-content .wpsr-ig-post-caption p a',
                     'color'  => array(
                         'text_color' => Arr::get($settings,'styles.hashtag.color.text_color', ''),
                     ),
                 ),
                 'statistics' => array(
-                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic span',
+                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic span,' . $prefix . ' .wpsr-ig-post-pin-card .wpsr-ig-post-pin-hover .wpsr-ig-post-pin-hover-content .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic span,' . $prefix . ' .wpsr-ig-post-overlay-card .wpsr-ig-post-overlay-hover .wpsr-ig-post-overlay-hover-content .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic span',
                     'color'  => array(
                         'text_color' => Arr::get($settings,'styles.statistics.color.text_color', ''),
                     ),
@@ -1001,13 +1033,13 @@ class Config
                     ),
                 ),
                 'statistics_icon' => array(
-                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic svg',
+                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic svg,' . $prefix . ' .wpsr-ig-post-pin-card .wpsr-ig-post-pin-hover .wpsr-ig-post-pin-hover-content .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic svg,' . $prefix . ' .wpsr-ig-post-overlay-card .wpsr-ig-post-overlay-hover .wpsr-ig-post-overlay-hover-content .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic svg',
                     'color'  => array(
                         'fill_color' => Arr::get($settings,'styles.statistics_icon.color.fill_color', ''),
                     )
                 ),
                 'statistics_wrapper' => array(
-                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic',
+                    'selector' => $prefix . ' .wpsr-ig-post .wpsr-ig-post-info .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic,' . $prefix . ' .wpsr-ig-post-pin-card .wpsr-ig-post-pin-hover .wpsr-ig-post-pin-hover-content .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic,' . $prefix . ' .wpsr-ig-post-overlay-card .wpsr-ig-post-overlay-hover .wpsr-ig-post-overlay-hover-content .wpsr-ig-post-statistics .wpsr-ig-post-single-statistic',
                     'slider'  => array(
                         'right' => array(
                             'desktop' => Arr::get($settings,'styles.statistics_wrapper.slider.right.desktop', 0),

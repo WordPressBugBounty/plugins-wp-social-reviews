@@ -18,7 +18,10 @@ if (!empty($feeds) && is_array($feeds)) {
                 }
              ?>
 
-            <div tabindex="0" role="group" class="wpsr-yt-video <?php echo ($wpsr_layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO')) ? 'swiper-slide' : ''; ?>">
+            <?php
+                $wpsr_is_default_gallery_active = $wpsr_index === 0 && isset($template_meta['video_settings']['play_mode']) && $template_meta['video_settings']['play_mode'] === 'gallery';
+            ?>
+            <div role="group" class="wpsr-yt-video <?php echo ($wpsr_layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO')) ? 'swiper-slide' : ''; ?> <?php echo $wpsr_is_default_gallery_active ? 'wpsr-yt-gallery-active' : ''; ?>">
                 <?php
                 /**
                  * youtube_feed_preview_image hook.

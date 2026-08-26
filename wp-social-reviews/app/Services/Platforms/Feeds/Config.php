@@ -149,6 +149,11 @@ class Config
             $play_mode = 'youtube';
         }
 
+        $header_layout = Arr::get($settings, 'header_settings.header_layout', 'classic');
+        if (!in_array($header_layout, array('classic', 'minimal'), true)) {
+            $header_layout = 'classic';
+        }
+
         return array(
             'feed_settings' => array(
                 'platform'                  => 'youtube',
@@ -186,7 +191,11 @@ class Config
                     'display_comments_counter' => Arr::get($settings,'video_settings.display_comments_counter', 'false'),
                     'play_mode'                => Arr::get($settings,'video_settings.play_mode', $play_mode),
                     'display_channel_name'     => Arr::get($settings,'video_settings.display_channel_name', 'false'),
-                    'image_size'               => Arr::get($settings, 'video_settings.image_size', 'high')
+                    'image_size'               => Arr::get($settings, 'video_settings.image_size', 'high'),
+                    // Fluent Player integration, see Youtube\FluentPlayerEmbed.
+                    'use_fluent_player'        => Arr::get($settings, 'video_settings.use_fluent_player', 'false'),
+                    'fluent_player_media'      => (int) Arr::get($settings, 'video_settings.fluent_player_media', 0),
+                    'fluent_player_layers_at_end' => Arr::get($settings, 'video_settings.fluent_player_layers_at_end', 'false')
                 ),
                 'carousel_settings' => array(
                     'autoplay'         => Arr::get($settings,'carousel_settings.autoplay', 'true'),
@@ -207,6 +216,7 @@ class Config
                 ),
                 'header_settings'           => array(
                     'display_header'             => Arr::get($settings,'header_settings.display_header', 'true'),
+                    'header_layout'              => $header_layout,
                     'display_name'               => Arr::get($settings,'header_settings.display_name', 'true'),
                     'display_description'        => Arr::get($settings,'header_settings.display_description', 'false'),
                     'display_videos_counter'     => Arr::get($settings,'header_settings.display_videos_counter', 'true'),
@@ -284,6 +294,11 @@ class Config
             $displayMode = ($displayMode === 'popup') ? 'instagram' : $displayMode;
         }
 
+        $header_layout = Arr::get($settings, 'header_settings.header_layout', 'classic');
+        if (!in_array($header_layout, array('classic', 'minimal'), true)) {
+            $header_layout = 'classic';
+        }
+
         return array(
             'feed_settings' => array (
                 'platform'      => 'instagram',
@@ -327,6 +342,7 @@ class Config
 
                 'header_settings' => array(
                     'display_header'            => Arr::get($settings,'header_settings.display_header', 'true'),
+                    'header_layout'             => $header_layout,
                     'account_to_show'           => $accounts['connected_account_id'],
                     'display_name'              => Arr::get($settings,'header_settings.display_name', 'true'),
                     'display_username'          => Arr::get($settings,'header_settings.display_username', 'true'),
@@ -340,7 +356,7 @@ class Config
 
                 'post_settings' => array (
                     'resolution'               => Arr::get($settings,'post_settings.resolution', 'full'),
-                    'aspect_ratio'             => Arr::get($settings,'post_settings.aspect_ratio', 'classic'),
+                    'aspect_ratio'             => Arr::get($settings,'post_settings.aspect_ratio', 'frame45'),
                     'display_mode'             => $displayMode,
                     'display_likes_counter'    => Arr::get($settings,'post_settings.display_likes_counter', 'true'),
                     'display_comments_counter' => Arr::get($settings,'post_settings.display_comments_counter', 'true'),
@@ -411,6 +427,11 @@ class Config
             $selectedAccounts = Arr::get($settings, 'source_settings.account_ids', [0 => $firstKey]);
         }
 
+        $header_layout = Arr::get($settings, 'header_settings.header_layout', 'classic');
+        if (!in_array($header_layout, array('classic', 'minimal'), true)) {
+            $header_layout = 'classic';
+        }
+
         return array(
             'feed_settings' => array(
                 'platform'                  => 'facebook_feed',
@@ -474,6 +495,7 @@ class Config
                 ),
                 'header_settings' => array(
                     'display_header'             => Arr::get($settings,'header_settings.display_header', 'true'),
+                    'header_layout'              => $header_layout,
                     'account_to_show'            => Arr::get($settings,'header_settings.account_to_show', $firstKey),
                     'display_cover_photo'        => Arr::get($settings,'header_settings.display_cover_photo', 'true'),
                     'display_profile_photo'      => Arr::get($settings,'header_settings.display_profile_photo', 'true'),

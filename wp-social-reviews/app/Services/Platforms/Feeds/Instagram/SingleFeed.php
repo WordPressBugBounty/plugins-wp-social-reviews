@@ -352,7 +352,7 @@ class SingleFeed
         if (strpos($permalink, 'https://') !== 0) {
             $permalink = str_replace('http://', 'https://', $permalink);
             if (strpos($permalink, 'https://') !== 0) {
-                $permalink = 'https://' . ltrim($permalink ?? '', '/');
+                $permalink = 'https://' . ltrim($permalink, '/');
             }
         }
 

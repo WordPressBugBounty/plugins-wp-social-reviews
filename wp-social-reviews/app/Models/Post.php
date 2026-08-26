@@ -5,6 +5,11 @@ namespace WPSocialReviews\App\Models;
 use WPSocialReviews\App\Models\Traits\SearchableScope;
 use WPSocialReviews\Framework\Support\Arr;
 
+/**
+ * @property int $ID
+ * @property string $post_type
+ * @property string $post_status
+ */
 class Post extends Model
 {
     use SearchableScope;
@@ -43,7 +48,8 @@ class Post extends Model
             $filter = '';
         }
 
-        $query = static::searchBy($search)->where('post_content', 'like', '%'.$filter.'%');
+        $query = static::searchBy($search)
+            ->where('post_content', 'like', '%' . static::escapeLikeTerm($filter) . '%');
 
         if ($orderBy === 'publish' || $orderBy === 'draft') {
             $query->orderBy('post_status',  $orderBy === 'publish' ? 'desc' : 'asc');
@@ -54,6 +60,16 @@ class Post extends Model
         }
 
         $posts = $query->latest('ID')->paginate();
+
+        // getPlatformNames() below reads post meta per row. This ORM does no priming of
+        // its own the way WP_Query does, so warm the whole page in one statement first.
+        $wpsr_post_ids = [];
+        foreach ($posts as $post) {
+            $wpsr_post_ids[] = (int) $post->ID;
+        }
+        if (!empty($wpsr_post_ids)) {
+            update_meta_cache('post', $wpsr_post_ids);
+        }
 
         foreach ($posts as $post) {
             $platforms = $post->getPlatformNames();
@@ -80,7 +96,7 @@ class Post extends Model
      * @param $postTitle
      * @param $platform
      *
-     * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
+     * @return int|\WP_Error The post ID on success. The value 0 or WP_Error on failure.
      */
     public function createPost($postArr)
     {
@@ -103,7 +119,7 @@ class Post extends Model
      *
      * @param $args
      *
-     * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
+     * @return int|\WP_Error The post ID on success. The value 0 or WP_Error on failure.
      */
     public function updatePost($args, $allowedType = null)
     {
@@ -128,7 +144,7 @@ class Post extends Model
      *
      * @param $postId
      *
-     * @return WP_Post|false|null Post data on success, false or null on failure.
+     * @return \WP_Post|false|null Post data on success, false or null on failure.
      */
     public function deletePost($postId, $allowedType = null)
     {
@@ -152,7 +168,7 @@ class Post extends Model
      * @param $postMeta
      * @param $platform
      *
-     * @return int|bool
+     * @return void
      */
     public function updatePostMeta($postId, $postMeta, $platform)
     {

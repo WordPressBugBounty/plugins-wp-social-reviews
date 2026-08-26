@@ -9,12 +9,21 @@ $wpsr_status_type = Arr::get($feed, 'status_type');
 <div>
     <?php foreach ($feed['attachments']['data'] as $wpsr_attachment) { ?>
     <div class="wpsr-fb-feed-url-summary-card-wrapper">
-        <?php if( $wpsr_attachment['type'] === 'video_inline' ){ ?>
+        <?php $wpsr_video_url = $wpsr_attachment['type'] === 'video_inline' ? Arr::get($wpsr_attachment, 'url') : '';
+        if($wpsr_video_url && FacebookHelper::isEmbeddable($feed)){ ?>
         <div class="wpsr-fb-feed-iframe">
             <iframe type="text/html" class="wpsr-fb-feed-url-summary-card wpsr-feed-link"
-                    src="<?php esc_url('https://www.facebook.com/plugins/video.php?href='.Arr::get($wpsr_attachment, 'url').'?autoplay=1&mute=0'); ?>" allowfullscreen="" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" title="Video">
+                    src="<?php echo esc_url(FacebookHelper::getVideoEmbedUrl($wpsr_video_url)); ?>" allowfullscreen="" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" title="Video">
             </iframe>
         </div>
+        <?php } else if($wpsr_video_url){ ?>
+        <a class="wpsr-fb-feed-video-not-embeddable" href="<?php echo esc_url($wpsr_video_url); ?>" target="_blank" rel="nofollow">
+            <?php if(Arr::get($wpsr_attachment, 'media.image.src')){ ?>
+            <img src="<?php echo esc_url(Arr::get($wpsr_attachment, 'media.image.src')); ?>" alt="<?php echo esc_attr(Arr::get($wpsr_attachment, 'title', '')); ?>"/>
+            <?php } ?>
+            <div class="wpsr-fb-feed-video-play"><div class="wpsr-fb-feed-video-play-icon"></div></div>
+            <span class="wpsr-fb-feed-video-not-embeddable-note"><?php echo esc_html($view_on_fb); ?></span>
+        </a>
         <?php } ?>
 
         <?php if( Arr::get($wpsr_attachment, 'title') && gettype(Arr::get($feed, 'message')) !== 'string'){ ?>

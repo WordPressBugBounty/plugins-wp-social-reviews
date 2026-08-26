@@ -28,6 +28,27 @@ class Config
 	                'selector'  => 'true',
                 ),
                 array(
+                    'title'     => __('Channel Logo', 'wp-social-reviews'),
+                    'key'      => 'channel_logo',
+                    'divider' => true,
+                    'typography' => false,
+                    'padding' => false,
+                    'border' => false,
+                    'condition' => array(
+                        'key' => 'header_settings.header_layout',
+                        'selector'  => 'minimal',
+                    ),
+                    'styles' => array(
+                        array(
+                            'title'      => __('Border Color:', 'wp-social-reviews'),
+                            'fieldKey'  => 'border_color',
+                            'type'      => 'color_picker',
+                            'flex'      => true,
+                            'disabled' => !$has_pro,
+                        )
+                    )
+                ),
+                array(
                     'title'     => __('Channel Name', 'wp-social-reviews'),
                     'key'      => 'channel_name',
                     'divider' => false,
@@ -443,6 +464,13 @@ class Config
         $prefix = '.wpsr-yt-feed-template-'.$postId;
         return [
             'styles' => array(
+                'channel_logo' => array(
+                    // Scoped to the minimal layout — that is the only header that rings the logo.
+                    'selector' => $prefix.' .wpsr-yt-header.wpsr-yt-header-layout-minimal .wpsr-yt-header-inner .wpsr-yt-header-logo a img',
+                    'color'  => array(
+                        'border_color' => Arr::get($settings,'styles.channel_logo.color.border_color', '')
+                    )
+                ),
                 'channel_name' => array(
                     'selector' => $prefix.' .wpsr-yt-header .wpsr-yt-header-inner .wpsr-yt-header-info .wpsr-yt-header-channel-name a',
                     'color'  => array(

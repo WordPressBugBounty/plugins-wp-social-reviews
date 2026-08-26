@@ -4,11 +4,17 @@ defined('ABSPATH') or die;
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Helper as GlobalHelper;
 use WPSocialReviews\App\Services\Platforms\Feeds\Facebook\Helper;
+use WPSocialReviews\App\Hooks\Handlers\FacebookFeedTemplateHandler;
+
+// Template 4 ships its own mosaic grid, so layout_type does not apply to it. This must use the
+// same test as the body renderer, or an older Pro builds the mosaic around template1 markup.
+$wpsr_is_mosaic   = $template === 'template4' && FacebookFeedTemplateHandler::canRenderProTemplate($template);
+$wpsr_is_carousel = !$wpsr_is_mosaic && $layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO');
 
 //carousel
 $wpsr_data_attrs  = array();
 $wpsr_slider_data = array();
-if ($layout_type === 'carousel') {
+if ($wpsr_is_carousel) {
     $wpsr_slider_data = array(
         'autoplay'               => $feed_settings['carousel_settings']['autoplay'],
         'autoplay_speed'         => $feed_settings['carousel_settings']['autoplay_speed'],
@@ -19,23 +25,24 @@ if ($layout_type === 'carousel') {
     );
 }
 
-$wpsr_data_attrs[] = $layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO') ? 'data-slider_settings=' . json_encode($wpsr_slider_data) . '' : '';
+$wpsr_data_attrs[] = $wpsr_is_carousel ? 'data-slider_settings=' . json_encode($wpsr_slider_data) . '' : '';
 $wpsr_feed_type = Arr::get($feed_settings, 'source_settings.feed_type');
 
 // wrapper classes
 $wpsr_classes   = array('wpsr-fb-feed-wrapper', 'wpsr-feed-wrap', 'wpsr_content');
 $wpsr_classes[] = 'wpsr-fb-feed-' . esc_attr($template) . '';
 $wpsr_classes[] = 'wpsr-fb-' . esc_attr($wpsr_feed_type) . '';
-$wpsr_classes[] = $layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO') ? 'wpsr-facebook-feed-slider-activate' : '';
-$wpsr_classes[] = $layout_type === 'masonry' ? 'wpsr-facebook-feed-masonry-activate' : '';
+$wpsr_classes[] = $wpsr_is_carousel ? 'wpsr-facebook-feed-slider-activate' : '';
+$wpsr_classes[] = !$wpsr_is_mosaic && $layout_type === 'masonry' ? 'wpsr-facebook-feed-masonry-activate' : '';
 $wpsr_classes[] = 'wpsr-fb-feed-template-' . esc_attr($templateId) . '';
 $wpsr_classes[] = Helper::generatePhotoAlbumFeedClass($feed_settings);
 $wpsr_classes[] = Arr::get($feed_settings, 'post_settings.equal_height') === 'true' ? 'wpsr-has-equal-height' : '';
-$wpsr_classes[] = $feed_settings['layout_type'] === 'timeline' ? 'wpsr-fb-feed-layout-standard' : '';
+$wpsr_classes[] = !$wpsr_is_mosaic && $feed_settings['layout_type'] === 'timeline' ? 'wpsr-fb-feed-layout-standard' : '';
 $wpsr_desktop_column_number   = Arr::get($feed_settings, 'responsive_column_number.desktop');
 
 $wpsr_header_settings = $feed_settings['header_settings'];
 $wpsr_profile_photo_hide_class = $wpsr_header_settings['display_profile_photo'] === 'false' ? 'wpsr-fb-feed-profile-pic-hide' : '';
+$wpsr_fb_header_layout_class = Helper::getHeaderLayoutClass($feed_settings);
 
 echo '<div  id="wpsr-fb-feed-' . esc_attr($templateId) . '" class="' . esc_attr(implode(' ', $wpsr_classes)) . '" ' . esc_attr(implode(' ',
         $wpsr_data_attrs)) . '  data-column="' . esc_attr($wpsr_desktop_column_number) . '">';
@@ -47,7 +54,7 @@ echo '<div class="wpsr-container">';
 
 <?php if ($wpsr_header_settings['display_header'] === 'true' && !empty($header)){ ?>
 <div class="wpsr-row">
-    <div class="wpsr-fb-feed-header wpsr-col-12 wpsr-gap-<?php echo esc_attr($column_gaps); ?> <?php echo esc_attr($wpsr_profile_photo_hide_class); ?>">
+    <div class="wpsr-fb-feed-header <?php echo esc_attr($wpsr_fb_header_layout_class); ?> wpsr-col-12 wpsr-gap-<?php echo esc_attr($column_gaps); ?> <?php echo esc_attr($wpsr_profile_photo_hide_class); ?>">
     <?php if(Arr::get($header, 'cover') &&  $wpsr_header_settings['display_cover_photo'] === 'true') {?>
         <div class="wpsr-fb-feed-user-profile-banner" >
             <img src="<?php echo esc_url($header['cover']); ?>" alt="<?php echo esc_attr($header['name']); ?>">
@@ -132,9 +139,15 @@ echo '<div class="wpsr-container">';
 
 
 echo '<div class="wpsr-fb-feed-wrapper-inner">';
-if($layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO')) {
+if($wpsr_is_carousel) {
     echo '<div class="swiper-container" tabindex="0">';
 }
-$wpsr_row_classes = $layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO') ? 'swiper-wrapper' : 'wpsr-row';
+if ($wpsr_is_mosaic) {
+    $wpsr_row_classes = 'wpsr-fb-highlights-grid';
+} elseif ($wpsr_is_carousel) {
+    $wpsr_row_classes = 'swiper-wrapper';
+} else {
+    $wpsr_row_classes = 'wpsr-row';
+}
 
 echo '<div class="'.esc_attr($wpsr_row_classes).' wpsr-fb-all-feed wpsr_feeds wpsr-column-gap-' . esc_attr($column_gaps) . '">';

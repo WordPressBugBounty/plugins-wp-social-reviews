@@ -386,7 +386,7 @@ class OnboardingService
                             'name' => 'template1',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 1', 'wp-social-reviews'),
+                        'title' => __('Classic Grid', 'wp-social-reviews'),
                         'description' => __('A clean and simple template for Instagram', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/instagram-template/template1.png'),
                         'pro' => false,
@@ -396,9 +396,29 @@ class OnboardingService
                             'name' => 'template2',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 2', 'wp-social-reviews'),
+                        'title' => __('Caption Card', 'wp-social-reviews'),
                         'description' => __('A modern grid for Instagram', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/instagram-template/template2.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template3',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Overlay Card', 'wp-social-reviews'),
+                        'description' => __('An overlay card grid for Instagram', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/instagram-template/template3.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template4',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Pin Card', 'wp-social-reviews'),
+                        'description' => __('A detailed post grid for Instagram', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/instagram-template/template4.png'),
                         'pro' => true
                     ],
                     [
@@ -428,9 +448,9 @@ class OnboardingService
                             'name' => 'template1',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 1', 'wp-social-reviews'),
+                        'title' => __('Classic Post', 'wp-social-reviews'),
                         'description' => __('Classic Facebook feed template', 'wp-social-reviews'),
-                        'icon' => $this->getAssetUrl('images/template/facebook-template/template2.png'),
+                        'icon' => $this->getAssetUrl('images/template/facebook-template/template1.png'),
                         'pro' => false
                     ],
                     [
@@ -438,9 +458,29 @@ class OnboardingService
                             'name' => 'template2',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 2', 'wp-social-reviews'),
+                        'title' => __('Media First', 'wp-social-reviews'),
                         'description' => __('Timeline style for Facebook', 'wp-social-reviews'),
-                        'icon' => $this->getAssetUrl('images/template/facebook-template/template1.png'),
+                        'icon' => $this->getAssetUrl('images/template/facebook-template/template2.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template3',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Profile Card', 'wp-social-reviews'),
+                        'description' => __('Card grid showing Facebook posts with media and engagement', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/facebook-template/template3.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template4',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Overlay Card', 'wp-social-reviews'),
+                        'description' => __('Full-bleed photo cards with the author over the image', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/facebook-template/template4.png'),
                         'pro' => true
                     ]
                 ],
@@ -450,7 +490,7 @@ class OnboardingService
                             'name' => 'template1',
                             'type' => 'standard'
                         ],
-                        'title' => __('Template 1', 'wp-social-reviews'),
+                        'title' => __('Classic Tweet', 'wp-social-reviews'),
                         'description' => __('Clean X (Twitter) feed template', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/twitter-template/template1.png'),
                         'pro' => false
@@ -482,7 +522,7 @@ class OnboardingService
                             'name' => 'template1',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 1', 'wp-social-reviews'),
+                        'title' => __('Video Grid', 'wp-social-reviews'),
                         'description' => __('YouTube video grid template', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/youtube-template/template1.png'),
                         'pro' => false
@@ -492,7 +532,7 @@ class OnboardingService
                             'name' => 'template2',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 2', 'wp-social-reviews'),
+                        'title' => __('Hover Overlay', 'wp-social-reviews'),
                         'description' => __('Grid layout showing YouTube video title, views, and description preview.', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/youtube-template/template2.png'),
                         'pro' => true
@@ -502,9 +542,29 @@ class OnboardingService
                             'name' => 'template3',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 3', 'wp-social-reviews'),
+                        'title' => __('List View', 'wp-social-reviews'),
                         'description' => __('Horizontal grid showing YouTube videos with title, views, and description.', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/youtube-template/template3.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template4',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Text-Top Card', 'wp-social-reviews'),
+                        'description' => __('Compact thumbnail cards for YouTube videos.', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/youtube-template/template4.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template5',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Player & Playlist', 'wp-social-reviews'),
+                        'description' => __('Playlist player with a large video and a scrolling side list.', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/youtube-template/template5.png'),
                         'pro' => true
                     ]
                 ],
@@ -514,7 +574,7 @@ class OnboardingService
                             'name' => 'template1',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 1', 'wp-social-reviews'),
+                        'title' => __('Classic Tile', 'wp-social-reviews'),
                         'description' => __('TikTok video feed template', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/tiktok-template/template1.png'),
                         'pro' => false
@@ -524,9 +584,29 @@ class OnboardingService
                             'name' => 'template2',
                             'type' => 'grid'
                         ],
-                        'title' => __('Template 2', 'wp-social-reviews'),
+                        'title' => __('Caption Card', 'wp-social-reviews'),
                         'description' => __('Grid layout showing TikTok videos with title and description.', 'wp-social-reviews'),
                         'icon' => $this->getAssetUrl('images/template/tiktok-template/template2.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template3',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Overlay Card', 'wp-social-reviews'),
+                        'description' => __('Four column overlay cards for TikTok videos.', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/tiktok-template/template3.png'),
+                        'pro' => true
+                    ],
+                    [
+                        'value' => [
+                            'name' => 'template4',
+                            'type' => 'grid'
+                        ],
+                        'title' => __('Spotlight Hero', 'wp-social-reviews'),
+                        'description' => __('Spotlight hero layout for TikTok videos.', 'wp-social-reviews'),
+                        'icon' => $this->getAssetUrl('images/template/tiktok-template/template4.png'),
                         'pro' => true
                     ]
                 ]

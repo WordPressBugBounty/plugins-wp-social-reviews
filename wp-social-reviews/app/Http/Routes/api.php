@@ -3,7 +3,7 @@
 defined('ABSPATH') or die;
 
 /**
- * @var $router \WPSocialReviews\Framework\Http\Router
+ * @var \WPSocialReviews\Framework\Http\Router $router
  */
 
 use WPSocialReviews\App\Http\Controllers\NotificationsController;
@@ -14,6 +14,7 @@ use WPSocialReviews\App\Http\Controllers\Platforms\Chats\MetaController as Chats
 use WPSocialReviews\App\Http\Controllers\Platforms\Feeds\ConfigsController as FeedsConfigsController;
 use WPSocialReviews\App\Http\Controllers\Platforms\Feeds\MetaController as FeedsMetaController;
 use WPSocialReviews\App\Http\Controllers\Platforms\PlatformController;
+use WPSocialReviews\App\Http\Controllers\Platforms\Reviews\CategoriesController;
 use WPSocialReviews\App\Http\Controllers\Platforms\Reviews\ConfigsController as ReviewsConfigsController;
 use WPSocialReviews\App\Http\Controllers\Platforms\Reviews\MetaController as ReviewsMetaController;
 use WPSocialReviews\App\Http\Controllers\Platforms\Reviews\RecommendationsController;
@@ -27,8 +28,6 @@ $router->prefix('platforms')->withPolicy('PlatformPolicy')->group(function ($rou
     $router->get('/enabled', [PlatformController::class, 'enabledPlatforms']);
     $router->get('/get-statuses', [PlatformController::class, 'getStatuses']);
     $router->post('/update-statuses', [PlatformController::class, 'updateStatuses']);
-    $router->get('/dashboard-notices', [PlatformController::class, 'getDashboardNotices']);
-    $router->post('/dashboard-notices', [PlatformController::class, 'updateDashboardNotices']);
     $router->post('/subscribe', [PlatformController::class, 'processSubscribeQuery']);
     $router->post('/addons', [AddonController::class, 'activePlugin']);
 
@@ -51,7 +50,14 @@ $router->prefix('platforms')->withPolicy('PlatformPolicy')->group(function ($rou
     });
 });
 
-$wpsr_routes = function ($router) {
+$router->prefix('platforms')->withPolicy('DashboardNoticesPolicy')->group(function ($router) {
+    $router->get('/dashboard-notices', [PlatformController::class, 'getDashboardNotices']);
+    $router->post('/dashboard-notices', [PlatformController::class, 'updateDashboardNotices']);
+});
+
+// Mounted under both prefixes, but the scope comes from the route (not a client
+// `type`/`filter`/`{id}`), so each prefix gets its own scoped entry point.
+$router->prefix('reviews')->withPolicy('ReviewPolicy')->group(function ($router) {
     $router->get('/', [RecommendationsController::class, 'index']);
     $router->post('/', [RecommendationsController::class, 'create']);
     $router->post('/duplicate', [RecommendationsController::class, 'duplicate']);
@@ -59,13 +65,48 @@ $wpsr_routes = function ($router) {
     $router->delete('/', [RecommendationsController::class, 'delete']);
     $router->put('/status-update', [RecommendationsController::class, 'statusUpdate']);
     $router->put('/spam', [RecommendationsController::class, 'spamReviews']);
+});
+$router->prefix('testimonials')->withPolicy('TestimonialPolicy')->group(function ($router) {
+    $router->get('/', [RecommendationsController::class, 'indexTestimonial']);
+    $router->post('/', [RecommendationsController::class, 'createTestimonial']);
+    $router->post('/duplicate', [RecommendationsController::class, 'duplicateTestimonial']);
+    $router->put('/{id}', [RecommendationsController::class, 'updateTestimonial'])->int('id');
+    $router->delete('/', [RecommendationsController::class, 'deleteTestimonial']);
+    $router->put('/status-update', [RecommendationsController::class, 'statusUpdateTestimonial']);
+    $router->put('/spam', [RecommendationsController::class, 'spamTestimonialReviews']);
+});
+
+// The two prefixes sit behind different capabilities, and `ids` comes from the
+// client, so each gets the handler that scopes writes to its own screen's rows.
+// Read stays per-screen too: both screens need the shared vocabulary.
+$wpsr_category_routes = function ($bulkCategoryMethod) {
+    return function ($router) use ($bulkCategoryMethod) {
+        $router->put('/bulk-category', [RecommendationsController::class, $bulkCategoryMethod]);
+
+        // No POST: categories are created by assigning them, never on their own.
+        // See the CategoriesController docblock.
+        $router->prefix('categories')->group(function ($router) {
+            $router->get('/', [CategoriesController::class, 'index']);
+        });
+    };
 };
 
-// Manage custom reviews from RecommendationsController controller
-$router->prefix('reviews')->withPolicy('ReviewPolicy')->group($wpsr_routes);
+$router->prefix('reviews')->withPolicy('ReviewPolicy')->group($wpsr_category_routes('bulkCategory'));
+$router->prefix('testimonials')->withPolicy('TestimonialPolicy')->group($wpsr_category_routes('bulkTestimonialCategory'));
 
-// Manage custom testimonial from RecommendationsController controller
-$router->prefix('testimonials')->withPolicy('TestimonialPolicy')->group($wpsr_routes);
+// Rename and delete are global — one shared vocabulary, and a delete detaches the
+// category from rows on both screens — so they demand both capabilities rather than
+// either one, via CategoryManagementPolicy. Kept under both prefixes only so each
+// screen's manage-categories modal keeps its existing URL.
+$wpsr_category_management_routes = function ($router) {
+    $router->prefix('categories')->group(function ($router) {
+        $router->put('/{id}', [CategoriesController::class, 'update'])->int('id');
+        $router->delete('/{id}', [CategoriesController::class, 'delete'])->int('id');
+    });
+};
+
+$router->prefix('reviews')->withPolicy('CategoryManagementPolicy')->group($wpsr_category_management_routes);
+$router->prefix('testimonials')->withPolicy('CategoryManagementPolicy')->group($wpsr_category_management_routes);
 
 $router->prefix('settings')->withPolicy('SettingsPolicy')->group(function ($router) {
     $router->get('/', [SettingsController::class, 'index']);

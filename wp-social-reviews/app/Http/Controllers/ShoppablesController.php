@@ -58,11 +58,8 @@ class ShoppablesController extends Controller
     {
         $settingsPayload = $request->get('settings');
 
-        // if payload is JSON string -> unslash and decode
         if (is_string($settingsPayload)) {
-            $settingsPayload = wp_unslash($settingsPayload);
-            $decoded = json_decode($settingsPayload, true);
-            $settingsPayload = is_array($decoded) ? $decoded : [];
+            $settingsPayload = $this->decodeJsonParam($settingsPayload) ?: [];
         }
 
         $validate_rules = ['hashtags' => 'required'];
@@ -90,10 +87,13 @@ class ShoppablesController extends Controller
         $settingsPayload = $request->get('settings');
 
         if (is_string($settingsPayload)) {
-            $settingsPayload = wp_unslash($settingsPayload);
-            $decoded = json_decode($settingsPayload, true);
-            $settingsPayload = is_array($decoded) ? $decoded : [];
+            $settingsPayload = $this->decodeJsonParam($settingsPayload) ?: [];
         }
+
+        // The surviving entries are a client-supplied replacement for the whole option,
+        // so they need the same sanitizer update() applies. No required-field rules:
+        // this endpoint removes entries and must not start rejecting stored shapes.
+        $settingsPayload = $this->recursive_sanitize($settingsPayload);
 
         update_option('wpsr_global_shoppable_settings', $settingsPayload);
         return [

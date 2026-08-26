@@ -22,7 +22,6 @@ class TranslationString
             'Videos' => Arr::get($translations, 'videos') ?: __('Videos', 'wp-social-reviews'),
             'Views' => Arr::get($translations, 'views') ?: __('Views', 'wp-social-reviews'),
             'Tweets' => Arr::get($translations, 'tweets') ?: __('Tweets', 'wp-social-reviews'),
-            'Likes' => Arr::get($translations, 'people_like_this') ?: __('Likes', 'wp-social-reviews'),
             'Posts' => Arr::get($translations, 'posts') ?: __('Posts', 'wp-social-reviews'),
             'Where you want to leave a review' => Arr::get($translations, 'leave_a_review') ?: __('Where you want to leave a review', 'wp-social-reviews'),
             'Recommends' => Arr::get($translations, 'recommends') ?: __('Recommends', 'wp-social-reviews'),

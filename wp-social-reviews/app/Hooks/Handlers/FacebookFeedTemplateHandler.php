@@ -10,6 +10,52 @@ use WPSocialReviews\App\Services\GlobalSettings;
 
 class FacebookFeedTemplateHandler
 {
+    /**
+     * Facebook templates the installed Pro release can actually render.
+     *
+     * Pro loads the view straight from the template key, so an unsupported key
+     * hits a missing file. Older Pro ships template2 only, hence the default.
+     *
+     * @return array
+     **/
+    public static function getProTemplates()
+    {
+        return apply_filters('wpsocialreviews/facebook_pro_templates', array('template2'));
+    }
+
+    /**
+     * Advertising a template is not enough; without a renderer the caller
+     * would concatenate the unfiltered array and print the word "Array".
+     *
+     * @param string $template
+     * @return bool
+     **/
+    public static function canRenderProTemplate($template)
+    {
+        return defined('WPSOCIALREVIEWS_PRO')
+            && in_array($template, self::getProTemplates(), true)
+            && has_filter('wpsocialreviews/add_facebook_feed_template');
+    }
+
+    /**
+     * The advertised templates this install will really render, decided by the
+     * same gate the public path uses. The admin app consumes this so JavaScript
+     * never has to rebuild part of the gate and drift away from PHP.
+     *
+     * @return array
+     **/
+    public static function getRenderableProTemplates()
+    {
+        $wpsr_renderable = array();
+
+        foreach (self::getProTemplates() as $wpsr_template) {
+            if (self::canRenderProTemplate($wpsr_template)) {
+                $wpsr_renderable[] = $wpsr_template;
+            }
+        }
+
+        return $wpsr_renderable;
+    }
 
     /**
      *
@@ -23,11 +69,24 @@ class FacebookFeedTemplateHandler
     public function renderTemplateItemWrapper($template_meta = []){
         $app = App::getInstance();
 
+        // Template 4's mosaic sizes its cells in CSS by :nth-child, so column classes would fight
+        // it. Gated the same way as the body renderer, or an older Pro mixes the two.
+        // Not memoised: the string compare short-circuits for every other template, and caching
+        // the Pro answer for the request made it survive changes to the filter behind it.
+        $wpsr_template = Arr::get($template_meta, 'template');
+        if ($wpsr_template === 'template4' && self::canRenderProTemplate($wpsr_template)) {
+            $app->view->render('public.feeds-templates.facebook.elements.item-parent-wrapper', array(
+                'classes' => 'wpsr-fb-highlight-item',
+            ));
+            return;
+        }
+
         $desktop_column = Arr::get($template_meta, 'responsive_column_number.desktop');
         $tablet_column = Arr::get($template_meta, 'responsive_column_number.tablet');
         $mobile_column = Arr::get($template_meta, 'responsive_column_number.mobile');
 
         $classes = 'wpsr-mb-30 wpsr-col-' . esc_attr($desktop_column) . ' wpsr-col-sm-' . esc_attr($tablet_column) . ' wpsr-col-xs-' . esc_attr($mobile_column);
+
         $app->view->render('public.feeds-templates.facebook.elements.item-parent-wrapper', array(
             'classes' => $classes,
         ));
@@ -104,9 +163,9 @@ class FacebookFeedTemplateHandler
         $animatedBGClass = defined('WPSOCIALREVIEWS_PRO') ? 'wpsr-animated-background' : '';
         $photo = Arr::get($feed, 'media_url', '') ?? '';
         $default_media = Arr::get($feed, 'default_media', "");
-        $imgClass = ((str_contains($photo ?? '', 'placeholder') && empty($default_media)) ||
-(!str_contains($photo ?? '', 'placeholder') && !empty($default_media)) ||
-(!str_contains($photo ?? '', 'placeholder') && empty($default_media))  ? '' : $animatedBGClass);
+        $imgClass = ((str_contains($photo, 'placeholder') && empty($default_media)) ||
+(!str_contains($photo, 'placeholder') && !empty($default_media)) ||
+(!str_contains($photo, 'placeholder') && empty($default_media))  ? '' : $animatedBGClass);
 
         $app->view->render('public.feeds-templates.facebook.elements.media', array(
             'feed'          => $feed,
@@ -124,10 +183,12 @@ class FacebookFeedTemplateHandler
 
         if(Arr::get($feed, 'attachments.data')){
             $app = App::getInstance();
+            $translations = GlobalSettings::getTranslations();
             $app->view->render('public.feeds-templates.facebook.elements.summary-card', array(
                 'feed'          => $feed,
                 'message'       => Arr::get($feed, 'message'),
                 'template_meta' => $template_meta,
+                'view_on_fb'    => Arr::get($translations, 'view_on_fb') ?: __('View on Facebook', 'wp-social-reviews'),
             ));
         }
     }
@@ -175,6 +236,8 @@ class FacebookFeedTemplateHandler
                 'paginate' => $pagination_settings['paginate'],
                 'sinceId' => $sinceId,
                 'maxId' => $maxId,
+                // Album templates read this; the first render passes it, so load-more must too.
+                'pagination_settings' => $pagination_settings,
                 'translations' => GlobalSettings::getTranslations(),
                 'image_settings' => $gdpr_settings,
                 'imageResolution' => $imageResolution,
@@ -184,11 +247,14 @@ class FacebookFeedTemplateHandler
                 'feed_type' => $feed_type,
             );
 
-             if ($templateNumber === 'template2') {
-                 return apply_filters('wpsocialreviews/add_facebook_feed_template', $template_body_data);
-             } else {
-                 return (string)$app->view->make('public.feeds-templates.facebook.template1', $template_body_data);
-             }
+             $wpsr_pro_html = self::canRenderProTemplate($templateNumber)
+                 ? apply_filters('wpsocialreviews/add_facebook_feed_template', $template_body_data)
+                 : null;
+
+             // No renderer ran, so the filter handed back the array it was given.
+             return is_string($wpsr_pro_html)
+                 ? $wpsr_pro_html
+                 : (string) $app->view->make('public.feeds-templates.facebook.template1', $template_body_data);
         }
     }
 
@@ -208,6 +274,20 @@ class FacebookFeedTemplateHandler
 
     public function handleAlbumPhoto($template_id = null, $feed_id = null)
     {
+        if (!check_ajax_referer('wpsr-ajax-nonce', 'security', false)) {
+            wp_send_json_error(['message' => __('Security validation failed.', 'wp-social-reviews')], 403);
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified above
+        $templateId = absint(Arr::get($_REQUEST, 'template_id'));
+
+        // The nonce is localized for logged-out visitors, so it authenticates nothing.
+        // Gate the dispatch on the template being publicly renderable, otherwise an
+        // anonymous request reaches the extension listener with an unowned template.
+        if (!(new ShortcodeHandler())->isPublicRenderableTemplate($templateId)) {
+            wp_send_json_error(['message' => __('Invalid template.', 'wp-social-reviews')], 403);
+        }
+
         do_action('wpsocialreviews/facebook_feed_handle_album_photo');
         die();
     }

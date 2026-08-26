@@ -109,8 +109,6 @@ class ChatHandler
 
     /**
      *  Enqueue All Front-End Assets
-     *
-     * @param
      */
     public function addAssets()
     {

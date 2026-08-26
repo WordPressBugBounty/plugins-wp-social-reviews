@@ -2,9 +2,9 @@
 Contributors: techjewel, adreastrian, devutpol, sabbir345, wpmanageninja
 Tags: Customer Reviews, Google Reviews, Social Reviews, Social Feeds,  Instagram Feeds
 Requires at least: 6.2
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 4.3.2
+Stable tag: 4.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -334,6 +334,32 @@ If you like this plugin, please give us [5 stars](https://wordpress.org/plugins/
 8. Make templates your own way, and all will look perfect on any screen
 
 == Changelog ==
+
+4.4.0 ( Date: August 26, 2026 )
+- Added a new frontend visitor toolbar for review feeds, allowing visitors to search, sort, and filter reviews by rating. (Pro)
+- Added reusable review categories with bulk assign/remove, category management, and category counts.
+- Added video support for testimonials with video URL/upload, poster images, player selection, and Fluent Player playback. (Pro)
+- Added Instagram Templates 3 and 4, plus a new Highlights layout. (Pro)
+- Added Facebook Templates 3 and 4, including a Mosaic layout that reveals post text on hover. (Pro)
+- Added TikTok Templates 3 and 4, including the Spotlight Hero layout. (Pro)
+- Added YouTube Templates 4 and 5.
+- Added Fluent Player support for YouTube feed videos with a new "Show Layers at Video End" option.
+- Added testimonial support to native review forms with author fields and logo upload. (Pro)
+- Added Tripadvisor Terra API support with automatic detection of legacy API connections, so existing connections continue working without reconnecting.
+- Added a Minimal header layout for YouTube, Instagram, Facebook, and TikTok feeds.
+- Added support for multiple review categories in CSV import and export. (Pro)
+- Improved feed template names to clearly describe each layout instead of using generic names like "Template 1–5."
+- Improved keyboard accessibility across feed cards, popups, album and video controls, and shoppable actions.
+- Improved editor previews to display video posts in Instagram Templates 2, 3, and 4, and support more than 6 reviews in slider, badge, and notification layouts.
+- Fixed TikTok word and hashtag filters not matching video captions.
+- Fixed Airbnb business information retrieval and rating parsing.
+- Fixed Facebook warnings caused by malformed identifiers and incorrect start-date handling.
+- Fixed CSV imports clearing author website fields. (Pro)
+- Fixed long words overflowing review cards and masonry layouts not updating correctly when videos change card height.
+- Fixed the Review Images option appearing for platforms that do not support review images.
+- Fixed image optimization incorrectly treating the same image from different platforms as one image.
+- Fixed the review cache cursor advancing before a refresh was attempted.
+- Fixed remaining Vue 3 lifecycle issues in the Facebook popup.
 
 4.3.2 ( Date: July 26, 2026 )
 - Fixed database errors being displayed on the site when WordPress debug mode is off.
@@ -667,206 +693,5 @@ If you like this plugin, please give us [5 stars](https://wordpress.org/plugins/
 - Added support for selecting any post type pages in the chat widget.
 - Exclude all unlisted videos from the YouTube feed.
 - Resolved Reviews are automatically removed when they are deleted from Facebook or Google.
-
-3.11.0 ( Date: 26 September, 2023 )
-- Added support for Twitter API version 2.
-- Increased the limit for Google Reviews locations to 200.
-- We have updated the Google My Business logo and renamed the platform from Google My Business to Google Business Profile.
-- Fixed an issue related to saving Instagram images when new images arrive.
-- Resolved the issue of saving Instagram images of the same size when downloaded via cURL.
-- Fixed the Instagram header cache creation and API error generation issue.
-- Fixed an issue related to the type of arguments in base64_decode.
-- Fixed the problem of connected Instagram accounts not being deleted properly.
-- Fixed a PHP required parameter error.
-- Fixed an issue where unnecessary style attributes were being printed.
-- Fixed the missing href tag in the chat widget.
-- Fixed a PHP notice in the Elementor widget class.
-
-3.10.1 ( Date: 26 July, 2023 )
-- Fixed compatible issue with oxygen page builder
-
-3.10.0 ( Date: 26 July, 2023 )
-- Added Optimize Images settings option in Settings -> Feed Platforms -> Instagram Settings. This feature automatically stores local copies of Instagram feed images on your server.
-- Added Instagram Feed GDPR compliant settings option in Settings -> Advanced Settings.
-- Added Optimize Images reset option in Settings -> Feed Platforms -> Instagram Settings.
-- Added Optimize Image resolution settings option in Template Editor -> Post -> Images Resolution.
-- Added a warning notice in the wp social ninja admin area to alert you about critical issues with your Instagram Feed.
-- Added Email notification alerts for critical Instagram Feed issues. You will receive an email notification if there's an unresolved issue with an Instagram feed on your website.
-- Fixed issue with editing button text in the shoppable Instagram Feed.
-- Fixed an issue with fetching the number of videos in the YouTube Feed.
-- Fixed multiple Google My Business (GMB) accounts auto sync issue.
-- Fixed the extra slash issue in the rest route for WPML plugin.
-
-3.9.4 ( Date: 25 May, 2023 )
-- Fix Instagram API error: Tried accessing nonexisting field (comments_count) on node type (Media)
-
-3.9.3 ( Date: 21 April, 2023 )
-- Fix Instagram accounts connection auto disconnect issue
-
-3.9.2 ( Date: 18 April, 2023 )
-- Fix Instagram feeds not found issue
-- Fix Instagram albums media display issue
-- Fix Only admin can see error messages
-- Fix Compatible with breeze plugins cache
-
-3.9.1 ( Date: 25 March, 2023 )
-Tweak: Instagram and Facebook feed data is permanently deleted from your site after deauthorizing the WP Social Ninja app. Due to Meta's platform requirements, any Meta's platform data on your site must be deleted within a reasonable time after the app has been deauthorized.
-Tweak: Facebook and Instagram access tokens are now encrypted in your WordPress database.
-
-3.9.0 ( Date: 30 December, 2022 )
-- Add Facebook Feed access token manually connect option
-- Add Facebook Reviews access token manually connect option
-- Add support for PHP 8.1
-- Add external urls hide option in reviews settings
-- Added date option, title & author spacing option in testimonial module
-- Fix Google My Bussiness access token expired issue
-- Fix Google My Bussiness accounts limit issue
-- Fix CRON JOB issue
-- Fix YouTube feed popup scrolling issue
-- Fix php mb_strpos function undefined issue
-- Fix autoptimizeCache method undefined issue
-- Fix Instagram video issue in inline mode for iphone
-
-3.8.0 ( Date: 16 November, 2022 )
-- Added Instagram shoppable feed module
-- Added responsive slider option
-- Added YouTube Feed custom banner upload option
-- Added Twitter Item Box style option
-- Added filter hook for facebook feed api data limit
-- Instagram, Facebook, Twitter feed compatible with siteground cache
-- Twitter feed compatible with caching plugins
-- Improve facebook and instagram profile header in editor
-- Fix web dev errors for chat widget
-- Fix permalink issue on facebook feed
-
-3.7.2 ( Date: 12 October, 2022 )
-- Fix Add Notifications and Add Testimonial button display issue
-
-3.7.1 ( Date: 11 October, 2022 )
-- Migrate Google my business APP
-- Compatible with Godaddy Cache, WP-Optimize Cache , WP Fastest Cache, Autoptimize Cache plugin
-- Added on-hover tooltip text option for chat widget icons layout
-- Added reviews title for amazon, tripadvisor, trustpilot, aliexpress, booking dot com
-- Improve platforms page UI
-- Improve route reload issue in settings
-- Remove Instagram empty media URL feeds from feed object
-- Fix oxygen page builder wpsn templates CSS loading in the footer issue
-- Fix business info issue
-- Fix responsive bar selected device and scroll issue
-- Fix Facebook feed incorrect media type issue
-- Fix Tripadvisor reviews Unicode text support issue
-- Fix Tripadvisor total reviews count
-
-3.7.0 ( Date: 24 August, 2022 )
-- Add Template Style Module for all platform
-- Add a responsive query option for all platform
-- Add a responsive column breakpoint option for all platform
-- Add Show/hide reviews by specific words option
-- Add hide date option for reviews
-- Add collect testimonials using Fluent Forms
-- Add hide facebook feed shared posts features
-- Add booking.com 1-10 starts filter option
-- Add google locations and facebook pages clear option
-- Improve Chat widget compatible with Litespeed cache
-- Improve IG, FB feed compatible with wp rocket plugin
-- Improve API Integrations
-- Fix Youtube Feed - live streams videos incorrect date display issue
-- Fix include/exclude feeds count issue
-- Fix booking.com average rating issue
-- Fix reviews business info issue
-- Fix Google reviews locations return false issue
-- Fix Facebook feed image undefined issue
-- Fix review empty URL issue
-- Fix YT and IG popup open issue
-- Fix Compatible issue with elementor pro
-- Refactored Editor Panel VueJS Components for better performance
-- Refactored App Controller and Models
-- Internal improvements
-
-3.6.1 ( Date: June 1, 2022 )
-- Fix business info auto delete issue
-- Fix reviews cache key delete issue
-- Improve YouTube feed include, exclude filter
-
-3.6.0 ( Date: May 30, 2022 )
-- Add Testimonial Module
-- Add Custom reviews Import & Export feature
-- Add manually auto-sync option
-- Add reviews sorting option in the admin panel
-- Improve Airbnb reviews API
-- Fix Facebook and Instagram feed line breaks issues for different language
-- Fix GMB duplicate reviews issue
-- Fix the number of feeds issue
-- Fix IG video thumbnail display issue in IOS device
-- Fix the Booking.com platform name alignment issue
-- Fix write a review button display issue
-
-3.5.7 ( Date: April 22, 2022 )
-- Fix slider issue
-
-3.5.6 ( Date: April 20, 2022 )
-- Remove Copyrighted media assets
-- Updated Assets and Readme file change
-
-3.5.5 ( Date: April 20, 2022 )
-- Fix the google locations limit issue
-- Fix the Redis object cache compatibility issue
-- Fix the phone number chat widget open in the new tab issue
-- Fix chat widget email and phone number plain text issue
-- Fix Twitter header display issue in the template editor panel
-- Fix elementor reviews widget reviewer name styling issue
-- Add read more/less styling option for elementor reviews widget
-
-3.5.4 ( Date: March 30, 2022 )
-- Add translate option in settings panel
-- Add filter hook for reviews platform icon
-- Add class name in all html elements
-- Improve notification popup settings panel
-- Improve global settings panel design
-- Improve Instagram feed compatible with Litespeed cache
-- Improve hide chat widget from elementor, oxygen, beaver builder editor panel
-- Update tripadvisor icon
-- Remove GMB deprecated API end points
-- Fix chat widget close button in only icons layout
-- Fix facebook header number format issue
-- Fix twitter hashtag url 404 not found issue
-- Fix slider issue in Oxygen page builder
-- Fix fluent forms chat widget info message
-- Fix 'ago' translate issue
-- Fix reviews template web accessibility issue
-- Fix Elementor 3.6.x compatibility issue
-- Fix http issue in GMB write a review URL
-
-3.5.3 ( Date: February 03, 2022 )
-- Fix critical error issue
-
-3.5.2 ( Date: February 02, 2022 )
-- Add header title option for Fluent Forms channel in Chat widgets
-- Fix js error in oxygen page builder issue
-- Fix Facebook Feed curl error issue
-- Fix Facebook Feed page profile picture image quality issue
-- Fix Facebook Feed Masonry Layout overlapping issue in Firefox browser
-- Fix Tripadvisor invalid date issue
-- Fix Tripadvisor header rating issue
-- Fix custom review and fluent forms review merge issue
-
-3.5.1 ( Date: January 25, 2022 )
-- Fix database issue
-- Improve localize script compatible for wp 5.9
-- Improve small css
-
-3.5.0 ( Date: January 24, 2022 )
-- Add Facebook Feed
-- Add Facebook Feed Elementor Widget
-- Add Facebook Feed Oxygen Widget
-- Add Facebook Feed Beaver Widget
-- Fix others platform reviews not showing when Fluent Forms reviews are added
-- Fix swiper slider conflict with elementor 3.5.0
-- Fix YouTube auto play issue in chrome browser
-- Fix fluent form chat widget icon issue
-- Fix reviews popup template scrollbar issue
-- Improve instagram template caption font size in mobile device
-- Improve GMB reviews limit is 100
-- Remove important tag from all button css
 
 [See changelog for all versions.](https://docs.wpsocialninja.com/guide/troubleshooting-support/change-log.html)

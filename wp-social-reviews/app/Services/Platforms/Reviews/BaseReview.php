@@ -12,6 +12,12 @@ use WPSocialReviews\App\Services\Helper as ServicesHelper;
 
 abstract class BaseReview
 {
+    /**
+     * Identity values and insert rows per statement. Payload length comes from a remote API
+     * page, so nothing in this class bounds it — statements stay chunked.
+     */
+    const SYNC_BATCH_SIZE = 500;
+
     public $platform = '';
     protected $optionKey = '';
     protected $cronScheduleName = '';
@@ -138,6 +144,25 @@ abstract class BaseReview
         $remoteSyncConsumerDisplayNames = apply_filters('wpsocialreviews/consumer_displayName_value_providers', []);
 
 
+        $fieldName = $this->syncIdentityColumn($remoteSyncReviewerNames);
+
+        // AliExpress decides on a delete only after learning a review is new, and that delete
+        // must land before the row is written, so its statements stay interleaved per item.
+        $batchable = $this->platform !== 'aliexpress';
+
+        $identityValues = [];
+        foreach ($reviews as $index => $review) {
+            $identityValues[$index] = $this->syncIdentityValue($review, $remoteSyncConsumerDisplayNames);
+        }
+
+        // Cleared before the lookup, not per item, so nothing can match a row this pass removes.
+        if ($this->platform === 'google') {
+            $this->deleteReviewsMissingReviewId($reviews);
+        }
+
+        $existingByIdentity = $batchable ? $this->findReviewsByIdentity($fieldName, $identityValues) : [];
+        $pendingInserts = [];
+
         foreach ($reviews as $index => $review) {
             if(($this->platform === 'tripadvisor' || $this->platform === 'yelp')){
                 $currentReviewId = Arr::get($review, 'id');
@@ -147,53 +172,16 @@ abstract class BaseReview
                 }
             }
 
-            $exist = false;
-            if (in_array($this->platform, $remoteSyncReviewerNames) || $this->platform === 'yelp' || $this->platform === 'airbnb' || $this->platform === 'google' || $this->platform === 'tripadvisor' || $this->platform === 'woocommerce' || $this->platform === 'fluent-cart' || $this->platform === 'aliexpress') {
-                $fieldName = 'review_id';
-            } else {
-                $fieldName = 'reviewer_url';
-            }
-
-            $value = '';
-            if ($this->platform === 'zomato') {
-                $value = Arr::get($review, 'review.user.profile_url');
-            } elseif ($this->platform === 'aliexpress') {
-                $value = Arr::get($review, 'evaluationIdStr');
-            } elseif ($this->platform === 'booking.com') {
-                $value = Arr::get($review, 'source_id').'-'. Arr::get($review, 'reviewer_name');
-            } elseif ($this->platform === 'tripadvisor' || $this->platform === 'yelp') {
-                $value = Arr::get($review, 'id');
-            } elseif ($this->platform === 'airbnb') {
-                $value = $this->getReviewId($review);
-            } elseif ($this->platform === 'google') {
-                $value = Arr::get($review, 'reviewId');
-            } elseif ($this->platform === 'facebook') {
-                $value = isset($review['reviewer']['id']) ? 'https://facebook.com/' . $review['reviewer']['id'] : $review['open_graph_story']['id'];
-            } elseif ($this->platform === 'amazon') {
-                $value = Arr::get($review, 'reviewer_name');
-            } elseif (in_array($this->platform, $remoteSyncConsumerDisplayNames)) {
-                $value = Arr::get($review, 'id');
-            } elseif ($this->platform === 'woocommerce' || $this->platform === 'fluent-cart') {
-                $value = Arr::get($review, 'review_id');
-            }
+            $value = $identityValues[$index];
+            $identityKey = (string) $value;
 
             // check if a review already exists or not
-            $exist = Review::where('platform_name', $this->platform)
-                ->where($fieldName, $value)
-                ->first();
-
-            //remove google reviews with empty review_id
-            if($this->platform === 'google') {
-                $reviewerName = Arr::get($review, 'reviewer.displayName');
-                if ($reviewerName) {
-                    Review::where('platform_name', $this->platform)
-                        ->where('reviewer_name', $reviewerName)
-                        ->where(function($query) {
-                            $query->whereNull('review_id')
-                                ->orWhere('review_id', '');
-                        })
-                        ->delete();
-                }
+            if ($batchable) {
+                $exist = isset($existingByIdentity[$identityKey]) ? $existingByIdentity[$identityKey] : false;
+            } else {
+                $exist = Review::where('platform_name', $this->platform)
+                    ->where($fieldName, $value)
+                    ->first();
             }
 
             $newReview = $this->formatData($review, $index);
@@ -235,18 +223,152 @@ abstract class BaseReview
                 }
 
                 Review::where('id', $exist->id)->update($newReview);
-            } else {
+            } elseif (!$batchable) {
                 Review::insert($newReview);
+            } else {
+                // A repeated identity inside one payload used to find the row the earlier item had
+                // just written and update it, keeping that row's approval. Staging repeats that.
+                if (isset($pendingInserts[$identityKey])) {
+                    $newReview['review_approved'] = (int) $pendingInserts[$identityKey]['review_approved'];
+                }
+
+                $pendingInserts[$identityKey] = $newReview;
             }
 
             // Update the last fetched review ID to the current one
             $lastFetchedReviewId = $currentReviewId;
         }
 
+        $this->insertSyncedReviews($pendingInserts);
+
         if(($this->platform === 'tripadvisor' || $this->platform === 'yelp')) {
             // Save the last fetched review ID for the next run
             $lastFetchedReviewsIds[$this->platform][$placeId] = $lastFetchedReviewId;
             update_option('last_fetched_reviews_id', $lastFetchedReviewsIds);
+        }
+    }
+
+    /**
+     * Which column identifies a review for this platform. It depends on the platform alone,
+     * so it is resolved once per sync rather than once per payload item.
+     */
+    protected function syncIdentityColumn($reviewerNameProviders)
+    {
+        if (in_array($this->platform, $reviewerNameProviders) || $this->platform === 'yelp' || $this->platform === 'airbnb' || $this->platform === 'google' || $this->platform === 'tripadvisor' || $this->platform === 'woocommerce' || $this->platform === 'fluent-cart' || $this->platform === 'aliexpress') {
+            return 'review_id';
+        }
+
+        return 'reviewer_url';
+    }
+
+    /**
+     * That column's value for one payload item.
+     */
+    protected function syncIdentityValue($review, $consumerDisplayNameProviders)
+    {
+        if ($this->platform === 'zomato') {
+            return Arr::get($review, 'review.user.profile_url');
+        } elseif ($this->platform === 'aliexpress') {
+            return Arr::get($review, 'evaluationIdStr');
+        } elseif ($this->platform === 'booking.com') {
+            return Arr::get($review, 'source_id').'-'. Arr::get($review, 'reviewer_name');
+        } elseif ($this->platform === 'tripadvisor' || $this->platform === 'yelp') {
+            return Arr::get($review, 'id');
+        } elseif ($this->platform === 'airbnb') {
+            return $this->getReviewId($review);
+        } elseif ($this->platform === 'google') {
+            return Arr::get($review, 'reviewId');
+        } elseif ($this->platform === 'facebook') {
+            return isset($review['reviewer']['id']) ? 'https://facebook.com/' . $review['reviewer']['id'] : $review['open_graph_story']['id'];
+        } elseif ($this->platform === 'amazon') {
+            return Arr::get($review, 'reviewer_name');
+        } elseif (in_array($this->platform, $consumerDisplayNameProviders)) {
+            return Arr::get($review, 'id');
+        } elseif ($this->platform === 'woocommerce' || $this->platform === 'fluent-cart') {
+            return Arr::get($review, 'review_id');
+        }
+
+        return '';
+    }
+
+    /**
+     * One SELECT per 500 identity values instead of one per payload item. Keyed on the first
+     * row seen for a value, which is what the single `first()` it replaces also gave.
+     */
+    protected function findReviewsByIdentity($fieldName, array $identityValues)
+    {
+        $values = array_values(array_unique(array_map('strval', $identityValues)));
+        if (empty($values)) {
+            return [];
+        }
+
+        $existing = [];
+        foreach (array_chunk($values, static::SYNC_BATCH_SIZE) as $chunk) {
+            $query = Review::where('platform_name', $this->platform);
+
+            // strval() folds a missing identity to '', but IN ('') never matches a NULL
+            // column, and the per-item where() this replaced compiled to IS NULL.
+            if (in_array('', $chunk, true)) {
+                $query = $query->where(function ($subQuery) use ($fieldName, $chunk) {
+                    $subQuery->whereIn($fieldName, $chunk)->orWhereNull($fieldName);
+                });
+            } else {
+                $query = $query->whereIn($fieldName, $chunk);
+            }
+
+            foreach ($query->get() as $row) {
+                $key = (string) $row->{$fieldName};
+                if (!isset($existing[$key])) {
+                    $existing[$key] = $row;
+                }
+            }
+        }
+
+        return $existing;
+    }
+
+    /**
+     * Google can return a review with no id for a reviewer that already has rows. Those rows
+     * are unusable, so every reviewer named in the payload is cleared in one statement.
+     */
+    protected function deleteReviewsMissingReviewId($reviews)
+    {
+        $reviewerNames = [];
+        foreach ($reviews as $review) {
+            $reviewerName = Arr::get($review, 'reviewer.displayName');
+            if ($reviewerName) {
+                $reviewerNames[(string) $reviewerName] = true;
+            }
+        }
+
+        foreach (array_chunk(array_keys($reviewerNames), static::SYNC_BATCH_SIZE) as $chunk) {
+            Review::where('platform_name', $this->platform)
+                ->whereIn('reviewer_name', $chunk)
+                ->where(function($query) {
+                    $query->whereNull('review_id')
+                        ->orWhere('review_id', '');
+                })
+                ->delete();
+        }
+    }
+
+    /**
+     * Rows are grouped by their key set because a multi-row INSERT takes its columns from the
+     * first row, and platforms whose payload omits a field produce more than one shape.
+     */
+    protected function insertSyncedReviews(array $rows)
+    {
+        $groups = [];
+        foreach ($rows as $row) {
+            $keys = array_keys($row);
+            sort($keys, SORT_STRING);
+            $groups[implode('|', $keys)][] = $row;
+        }
+
+        foreach ($groups as $group) {
+            foreach (array_chunk($group, static::SYNC_BATCH_SIZE) as $chunk) {
+                Review::insert($chunk);
+            }
         }
     }
 
@@ -470,8 +592,11 @@ abstract class BaseReview
 //
 //                    }
 
+                    $attempted = false;
+
                     if($this->platform === 'aliexpress') {
                         if(!empty($businessName) && !empty($businessId)) {
+                            $attempted = true;
                             try {
                                 $businessInfo = $this->verifyCredential($credData);
                             } catch (\Exception $exception) {
@@ -481,11 +606,17 @@ abstract class BaseReview
                         }
                     } else {
                         if($businessUrl) {
+                            $attempted = true;
                             $this->syncReviews($credData);
                         }
                     }
 
-                    $this->cacheHandler->createCache('wpsr_reviews_' . $this->platform . '_business_info_' . $placeId, $placeId);
+                    // Only move the cursor once a refresh has actually been attempted.
+                    // Advancing it regardless left an unrefreshable business looking fresh,
+                    // so the next cron skipped it instead of retrying.
+                    if ($attempted) {
+                        $this->cacheHandler->createCache('wpsr_reviews_' . $this->platform . '_business_info_' . $placeId, $placeId);
+                    }
                 }
             }
         }

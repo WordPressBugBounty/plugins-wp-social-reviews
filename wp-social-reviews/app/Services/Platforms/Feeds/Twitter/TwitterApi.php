@@ -93,14 +93,14 @@ class TwitterApi
      *
      * @param array $array Array of parameters to send to API
      *
-     * @return TwitterAPIExchange Instance of self for method chaining
+     * @return $this Instance of self for method chaining
      * @throws \Exception When you are trying to set both get and post fields
      *
      */
     public function setPostfields(array $array)
     {
         if (!is_null($this->getGetfield())) {
-            throw new Exception('You can only choose get OR post fields (post fields include put).');
+            throw new \Exception('You can only choose get OR post fields (post fields include put).');
         }
         if (isset($array['status']) && substr($array['status'], 0, 1) === '@') {
             $array['status'] = sprintf("\0%s", $array['status']);
@@ -124,14 +124,14 @@ class TwitterApi
      *
      * @param string $string Get key and value pairs as string
      *
-     * @return \TwitterAPIExchange Instance of self for method chaining
+     * @return $this Instance of self for method chaining
      * @throws \Exception
      *
      */
     public function setGetfield($string)
     {
         if (!is_null($this->getPostfields())) {
-            throw new Exception('You can only choose get OR post / post fields.');
+            throw new \Exception('You can only choose get OR post / post fields.');
         }
 
         $getfields = preg_replace('/^\?/', '', explode('&', $string));
@@ -176,12 +176,12 @@ class TwitterApi
      *
      * @throws \Exception
      *
-     * @return \TwitterAPIExchange Instance of self for method chaining
+     * @return $this Instance of self for method chaining
      */
     public function buildOauth($url, $requestMethod)
     {
         if (!in_array(strtolower($requestMethod), array('post', 'get', 'put', 'delete'))) {
-            throw new Exception('Request method must be either POST, GET or PUT or DELETE');
+            throw new \Exception('Request method must be either POST, GET or PUT or DELETE');
         }
         $consumer_key              = $this->consumer_key;
         $consumer_secret           = $this->consumer_secret;
@@ -253,8 +253,8 @@ class TwitterApi
 
         if(isset($result['error'])) {
             $error_message = 'Unknown Error!';
-            if(isset($error['error']['message'])) {
-                $error_message = $error['error']['message'];
+            if(isset($result['error']['message'])) {
+                $error_message = $result['error']['message'];
             }
 
             throw new \Exception(esc_html($error_message));

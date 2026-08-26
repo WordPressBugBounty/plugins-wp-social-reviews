@@ -2,6 +2,7 @@
 defined('ABSPATH') or die;
 
 use WPSocialReviews\App\Services\Helper as GlobalHelper;
+use WPSocialReviews\App\Services\Integrations\FluentPlayer\FluentPlayerEmbed;
 use WPSocialReviews\Framework\Support\Arr;
 
 $wpsr_image_optimization = Arr::get($image_settings, 'optimized_images');
@@ -14,6 +15,11 @@ $wpsr_image_resolution = Arr::get($template_meta, 'video_settings.resolution');
 $wpsr_animation_img_class = str_contains($wpsr_media_url ?? '', 'placeholder') && $wpsr_media_url ? 'wpsr-animated-background' : '';
 $wpsr_img_class = !empty($wpsr_media_url) && !str_contains($wpsr_media_url ?? '', 'placeholder') ? 'wpsr-yt-post-img wpsr-show' : 'wpsr-yt-post-img wpsr-hide';
 $wpsr_thumbnail_url = $wpsr_image_optimization === 'true' ? $wpsr_media_url : $wpsr_thumbnail_url;
+// Length in seconds for Fluent Player's "layers at end", read on the click AJAX so
+// the server needn't re-look-up the feed. Only parsed when that option is on.
+$wpsr_fp_duration = Arr::get($template_meta, 'video_settings.fluent_player_layers_at_end') === 'true'
+    ? FluentPlayerEmbed::videoDuration($feed)
+    : 0;
 ?>
 <div class="wpsr-yt-post"
      data-post_id="<?php echo esc_attr($wpsr_feed_id); ?>"
@@ -24,9 +30,12 @@ $wpsr_thumbnail_url = $wpsr_image_optimization === 'true' ? $wpsr_media_url : $w
     <a data-videoid="<?php echo esc_attr($videoId); ?>" data-index="<?php echo esc_attr($index); ?>"
        data-playmode="<?php echo isset($template_meta['video_settings']['play_mode']) ? esc_attr($template_meta['video_settings']['play_mode']) : 'inline'; ?>"
        data-template_id="<?php echo esc_attr($templateId); ?>"
+       data-duration="<?php echo esc_attr($wpsr_fp_duration); ?>"
        class="wpsr-yt-video-preview wpsr-yt-video-playmode wpsr-yt-post-media <?php echo esc_attr($wpsr_animation_img_class); ?>"
        title="<?php echo esc_attr($feed['snippet']['title']); ?>"
        rel="noopener noreferrer"
+       tabindex="0"
+       role="button"
     >
 
         <img class="wpsr-yt-video-img-render <?php echo esc_attr($wpsr_img_class); ?>" src="<?php echo esc_url($wpsr_thumbnail_url); ?>"

@@ -43,8 +43,11 @@ class MetaController extends Controller
     public function update(Request $request, $postId)
     {
         $platform = $request->get('platform');
-        $settings = json_decode($request->get('settings'), true);
-        $settings = wp_unslash($settings);
+        $settings = $this->decodeJsonParam($request->get('settings'));
+
+        if (null === $settings) {
+            return $this->invalidJsonPayload();
+        }
 
         $format_feed_settings = Config::formatSocialWallConfig($settings, array());
         $encodedMeta        = json_encode($format_feed_settings, JSON_UNESCAPED_UNICODE);

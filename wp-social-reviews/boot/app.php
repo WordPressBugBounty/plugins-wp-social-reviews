@@ -5,6 +5,7 @@ defined('ABSPATH') or die;
 use WPSocialReviews\Framework\Foundation\Application;
 use WPSocialReviews\App\Hooks\Handlers\ActivationHandler;
 use WPSocialReviews\App\Hooks\Handlers\DeactivationHandler;
+use WPSocialReviews\Database\Migrations\ReviewCategoriesMigrator;
 //use WPSocialReviews\App\Hooks\Handlers\UninstallHandler;
 
 return function ($file) {
@@ -33,6 +34,26 @@ return function ($file) {
                 printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
             });
         } else {
+            /*
+             * Drains whatever the category taxonomy still owes — creating its tables,
+             * copying the legacy `category` column, sweeping orphaned relationships — on
+             * admin, cron and WP-CLI requests only. All of it is bounded but real work
+             * against wpsr_reviews, so public, REST and admin-ajax requests skip it and
+             * read through the `category` column fallback until it has run.
+             */
+            if (ReviewCategoriesMigrator::isMaintenanceRequest()) {
+                // isBackfilled() re-checks the tables, not just the flag, so a completion
+                // flag that outlived a dropped table still routes back to migrate() —
+                // which recreates the schema and clears the stale flag before any sweep.
+                if (!ReviewCategoriesMigrator::isBackfilled()) {
+                    ReviewCategoriesMigrator::migrate();
+                } else {
+                    // Resumes a sweep left unfinished by its per-request cap; migrate() no
+                    // longer runs to pick it up. One option read when nothing is pending.
+                    ReviewCategoriesMigrator::maybeContinueOrphanSweep();
+                }
+            }
+
             do_action('wp_social_reviews_loaded', $app);
             do_action('wp_social_reviews_loaded_v2', $app);
         }

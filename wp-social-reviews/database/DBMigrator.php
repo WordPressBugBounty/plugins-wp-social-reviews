@@ -6,6 +6,7 @@ require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
 use WPSocialReviews\Database\Migrations\CacheMigrator;
 use WPSocialReviews\Database\Migrations\ImageOptimizationMigrator;
+use WPSocialReviews\Database\Migrations\ReviewCategoriesMigrator;
 use WPSocialReviews\Database\Migrations\ReviewFormsMigrator;
 use WPSocialReviews\Database\Migrations\ReviewsMigrator;
 
@@ -16,6 +17,7 @@ class DBMigrator
 	    CacheMigrator::class,
         ImageOptimizationMigrator::class,
         ReviewFormsMigrator::class,
+        ReviewCategoriesMigrator::class,
     ];
 
     public static function run($network_wide = false)

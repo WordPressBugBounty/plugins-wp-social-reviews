@@ -193,7 +193,7 @@ class PlatformErrorManager
             // translators: Please retain the placeholders (%s, %d, etc.) and ensure they are correctly used in context.
             $return_message['admin_only']          = sprintf( __( 'Error connecting to %s:', 'wp-social-reviews' ), Arr::get($errors, 'url') );
 
-            if ( isset( $errors ) && isset($errors->errors) ) {
+            if ( isset($errors->errors) ) {
                 $num = count( $errors->errors );
                 $i   = 1;
                 foreach ( $errors->errors as $key => $item ) {
@@ -364,7 +364,7 @@ class PlatformErrorManager
             return null;
         }
         
-        if(!empty($accounts_revoked) && is_array($accounts_revoked)){
+        if(is_array($accounts_revoked)){
             $accounts_revoked = implode( ', ', $accounts_revoked );
         }
 

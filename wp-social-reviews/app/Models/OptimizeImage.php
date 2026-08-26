@@ -49,6 +49,14 @@ class OptimizeImage extends Model
 
     public function updateData($mediaId, $userName, $data)
     {
-       return static::updateOrCreate(['media_id' => $mediaId, 'user_name' => $userName], $data);
+        // Identity without the platform let an image carrying the same id and user name
+        // on another platform claim this row instead of getting one of its own.
+        $identity = ['media_id' => $mediaId, 'user_name' => $userName];
+
+        if (isset($data['platform'])) {
+            $identity['platform'] = $data['platform'];
+        }
+
+        return static::updateOrCreate($identity, $data);
     }
 }

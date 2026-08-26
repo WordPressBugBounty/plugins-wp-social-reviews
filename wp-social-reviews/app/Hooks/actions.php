@@ -12,7 +12,7 @@ defined('ABSPATH') or die;
  */
 
 /**
- * @var $app \WPSocialReviews\Framework\Foundation\Application
+ * @var \WPSocialReviews\Framework\Foundation\Application $app
  */
 
 // Init the platform on plugin load
@@ -252,6 +252,14 @@ $app->addAction('wpsocialreviews/youtube_feed_title', 'YoutubeTemplateHandler@re
  */
 $app->addAction('wp_ajax_nopriv_wpsr_youtube_popup_feed', 'YoutubeTemplateHandler@renderPopupFeed');
 $app->addAction('wp_ajax_wpsr_youtube_popup_feed', 'YoutubeTemplateHandler@renderPopupFeed');
+
+/**
+ * Render a feed video in Fluent Player (inline & gallery play modes)
+ *
+ * @since  4.4.0
+ */
+$app->addAction('wp_ajax_nopriv_wpsr_youtube_fluent_player', 'YoutubeTemplateHandler@renderFluentPlayer');
+$app->addAction('wp_ajax_wpsr_youtube_fluent_player', 'YoutubeTemplateHandler@renderFluentPlayer');
 
 /*******
  *

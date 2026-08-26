@@ -1,6 +1,7 @@
 <?php
 defined('ABSPATH') or die;
 
+use WPSocialReviews\App\Services\Platforms\Reviews\Helper;
 use WPSocialReviews\Framework\Support\Arr;
 
 $wpsr_slider_data              = Arr::get($template_meta, 'carousel_settings');
@@ -197,6 +198,15 @@ if($wpsr_ai_enabled === 'true' && ($templateType === 'grid' || $templateType ===
 }
 
 
+
+// Pro sort/rating toolbar, printed just BEFORE the feed container so it is a sibling a re-fetch cannot replace.
+if (defined('WPSOCIALREVIEWS_PRO') && Helper::supportsVisitorSorting($platforms)) {
+    $wpsr_sort_toolbar = (string) apply_filters('wpsocialreviews/add_reviews_sort_toolbar', '', $template_meta,
+        $templateId, $translations, $platforms, $templateType);
+
+    // HTML, so wp_kses() not esc_html(). Our callback escapes as it builds; the allowlist bounds any other.
+    echo wp_kses($wpsr_sort_toolbar, Helper::sortToolbarAllowedHtml());
+}
 
 echo ($templateType === 'slider' && defined('WPSOCIALREVIEWS_PRO')) ? '<div class="wpsr-reviews-slider swiper-container '.esc_attr($wpsr_ai_enabled_class).'" tabindex="0">'
     : '<div class="wpsr-all-reviews wpsr_feeds '. esc_attr($wpsr_ai_enabled_class) . ' ' . esc_attr($wpsr_has_header) . ' ' . esc_attr($wpsr_masonry) . ' ' . esc_attr($wpsr_should_add_top_padding).'" data-column="' . esc_attr($wpsr_desktop_column_number) . '">';

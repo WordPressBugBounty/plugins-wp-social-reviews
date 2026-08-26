@@ -270,7 +270,7 @@ class TwitterFeed extends BaseFeed
      * @param string $feed_type
      * @param string $hashtag
      *
-     * @return string
+     * @return void
      * @since 2.0.0
      */
     public function setGetFieldsString($name, $count, $feed_type, $hashtag)
@@ -291,7 +291,7 @@ class TwitterFeed extends BaseFeed
     /**
      * sets the complete url for API endpoint
      *
-     * @param string $feed_type
+     * @param string $apiType
      *
      * @return string
      * @since 2.0.0

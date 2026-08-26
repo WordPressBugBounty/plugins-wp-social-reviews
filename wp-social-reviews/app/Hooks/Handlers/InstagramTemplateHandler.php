@@ -9,6 +9,34 @@ use WPSocialReviews\App\Services\Helper as GlobalHelper;
 class InstagramTemplateHandler
 {
     /**
+     * Instagram templates the installed Pro release can actually render.
+     *
+     * Pro builds the view path from the template key on both the first paint
+     * and the load-more path, so an unsupported key hits a missing file.
+     * Released Pro ships none of these, hence the empty default.
+     *
+     * @return array
+     **/
+    public static function getProTemplates()
+    {
+        return apply_filters('wpsocialreviews/instagram_pro_templates', array());
+    }
+
+    /**
+     * Advertising a template is not enough; without a renderer the caller
+     * would concatenate the unfiltered array and print the word "Array".
+     *
+     * @param string $template
+     * @return bool
+     **/
+    public static function canRenderProTemplate($template)
+    {
+        return defined('WPSOCIALREVIEWS_PRO')
+            && in_array($template, self::getProTemplates(), true)
+            && has_filter('wpsocialreviews/add_instagram_feed_template');
+    }
+
+    /**
      *
      * Render parent opening div for the template item
      *
@@ -175,7 +203,7 @@ class InstagramTemplateHandler
         }
 
         // Show placeholder if media_url exists and doesn't contain 'placeholder'
-        if ($media_url && !str_contains($media_url ?? '', 'placeholder')) {
+        if ($media_url && !str_contains($media_url, 'placeholder')) {
             return 'wpsr-show';
         }
 
@@ -199,7 +227,7 @@ class InstagramTemplateHandler
         // Add animation class if:
         // 1. Media URL exists and contains 'placeholder', OR
         // 2. Layout type is carousel
-        if (($media_url && str_contains($media_url ?? '', 'placeholder')) || $layout_type === 'carousel') {
+        if (($media_url && str_contains($media_url, 'placeholder')) || $layout_type === 'carousel') {
             return 'wpsr-animated-background';
         }
 

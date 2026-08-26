@@ -20,7 +20,7 @@ class AdminMenuHandler
     /**
      *
      * Add Menu and sub menu for the admin page
-     * @return string
+     * @return void
      * @since 1.0.0
      *
      **/
@@ -186,7 +186,7 @@ class AdminMenuHandler
     /**
      *
      * 3rd party developer can render admin app from here
-     * @return string
+     * @return void
      * @since 1.0.0
      *
      **/
@@ -304,6 +304,9 @@ class AdminMenuHandler
                 'wpsr_import_export_nonce' => wp_create_nonce('wpsr_import_export_data'),
                 'assets_url'              => WPSOCIALREVIEWS_URL . 'assets',
                 'has_pro'                 => defined('WPSOCIALREVIEWS_PRO') && WPSOCIALREVIEWS_PRO,
+                // Renderable, not merely advertised: every consumer asks "will this draw?".
+                'facebook_pro_templates'  => FacebookFeedTemplateHandler::getRenderableProTemplates(),
+                'instagram_pro_templates' => InstagramTemplateHandler::getProTemplates(),
                 'is_custom_feed_for_tiktok_activated'   => defined('CUSTOM_FEED_FOR_TIKTOK') && CUSTOM_FEED_FOR_TIKTOK,
                 'is_custom_feed_for_tiktok_installed' => Helper::isCustomFeedForTiktokInstalled(),
                 'ajaxurl'                 => admin_url('admin-ajax.php'),
@@ -316,7 +319,9 @@ class AdminMenuHandler
                 'nonce'                   => wp_create_nonce($slug),
                 'rest'                    => $this->getRestInfo($app),
                 'has_fluent_form'         => defined('FLUENTFORM_VERSION'),
+                'has_fluent_player'       => defined('FLUENT_PLAYER_VERSION'),
                 'hasFluentCart'           => defined('FLUENTCART_VERSION'),
+                'hasWooCommerce'          => defined('WC_VERSION'),
                 'brand_icons'             => $this->getBrandIcons(),
                 'tp_slug'                 => '_not_defined_yet_',
                 'tp_title'                 => ' ',
@@ -486,7 +491,7 @@ class AdminMenuHandler
                 'message'            => '',
                 'reviewsinfo'        => [],
                 'sourceText'         => 'Place',
-                'apiUrl'             => 'https://www.tripadvisor.com/developers?screen=credentials',
+                'apiUrl'             => 'https://www.tripadvisor.com/developers',
                 'sourceUrl'          => 'https://www.tripadvisor.com',
                 'exampleURL'         => 'https://www.tripadvisor.com/Attraction_Review-g2368232-d10238477-Reviews-Nilachal-Bandarban_Chittagong_Division.html',
                 'docs'               => 'https://wpsocialninja.com/docs/tripadvisor-configuration-social-reviews-wp-social-ninja/',

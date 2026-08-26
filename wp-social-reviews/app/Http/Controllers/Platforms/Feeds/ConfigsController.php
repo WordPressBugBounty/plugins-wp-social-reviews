@@ -16,9 +16,12 @@ class ConfigsController extends Controller
 
     public function store(Request $request)
     {
-        $settings = $request->get('settings');
-        $settings = json_decode($settings, true);
-        $settings = wp_unslash($settings);
+        $settings = $this->decodeJsonParam($request->get('settings'));
+
+        if (null === $settings) {
+            return $this->invalidJsonPayload();
+        }
+
         $platform = $request->get('platform');
         do_action('wpsocialreviews/verify_credential_' . $platform, $settings);
     }

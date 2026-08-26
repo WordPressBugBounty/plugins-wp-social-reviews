@@ -15,6 +15,17 @@ abstract class BaseFeed
     protected $authProvider = '';
     protected $authFlow = '';
 
+    /** @var CacheHandler|null Set by each platform feed in its own constructor. */
+    protected $cacheHandler;
+
+    /**
+     * Refresh the given expired caches. Each platform builds its own API calls.
+     *
+     * @param array $caches
+     * @return void
+     */
+    abstract public function updateCachedFeeds($caches);
+
     public function __construct($platform)
     {
         $this->platform = $platform;
@@ -43,7 +54,7 @@ abstract class BaseFeed
         add_action('wpsocialreviews/update_editor_settings_' . $this->platform, array($this, 'updateEditorSettings'), 10, 2);
 
         //handle advance settings
-        add_action('wpsocialreviews/save_advance_settings_' . $this->platform, array($this, 'saveAdvanceSettings'), 10, 2);
+        add_action('wpsocialreviews/save_advance_settings_' . $this->platform, array($this, 'saveAdvanceSettings'));
         add_action('wpsocialreviews/get_advance_settings_' . $this->platform, array($this, 'getAdvanceSettings'));
         add_action('wpsocialreviews/clear_cache_' . $this->platform, array($this, 'clearCache'));
 
@@ -93,7 +104,7 @@ abstract class BaseFeed
     /**
      * Get Advance Settings
      *
-     * @return json
+     * @return void
      * @since 1.2.5
      */
     public function getAdvanceSettings()

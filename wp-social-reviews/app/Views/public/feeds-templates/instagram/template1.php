@@ -18,7 +18,10 @@ if (!empty($feeds) && is_array($feeds)) {
                 if(Arr::get($wpsr_feed, 'shoppable_options')) {
                     $wpsr_target = Arr::get($wpsr_feed, 'shoppable_options.url_settings.open_in_new_tab') ? '_blank' : '';
                 }
-                if ($wpsr_layout_type !== 'carousel') {
+                if ($wpsr_layout_type === 'highlights' && defined('WPSOCIALREVIEWS_PRO')) {
+                    // Big/small placement is decided in CSS by :nth-child.
+                    echo '<div class="wpsr-highlight-item">';
+                } elseif ($wpsr_layout_type !== 'carousel') {
                     /**
                      * instagram_feed_template_item_wrapper_before hook.
                      *
@@ -29,7 +32,11 @@ if (!empty($feeds) && is_array($feeds)) {
             ?>
             
             <div role="group" class="wpsr-ig-post wpsr-image-ratio-<?php echo esc_attr($wpsr_image_aspect_ratio); ?> <?php echo ($wpsr_layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO')) ? 'swiper-slide' : ''; ?>" data-user_name="<?php echo esc_attr(Arr::get($wpsr_feed, 'username', ''));?>" data-post_id="<?php echo esc_attr(Arr::get($wpsr_feed, 'id', ''));?>" data-image_size="<?php echo esc_attr($wpsr_image_size);?>">
-                <a class="wpsr-ig-playmode" <?php echo ($wpsr_display_mode === 'instagram' && $wpsr_feed_link ) ? 'href=' . esc_url($wpsr_feed_link) . '' : ''; ?>
+                <?php
+                // Without an href the anchor is not focusable, so the caption stays keyboard-unreachable.
+                $wpsr_has_link = ($wpsr_display_mode === 'instagram' && $wpsr_feed_link);
+                ?>
+                <a class="wpsr-ig-playmode" <?php echo $wpsr_has_link ? 'href="' . esc_url($wpsr_feed_link) . '"' : 'tabindex="0" role="button"'; ?>
                    target="<?php echo esc_attr($wpsr_target); ?>"
                    data-index="<?php echo esc_attr($wpsr_index); ?>"
                    data-playmode="<?php echo isset($wpsr_display_mode) ? esc_attr($wpsr_display_mode) : 'instagram'; ?>"

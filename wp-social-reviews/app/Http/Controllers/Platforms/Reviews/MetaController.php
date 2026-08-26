@@ -16,13 +16,24 @@ use WPSocialReviews\App\Services\Platforms\ReviewImageOptimizationHandler;
 use WPSocialReviews\App\Services\Includes\CountryNames;
 use WPSocialReviews\App\Services\Onboarding\OnboardingHelper;
 use WPSocialReviews\App\Models\ReviewForm;
+use WPSocialReviews\App\Models\ReviewCategory;
 class MetaController extends Controller
 {
     public function index($templateId, $isFirstRound = false)
     {
-        $templateId = absint($templateId);
+        // Same guard as update(): this endpoint persists resolved category ids back
+        // into the config, so it must not accept an arbitrary post id either.
+        $templateDetails = $this->getTemplatePost($templateId);
+
+        if (!$templateDetails) {
+            return $this->sendError([
+                'message' => __('Template not found.', 'wp-social-reviews')
+            ], 404);
+        }
+
+        $templateId = $templateDetails->ID;
+
         $reviewConfig = new ReviewConfig();
-        $templateDetails    = get_post($templateId);
         $feed_template_style_meta = get_post_meta($templateId, '_wpsr_template_styles_config', true);
 
         $formattedMeta = Helper::getTemplateMetaByTemplateId($templateId);
@@ -33,6 +44,14 @@ class MetaController extends Controller
         $currentPlatforms   = Arr::get($formattedMeta, 'platform', array());
         $allBusinessInfo    = Helper::getBusinessInfoByPlatforms($currentPlatforms);
 		$categories         = Review::getCategories();
+
+        // The filter is stored by id, so the editor's names come back from those ids and
+        // a category renamed since the last save shows under its current name.
+        $storedCategoryIds = Arr::get($formattedMeta, 'selectedCategoryIds', []);
+        if (!empty($storedCategoryIds)) {
+            $formattedMeta['selectedCategories'] = ReviewCategory::namesForIds($storedCategoryIds);
+            $this->persistCategoryFilterIds($templateId, $storedCategoryIds);
+        }
         $countryList     = (new CountryNames())->getCountries();
 
         $formattedMeta['styles_config']    = $reviewConfig->formatStylesConfig(json_decode($feed_template_style_meta, true), $templateId);
@@ -207,37 +226,40 @@ class MetaController extends Controller
     const ALLOWED_POST_TYPES = ['wp_social_reviews', 'wpsr_reviews_notify'];
 
     /**
-     * @param int $templateId
      * @return \WP_Post|null The template post, or null if it is not one of ours.
      */
     private function getTemplatePost($templateId)
     {
-        if (!$templateId) {
+        $post = get_post(absint($templateId));
+
+        if (!$post || !in_array($post->post_type, self::ALLOWED_POST_TYPES, true)) {
             return null;
         }
 
-        $templateDetails = get_post($templateId);
-
-        if (!$templateDetails || !in_array($templateDetails->post_type, self::ALLOWED_POST_TYPES, true)) {
-            return null;
-        }
-
-        return $templateDetails;
+        return $post;
     }
 
     public function update(Request $request, $templateId)
     {
-        $templateId = absint($templateId);
+        $templateDetails = $this->getTemplatePost($templateId);
 
-        if (!$this->getTemplatePost($templateId)) {
+        if (!$templateDetails) {
             return $this->sendError([
                 'message' => __('Template not found.', 'wp-social-reviews')
             ], 404);
         }
 
-        $templateMeta = wp_unslash($request->get('template_meta'));
-        $templateMeta = json_decode($templateMeta, true);
+        $templateId = $templateDetails->ID;
+
+        $templateMeta = $this->decodeJsonParam($request->get('template_meta'));
+
+        if (null === $templateMeta) {
+            return $this->invalidJsonPayload();
+        }
+
         $templateMeta = $this->sanitizeTemplateMeta($templateMeta);
+
+        $templateMeta = $this->stripClientCategoryIds($templateMeta);
 
         if ($this->hasBlankCustomWriteReviewUrl($templateMeta)) {
             return $this->sendError([
@@ -317,6 +339,52 @@ class MetaController extends Controller
         ];
     }
 
+    /**
+     * Pins a config that still carries only category names to the resolved ids, once.
+     *
+     * A name resolves to an id only while it matches a category, so this has to happen
+     * before a rename, not after.
+     */
+    /**
+     * Drops the category ids the editor echoes back, so the submitted names decide the
+     * filter.
+     *
+     * Every request-driven path must call this before querying or saving: ids are
+     * authoritative in `filteredReviewsQuery()`, so echoed-back ones would keep filtering
+     * on the previous selection after the user picks a different category.
+     */
+    private function stripClientCategoryIds($templateMeta)
+    {
+        if (is_array($templateMeta)) {
+            unset($templateMeta['selectedCategoryIds']);
+        }
+
+        return $templateMeta;
+    }
+
+    private function persistCategoryFilterIds($templateId, $categoryIds)
+    {
+        // Decoded as an object: an assoc decode turns every empty object in the config
+        // into an empty array, and re-encoding would persist that shape change.
+        $stored = json_decode(get_post_meta($templateId, '_wpsr_template_config', true));
+
+        if (!is_object($stored) || !empty($stored->selectedCategoryIds)) {
+            return;
+        }
+
+        $stored->selectedCategoryIds = array_values(array_map('intval', $categoryIds));
+
+        $encoded = json_encode($stored, JSON_UNESCAPED_UNICODE);
+        if ($encoded === false) {
+            // A name-keyed filter still works; a wiped config does not.
+            return;
+        }
+
+        // update_post_meta() unslashes what it is given, so slash first or the JSON's own
+        // escape sequences are stripped and the config stops parsing.
+        update_post_meta($templateId, '_wpsr_template_config', wp_slash($encoded));
+    }
+
     private function hasBlankCustomWriteReviewUrl($templateMeta)
     {
         return Arr::get($templateMeta, 'add_custom_war_btn_url') === 'true'
@@ -324,12 +392,29 @@ class MetaController extends Controller
             && trim((string) Arr::get($templateMeta, 'war_btn_source_custom_url', '')) === '';
     }
 
+    /**
+     * Same guard as index()/update(): this hands the post object back.
+     */
     public function edit(Request $request, $templateId)
     {
-        $templateId = absint($templateId);
-        $templateMeta = wp_unslash($request->get('template_meta'));
-        $templateMeta = json_decode($templateMeta, true);
+        $templateDetails = $this->getTemplatePost($templateId);
+
+        if (!$templateDetails) {
+            return $this->sendError([
+                'message' => __('Template not found.', 'wp-social-reviews')
+            ], 404);
+        }
+
+        $templateId = $templateDetails->ID;
+
+        $templateMeta = $this->decodeJsonParam($request->get('template_meta'));
+
+        if (null === $templateMeta) {
+            return $this->invalidJsonPayload();
+        }
+
         $templateMeta = $this->sanitizeTemplateMeta($templateMeta);
+        $templateMeta = $this->stripClientCategoryIds($templateMeta);
 
 	    $currentPlatforms  = $templateMeta['platform'];
 	    if (empty($templateMeta['platform'])) {
@@ -352,7 +437,6 @@ class MetaController extends Controller
             $templateMeta['notification_settings']['url'] = $url;
         }
 
-        $templateDetails    = get_post($templateId);
         $reviewsData        = Review::collectReviewsAndBusinessInfo($templateMeta, $templateId);
         $templateMeta       = Review::modifyIncludeAndExclude($templateMeta, $reviewsData);
         $allBusinessInfo    = Helper::getBusinessInfoByPlatforms($currentPlatforms);
@@ -448,16 +532,25 @@ class MetaController extends Controller
 
     public function loadMore(Request $request, $templateId)
     {
-        $templateId = absint($templateId);
+        $templateDetails = $this->getTemplatePost($templateId);
 
-        if (!$this->getTemplatePost($templateId)) {
-            return $this->sendError(['message' => __('Template not found.', 'wp-social-reviews')], 404);
+        if (!$templateDetails) {
+            return $this->sendError([
+                'message' => __('Template not found.', 'wp-social-reviews')
+            ], 404);
         }
 
+        $templateId = $templateDetails->ID;
+
         $page = (int) $request->get('page', 1);
-        $templateMeta = wp_unslash($request->get('template_meta'));
-        $templateMeta = json_decode($templateMeta, true);
+        $templateMeta = $this->decodeJsonParam($request->get('template_meta'));
+
+        if (null === $templateMeta) {
+            return $this->invalidJsonPayload();
+        }
+
         $templateMeta = $this->sanitizeTemplateMeta($templateMeta);
+        $templateMeta = $this->stripClientCategoryIds($templateMeta);
         $currentPlatforms = Arr::get($templateMeta, 'platform', []);
 
         // Get responsive paginate value
@@ -555,6 +648,7 @@ class MetaController extends Controller
             'platform_label'                    => 'sanitize_text_field',
             'equalHeightLen'                    => 'intval',
             'content_length'                    => 'intval',
+            'fluent_player_media'               => 'absint',
             'contentLanguage'                   => 'sanitize_text_field',
             'contentType'                       => 'sanitize_text_field',
             'current_template_type'             => 'sanitize_text_field',
@@ -595,8 +689,11 @@ class MetaController extends Controller
             'display_review_title'              => 'wpsr_sanitize_boolean',
             'isReviewerText'                    => 'wpsr_sanitize_boolean',
             'show_review_images'                => 'wpsr_sanitize_boolean',
+            'show_review_video'                 => 'wpsr_sanitize_boolean',
+            'use_fluent_player'                 => 'wpsr_sanitize_boolean',
             'isPlatformIcon'                    => 'wpsr_sanitize_boolean',
             'hide_empty_reviews'                => 'rest_sanitize_boolean',
+            'enable_visitor_sorting'            => 'wpsr_sanitize_boolean',
             'show_header'                       => 'wpsr_sanitize_boolean',
             'display_header_business_logo'      => 'rest_sanitize_boolean',
             'display_header_business_name'       => 'rest_sanitize_boolean',
@@ -692,6 +789,7 @@ class MetaController extends Controller
             'platform'                                  => 'wpsr_array_map_sanitize_text_field',
             'selectedBusinesses'                        => 'wpsr_array_map_sanitize_text_field',
             'selectedCategories'                        => 'wpsr_array_map_sanitize_text_field',
+            'selectedCategoryIds'                       => 'wpsr_array_map_absint',
         ];
 
         // Run the main recursive sanitizer on the rest of the data ---

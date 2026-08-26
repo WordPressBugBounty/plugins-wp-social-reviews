@@ -28,6 +28,27 @@ class Config
 					'selector'  => 'true',
 				),
                 array(
+                    'title'     => __('Profile Photo', 'wp-social-reviews'),
+                    'key'      => 'profile_photo',
+                    'divider' => true,
+                    'typography' => false,
+                    'padding' => false,
+                    'border' => false,
+                    'condition' => array(
+                        'key' => 'header_settings.header_layout',
+                        'selector'  => 'minimal',
+                    ),
+                    'styles' => array(
+                        array(
+                            'title'      => __('Border Color:', 'wp-social-reviews'),
+                            'fieldKey'  => 'border_color',
+                            'type'      => 'color_picker',
+                            'flex'      => true,
+                            'disabled' => !$has_pro,
+                        )
+                    )
+                ),
+                array(
                     'title'     => __('User Name', 'wp-social-reviews'),
                     'key'      => 'user_name',
                     'divider' => false,
@@ -696,6 +717,13 @@ class Config
         $prefix = '.wpsr-fb-feed-template-'.$postId;
         return [
             'styles' => array(
+                'profile_photo' => array(
+                    // Scoped to the minimal layout — that is the only header that rings the avatar.
+                    'selector' => $prefix.' .wpsr-fb-feed-header.wpsr-fb-feed-header-layout-minimal .wpsr-fb-feed-user-info-wrapper .wpsr-fb-feed-user-info-head .wpsr-fb-feed-header-info .wpsr-fb-feed-user-profile-pic img',
+                    'color'  => array(
+                        'border_color' => Arr::get($settings,'styles.profile_photo.color.border_color', '')
+                    )
+                ),
                 'user_name' => array(
                     'selector' => $prefix.' .wpsr-fb-feed-header .wpsr-fb-feed-user-info-wrapper .wpsr-fb-feed-user-info-head .wpsr-fb-feed-header-info .wpsr-fb-feed-user-info .wpsr-fb-feed-user-info-name-wrapper a',
                     'color'  => array(
@@ -879,7 +907,7 @@ class Config
                     ),
                 ),
                 'author' => array(
-                    'selector' => $prefix.' .wpsr-fb-feed-author .wpsr-fb-feed-author-info a',
+                    'selector' => $prefix.' .wpsr-fb-feed-author .wpsr-fb-feed-author-info a, '.$prefix.' .wpsr-fb-card-author .wpsr-fb-feed-author-name, '.$prefix.' .wpsr-fb-overlay-username',
                     'color'  => array(
                         'text_color' => Arr::get($settings,'styles.author.color.text_color', '')
                     ),
@@ -906,7 +934,7 @@ class Config
                     ),
                 ),
                 'post_date' => array(
-                    'selector' => $prefix.' .wpsr-fb-feed-author .wpsr-fb-feed-time , .wpsr-fb-feed-item .wpsr-fb-feed-video-info .wpsr-fb-feed-video-statistics .wpsr-fb-feed-video-statistic-item',
+                    'selector' => $prefix.' .wpsr-fb-feed-author .wpsr-fb-feed-time, '.$prefix.' .wpsr-fb-card-author .wpsr-fb-feed-time, '.$prefix.' .wpsr-fb-overlay-user-details .wpsr-fb-feed-time, '.$prefix.' .wpsr-fb-overlay-text-author .wpsr-fb-feed-time, '.$prefix.' .wpsr-fb-feed-item .wpsr-fb-feed-video-info .wpsr-fb-feed-video-statistics .wpsr-fb-feed-video-statistic-item',
                     'color'  => array(
                         'text_color' => Arr::get($settings,'styles.post_date.color.text_color', '')
                     ),
@@ -1479,7 +1507,7 @@ class Config
                     ),
                 ),
                 'item_box' => array(
-                    'selector' => $prefix.' .wpsr-fb-feed-item .wpsr-fb-feed-inner',
+                    'selector' => $prefix.' .wpsr-fb-feed-item .wpsr-fb-feed-inner, '.$prefix.' .wpsr-fb-card-item',
                     'color'  => array(
                         'background_color' => Arr::get($settings,'styles.item_box.color.background_color', ''),
                     ),

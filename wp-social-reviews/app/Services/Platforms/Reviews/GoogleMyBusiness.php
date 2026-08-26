@@ -141,7 +141,7 @@ class GoogleMyBusiness extends BaseReview
 
                 $myBusinessKey = '';
                 $myBusinessKeys = explode('/', $placeId);
-                if(!empty($myBusinessKeys)) {
+                if(isset($myBusinessKeys[3])) {
                     $myBusinessKey = $myBusinessKeys[3];
                 }
 
@@ -343,7 +343,7 @@ class GoogleMyBusiness extends BaseReview
         $locationInfo = json_decode(wp_remote_retrieve_body($response), true);
 
         $locationId = explode('/', $locationInfo['name']);
-        if(!empty($locationId) && isset($locationId[1])){
+        if(isset($locationId[1])){
             $businessInfo['place_id']       = $locationId[1];
             $businessInfo['name']           = Arr::get($locationInfo, 'title', '');
             $businessInfo['url']            = Arr::get($locationInfo, 'metadata.newReviewUri', '');
@@ -582,8 +582,8 @@ class GoogleMyBusiness extends BaseReview
             foreach ($accountsData['accounts'] as $index => $accountData) {
                 $accountName = Arr::get($accountData, 'name');
                 $account     = explode('/', $accountName);
-                $accountId   = $account[1];
-                if ($accountId || !empty($accountId)) {
+                $accountId   = isset($account[1]) ? $account[1] : '';
+                if (!empty($accountId)) {
                     $locations = $this->getLocationsList($accountData, $headers);
                     if(!empty($locations)){
                         $locationsLists += $locations;
@@ -741,9 +741,12 @@ class GoogleMyBusiness extends BaseReview
                         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional logging for background sync monitoring
                         error_log($exception->getMessage());
                     }
-                }
 
-                $cacheHandler->createCache('wpsr_reviews_' . $this->platform . '_business_info_' . $placeId, $placeId);
+                    // Only move the cursor once a refresh has been attempted. Advancing it
+                    // without a token left the business looking fresh, so the next cron
+                    // skipped it instead of retrying once the token came back.
+                    $cacheHandler->createCache('wpsr_reviews_' . $this->platform . '_business_info_' . $placeId, $placeId);
+                }
             }
         }
     }

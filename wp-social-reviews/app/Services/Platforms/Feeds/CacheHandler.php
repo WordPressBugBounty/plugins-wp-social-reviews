@@ -33,7 +33,7 @@ class CacheHandler
 	 * @param string $transientName transient name
 	 * @param string|array $data           data
 	 *
-	 * @throws /Exception
+	 * @throws \Exception
 	 * @since  1.2.5
 	 */
 	public function createCache($transientName, $data)
@@ -76,7 +76,7 @@ class CacheHandler
 
 	/**
 	 * Clear Cache
-	 * @throws /Exception
+	 * @throws \Exception
 	 * @since  1.1.0
 	 */
 	public function clearCache()

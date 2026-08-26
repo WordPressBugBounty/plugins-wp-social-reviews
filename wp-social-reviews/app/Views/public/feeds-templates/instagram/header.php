@@ -2,6 +2,7 @@
 defined('ABSPATH') or die;
 
 use WPSocialReviews\Framework\Support\Arr;
+use WPSocialReviews\App\Services\Platforms\Feeds\Instagram\Helper as InstagramHelper;
 
 //carousel
 $wpsr_data_attrs  = array();
@@ -28,13 +29,15 @@ $wpsr_desktop_column_number   = Arr::get($feed_settings, 'responsive_column_numb
 
 $wpsr_header_settings = $feed_settings['header_settings'];
 
+$wpsr_ig_header_layout_class = InstagramHelper::getHeaderLayoutClass($feed_settings);
+
 echo '<div id="wpsr-ig-feed-' . esc_attr($templateId) . '" class="' . esc_attr(implode(' ', $wpsr_classes)) . '" ' . esc_attr(implode(' ',
         $wpsr_data_attrs)) . '  data-column="' . esc_attr($wpsr_desktop_column_number) . '">';
 echo '<div class="wpsr-container wpsr-insta-feed-' . esc_attr($templateId) . '">';
 ?>
 
 <?php if ($wpsr_header_settings['display_header'] === 'true'): ?>
-    <div class="wpsr-ig-header wpsr-gap-<?php echo esc_attr($column_gaps); ?>">
+    <div class="wpsr-ig-header <?php echo esc_attr($wpsr_ig_header_layout_class); ?> wpsr-gap-<?php echo esc_attr($column_gaps); ?>">
         <div class="wpsr-ig-header-inner">
             <?php do_action('wpsocialreviews/instagram_user_avatar', $header, $wpsr_header_settings); ?>
 
@@ -92,6 +95,12 @@ echo '<div class="wpsr-ig-feed-wrapper-inner">';
 if($layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO')) {
     echo '<div class="swiper-container" tabindex="0">';
 }
-$wpsr_row_classes = $layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO') ? 'swiper-wrapper' : 'wpsr-row';
+if ($layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO')) {
+    $wpsr_row_classes = 'swiper-wrapper';
+} elseif ($layout_type === 'highlights' && defined('WPSOCIALREVIEWS_PRO')) {
+    $wpsr_row_classes = 'wpsr-ig-highlights-grid';
+} else {
+    $wpsr_row_classes = 'wpsr-row';
+}
 
 echo '<div class="'.esc_attr($wpsr_row_classes).' wpsr-ig-all-feed wpsr_feeds wpsr-column-gap-' . esc_attr($column_gaps) . '">';

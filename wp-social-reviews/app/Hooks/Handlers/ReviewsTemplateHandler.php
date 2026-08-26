@@ -245,7 +245,10 @@ class ReviewsTemplateHandler
 
     public function renderReviewTitleHtml($display_review_title = 'false', $review_title = '', $platform_name = '')
     {
-        if ($platform_name !== 'ai' && $display_review_title === 'true' && strlen($review_title) && !str_contains($review_title ?? '', $platform_name."_")) {
+        // review_title is a nullable column, and the hook passes it through untouched.
+        $review_title = (string) $review_title;
+
+        if ($platform_name !== 'ai' && $display_review_title === 'true' && strlen($review_title) && !str_contains($review_title, $platform_name."_")) {
             $app = App::getInstance();
 
             $htmlTag = apply_filters('wpsocialreviews/review_title_html_tag', 'h3');
@@ -271,6 +274,9 @@ class ReviewsTemplateHandler
      **/
     public function renderReviewContentHtml($display_review_text, $content_length, $contentType, $reviewer_text, $contentLanguage, $platform_name = '', $enable_ai_readmore = 'false', $enable_text_typing_animation = 'true')
     {
+        // reviewer_text is a nullable column, and the hook passes it through untouched.
+        $reviewer_text = (string) $reviewer_text;
+
         if ($display_review_text === 'false' || (strlen($reviewer_text) === 0)) {
             return;
         }
@@ -311,29 +317,129 @@ class ReviewsTemplateHandler
 
     /**
      *
-     * Retrieve reviews load more data
+     * Retrieve reviews load more data. String-only wrapper over getPaginatedFeedData().
      *
      * @since 1.2.4
      *
      **/
     public function getPaginatedFeedHtml($templateId, $page, $imageSettings)
     {
+        $data = $this->getPaginatedFeedData($templateId, $page, $imageSettings);
+
+        return Arr::get($data, 'content', '');
+    }
+
+    /**
+     * Reviews load more data plus the total and the order/rating/search actually applied.
+     */
+    public function getPaginatedFeedData($templateId, $page, $imageSettings, $order = null, $exactRating = -1, $knownTotal = null, $productId = 0, $seed = 0, $search = '')
+    {
         $app = App::getInstance();
         $shortcodeHandler = new ShortcodeHandler();
 
+        // Sanitize here too: this method is public and the caller is not the only way in.
+        $search = Helper::sanitizeVisitorSearch($search);
+
+        $emptyFeed = array(
+            'content'       => '',
+            'total_reviews' => 0,
+            'has_more'      => false,
+            'order'         => '',
+            'exactRating'   => -1,
+            'search'        => '',
+        );
+
         $template_meta = $shortcodeHandler->templateMeta($templateId, 'reviews');
 
+        // Bail on a broken template: an empty platform list matches every platform and fetches the whole table.
+        if (empty($template_meta)
+            || !empty($template_meta['error_message'])
+            || empty($template_meta['platform'])) {
+            return $emptyFeed;
+        }
+
+        // Mirror the SSR gate: GDPR on with image optimization off means the feed is not renderable.
+        if (Arr::get($imageSettings, 'has_gdpr', 'false') === 'true'
+            && Arr::get($imageSettings, 'optimized_images', 'false') === 'false'
+            && Arr::get($template_meta, 'templateType') !== 'notification') {
+            return $emptyFeed;
+        }
+
         if ($template_meta) {
-            $reviews = array();
             $platforms = isset($template_meta['platform']) ? $template_meta['platform'] : [];
             $validTemplatePlatforms = Helper::validPlatforms($platforms);
-            if (!empty($validTemplatePlatforms)) {
-                $data = Review::paginatedReviews($validTemplatePlatforms, $template_meta, $page);
-                $reviews = $data['reviews'];
+
+            // Re-apply the product scope first, or a re-fetch returns every product's reviews.
+            if (in_array('woocommerce', $validTemplatePlatforms) || in_array('fluent-cart', $validTemplatePlatforms)) {
+                $template_meta = apply_filters('wpsocialreviews/process_product_context_template_meta', $template_meta, $templateId, $productId);
+                $platforms = Arr::get($template_meta, 'platform', []);
+                $validTemplatePlatforms = Helper::validPlatforms($platforms);
             }
 
+            // Drop every override on a 1-10 scale (booking.com) or when off; the seed too, so random reshuffles.
+            if (!Helper::supportsVisitorSorting($platforms)
+                || Arr::get($template_meta, 'enable_visitor_sorting', 'false') !== 'true') {
+                $order = null;
+                $exactRating = -1;
+                $seed = 0;
+                $search = '';
+            }
+
+            // The toolbar's gate, not the box's: an unsearchable feed still drops the term at the query.
+            if ($search !== '' && !Helper::visitorSortToolbarEnabled(
+                $template_meta,
+                $templateId,
+                Arr::get($template_meta, 'templateType', ''),
+                $platforms
+            )) {
+                $search = '';
+            }
+
+            if ($order) {
+                $template_meta['order'] = $order;
+            }
+
+            // Keep the shuffle the visitor is looking at. Re-cast: this came from the request.
+            $seed = (int) $seed;
+            if ($seed > 0) {
+                $template_meta['wpsr_random_seed'] = $seed;
+            }
+
+            // Exact match in its own key, dropped below the admin's starFilterVal floor so it can only narrow.
+            $exactRating = (int) $exactRating;
+            $adminStarFloor = (int) Arr::get($template_meta, 'starFilterVal', -1);
+            if ($adminStarFloor > 0 && $exactRating > 0 && $exactRating < $adminStarFloor) {
+                $exactRating = -1;
+            }
+            $template_meta['exactRating'] = $exactRating;
+
+            // Own key as well, read by the query after the admin's filters so it can only narrow.
+            $template_meta['visitorSearch'] = $search;
+
+            // No AI summary card: its cache key includes `order`, so a visitor sort would re-bill the provider.
+            $reviews = array();
+            $totalReviews = 0;
+            $hasMore = null;
+            if (!empty($validTemplatePlatforms)) {
+                $data = Review::paginatedReviews($validTemplatePlatforms, $template_meta, $page, $knownTotal);
+                $reviews = $data['reviews'];
+                $totalReviews = (int) Arr::get($data, 'total_reviews', 0);
+                $wpsr_has_more = Arr::get($data, 'has_more');
+                $hasMore = is_null($wpsr_has_more) ? null : (bool) $wpsr_has_more;
+            }
+
+            $feedState = array(
+                'total_reviews' => $totalReviews,
+                // null unless a search answered it with a probe row, where total_reviews is a floor, not a count.
+                'has_more'      => $hasMore,
+                'order'         => Helper::resolveOrderKey(Arr::get($template_meta, 'order', 'desc')),
+                'exactRating'   => $exactRating,
+                // What the gates left, not what was asked for: the browser reads this as the server's verdict.
+                'search'        => $search,
+            );
+
             $reviews = Helper::handleReviewerName($reviews, $template_meta);
-            $template = $template_meta['template'];
+            $template = Arr::get($template_meta, 'template', '');
             $templates = ['grid1', 'grid2', 'grid3', 'grid4', 'grid5'];
 
             $optimized_image = Arr::get($imageSettings, 'optimized_images', 'false');
@@ -341,25 +447,30 @@ class ReviewsTemplateHandler
             if($optimized_image == 'true') {
                 $imageHandlerObj = new ReviewImageOptimizationHandler($platforms);
                 $resizedImages = $imageHandlerObj->getResizeNeededImageLists($reviews);
-                $imageSize = Arr::get($template, 'resolution', 'full');
+                // Read from the meta, not $template (a string): Arr::get() would always return the default.
+                $imageSize = Arr::get($template_meta, 'resolution', 'full');
                 $reviews = Helper::mediaUrlManage('reviews', $resizedImages, $imageSettings, $imageSize, $reviews, $optimized_image); // hardcode 'reviews' denotes its a platform
             }
             
             if (!in_array($template, $templates)) {
-                return (string)apply_filters('wpsocialreviews/add_reviews_template', $template, $reviews, $template_meta);
+                $feedState['content'] = (string)apply_filters('wpsocialreviews/add_reviews_template', $template, $reviews, $template_meta);
+                return $feedState;
             }
-            
+
             $selectedBusinesses = Arr::get($template_meta, 'selectedBusinesses', []);
-            $business_info = Helper::getSelectedBusinessInfoByPlatforms($platforms, $selectedBusinesses, []);
+            $business_info = Helper::getSelectedBusinessInfoByPlatforms($platforms, $selectedBusinesses);
 
             $templatePath = $shortcodeHandler->reviewsTemplatePath($template);
-            return (string) $app->view->make($templatePath, array(
+            $feedState['content'] = (string) $app->view->make($templatePath, array(
                 'reviews'       => $reviews,
                 'template_meta' => $template_meta,
                 'business_info' => $business_info
             ));
+
+            return $feedState;
         }
 
+        return $emptyFeed;
     }
 
     public function renderAiSummaryList($aiSummaryAsList = false, $summaryList = [], $displayReadMore = 'false', $contentLength = 0, $enableTextTypingAnimation = 'true', $contentType = 'excerpt')

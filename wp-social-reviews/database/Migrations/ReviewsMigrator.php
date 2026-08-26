@@ -38,8 +38,9 @@ class ReviewsMigrator
                 INDEX `idx_review_id` (`review_id`),
                 INDEX `idx_source_id` (`source_id`),
                 INDEX `idx_review_approved` (`review_approved`),
-                INDEX `idx_rating` (`rating`),
-                INDEX `idx_reviewer_email` (`reviewer_email`)
+                INDEX `idx_reviewer_email` (`reviewer_email`),
+                INDEX `idx_rating_time` (`rating`, `review_time`, `id`),
+                INDEX `idx_review_time` (`review_time`, `id`)
             ) $charsetCollate;";
             dbDelta($sql);
         } else {
@@ -98,26 +99,38 @@ class ReviewsMigrator
             $existing_index_names[] = $index->Key_name;
         }
 
+        // Desired indexes, all hardcoded literals. The sort indexes end with `id` to match the query's tie-break.
         $indexes = [
-            'idx_platform_name' => 'platform_name',
-            'idx_review_id'     => 'review_id',
-            'idx_source_id'     => 'source_id',
-            'idx_review_approved'     => 'review_approved',
-            'idx_rating'        => 'rating',
+            'idx_platform_name'   => '`platform_name`',
+            'idx_review_id'       => '`review_id`',
+            'idx_source_id'       => '`source_id`',
+            'idx_review_approved' => '`review_approved`',
+            'idx_reviewer_email'  => '`reviewer_email`',
+            'idx_review_time'     => '`review_time`, `id`',
+            'idx_rating_time'     => '`rating`, `review_time`, `id`',
         ];
 
-        foreach ($indexes as $index_name => $column_name) {
+        // One at a time, so a failure blocks nothing. %i binds one name, so the hardcoded columns interpolate.
+        $wpsr_present = $existing_index_names;
+
+        foreach ($indexes as $index_name => $columns) {
             if (!in_array($index_name, $existing_index_names)) {
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required for migration to add missing indexes
-                $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD INDEX %i (%i)", $table, $index_name, $column_name));
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $columns is a hardcoded literal from the list above; both identifiers are bound with %i.
+                $result = $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD INDEX %i ({$columns})", $table, $index_name));
+
+                // A failed index must not count as present, or the drop below could run without its replacement.
+                if ($result === false) {
+                    continue;
+                }
+
+                $wpsr_present[] = $index_name;
             }
         }
 
-        // Index on reviewer_email for duplicate-check query performance.
-        // Uniqueness is enforced at the application layer (respects one_review_per_email toggle).
-        if (!in_array('idx_reviewer_email', $existing_index_names)) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required for migration to add index
-            $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD INDEX %i (%i)", $table, 'idx_reviewer_email', 'reviewer_email'));
+        // idx_rating_time leads on rating too, so drop the duplicate -- but only once it is really there.
+        if (in_array('idx_rating', $wpsr_present) && in_array('idx_rating_time', $wpsr_present)) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+            $wpdb->query($wpdb->prepare("ALTER TABLE %i DROP INDEX %i", $table, 'idx_rating'));
         }
     }
 }

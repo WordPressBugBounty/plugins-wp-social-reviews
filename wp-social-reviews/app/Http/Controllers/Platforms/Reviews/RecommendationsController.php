@@ -2,21 +2,62 @@
 
 namespace WPSocialReviews\App\Http\Controllers\Platforms\Reviews;
 
+use Closure;
 use WPSocialReviews\App\Http\Controllers\Controller;
 use WPSocialReviews\App\Models\Review;
+use WPSocialReviews\App\Models\ReviewCategory;
+use WPSocialReviews\App\Models\ReviewCategoryRelationship;
 use WPSocialReviews\Framework\Http\Request\Request;
 use WPSocialReviews\App\Http\Requests\ReviewRequest;
 use WPSocialReviews\Framework\Support\Arr;
 
 class RecommendationsController extends Controller
 {
+    // Keys inside `fields` that hold a list. WooCommerce and FluentCart store
+    // product_thumbnail as the array wp_get_attachment_image_src() returns.
+    private const LIST_FIELD_KEYS = ['fields.review_images', 'fields.product_thumbnail'];
+
+    // Columns that map to a single DB value, so a list on one is malformed.
+    private const SCALAR_COLUMNS = [
+        'rating', 'review_approved', 'review_time', 'reviewer_name',
+        'reviewer_text', 'reviewer_email', 'reviewer_img', 'platform_name',
+        'review_title', 'reviewer_url', 'category', 'source_id',
+        'review_id', 'recommendation_type',
+    ];
+
+    // Scalar keys inside `fields` that must be a full http(s) URL when filled.
+    private const URL_FIELD_LABELS = [
+        'video_url'    => 'video URL',
+        'video_poster' => 'video thumbnail URL',
+    ];
+
     public function index(Request $request)
+    {
+        return $this->applyIndex($request, 'review');
+    }
+
+    public function indexTestimonial(Request $request)
+    {
+        return $this->applyIndex($request, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which rows the caller may list.
+     */
+    protected function applyIndex(Request $request, $scope)
     {
         //find all available platforms for templating
         $valid_platforms = apply_filters('wpsocialreviews/available_valid_reviews_platforms', []);
         $customValidPlatforms = get_option('wpsr_available_valid_platforms', []);
 
         $type = sanitize_text_field(wp_unslash((string) $request->get('type', '')));
+
+        if ($scope === 'testimonial') {
+            $type = 'testimonial';
+        } elseif ($type !== 'custom_review') {
+            $type = 'review';
+        }
+
         $sourceId = sanitize_text_field(wp_unslash((string) $request->get('source_id', '')));
 
         $search  = sanitize_text_field(wp_unslash((string) $request->get('search', '')));
@@ -147,7 +188,16 @@ class RecommendationsController extends Controller
             }
         }
 
-        $reviews = $reviews->paginate();
+        // Final scope authority regardless of the type/filter branches above, so a
+        // crafted `filter=testimonial` (or an unhandled path) cannot leak rows.
+        if ($scope === 'testimonial') {
+            $reviews = $reviews->where('platform_name', 'testimonial');
+        } else {
+            $reviews = $reviews->where('platform_name', '!=', 'testimonial');
+        }
+
+        // Eager-loaded so the listing renders its category chips without a query per row.
+        $reviews = $reviews->with('categories')->paginate();
 
         $totalReviews = $reviews->total();
 
@@ -160,6 +210,22 @@ class RecommendationsController extends Controller
 
 	public function create(ReviewRequest $request)
 	{
+        return $this->applyCreate($request, 'review');
+	}
+
+    /**
+     * Testimonials side (wpsn_manage_testimonials) — the route fixes `platform_name`.
+     */
+    public function createTestimonial(ReviewRequest $request)
+    {
+        return $this->applyCreate($request, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which kind of row this creates.
+     */
+    protected function applyCreate(ReviewRequest $request, $scope)
+    {
         $review_fields = $request->get('review');
 		$review_fields = wp_unslash($review_fields);
         $wpsr_errors = $this->validateReviewTypedFields($review_fields);
@@ -167,7 +233,20 @@ class RecommendationsController extends Controller
             return $this->sendError($wpsr_errors, 422);
         }
 
+        // Not wpsr_reviews columns — applied against the pivot once the row has an id.
+        $categoryIds = Arr::get($review_fields, 'category_ids');
+        $newCategoryNames = Arr::get($review_fields, 'new_category_names');
+        unset($review_fields['category_ids'], $review_fields['new_category_names']);
+
         $review = $this->sanitize($review_fields);
+
+        if ($scope === 'testimonial') {
+            $review['platform_name'] = 'testimonial';
+        } elseif (Arr::get($review, 'platform_name') === 'testimonial') {
+            return $this->sendError([
+                'message' => __('A review cannot be created as a testimonial', 'wp-social-reviews')
+            ], 422);
+        }
 
 		$review['recommendation_type'] = 'positive';
         $review['review_approved'] = 1;
@@ -178,6 +257,12 @@ class RecommendationsController extends Controller
         ];
 
         $createdReview = Review::create($review);
+
+        if (is_array($categoryIds) || is_array($newCategoryNames)) {
+            $createdReview->categories()->sync(
+                ReviewCategory::resolveIds($categoryIds, $newCategoryNames)
+            );
+        }
 
         $businessInfo = Review::getInternalBusinessInfo($platformName, $dataSource);
         update_option('wpsr_reviews_'.$platformName.'_business_info', $businessInfo);
@@ -192,6 +277,22 @@ class RecommendationsController extends Controller
 
     public function duplicate(Request $request)
     {
+        return $this->applyDuplicate($request, 'review');
+    }
+
+    /**
+     * Testimonials side (wpsn_manage_testimonials) — the route fixes which rows apply.
+     */
+    public function duplicateTestimonial(Request $request)
+    {
+        return $this->applyDuplicate($request, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which rows the caller may copy.
+     */
+    protected function applyDuplicate(Request $request, $scope)
+    {
         $ids = (array) $request->get('ids', []);
         $ids = array_map('intval', $ids);
 
@@ -201,9 +302,19 @@ class RecommendationsController extends Controller
 
         // Only allow duplicating user-editable review types; platform-imported reviews are read-only.
         $duplicatablePlatforms = apply_filters('wpsocialreviews/duplicatable_review_platforms', ['custom', 'testimonial', 'native_form']);
-        $reviewsToDuplicate = Review::whereIn('id', $ids)
-            ->whereIn('platform_name', $duplicatablePlatforms)
-            ->get();
+
+        // Scope clause = the authorisation boundary for client-supplied `ids`;
+        // out-of-scope ids are dropped silently, mirroring applyBulkCategory().
+        $query = Review::whereIn('id', $ids)
+            ->whereIn('platform_name', $duplicatablePlatforms);
+
+        if ($scope === 'testimonial') {
+            $query = $query->where('platform_name', 'testimonial');
+        } else {
+            $query = $query->where('platform_name', '!=', 'testimonial');
+        }
+
+        $reviewsToDuplicate = $query->with('categories')->get();
 
         $duplicatedCount = 0;
         $createdReviews = [];
@@ -215,6 +326,10 @@ class RecommendationsController extends Controller
             unset($reviewData['id']);
 
             $createdReview = Review::create($reviewData);
+
+            // toArray() above didn't carry the pivot rows over.
+            $createdReview->categories()->sync($review->categories->pluck('id')->toArray());
+
             $createdReviews[] = $createdReview;
             $duplicatedCount++;
             do_action('wpsocialreviews/custom_review_created', $createdReview);
@@ -237,6 +352,22 @@ class RecommendationsController extends Controller
 
 	public function update(ReviewRequest $request, $reviewId)
 	{
+        return $this->applyUpdate($request, $reviewId, 'review');
+	}
+
+    /**
+     * Testimonials side (wpsn_manage_testimonials) — the route fixes the scope.
+     */
+    public function updateTestimonial(ReviewRequest $request, $reviewId)
+    {
+        return $this->applyUpdate($request, $reviewId, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which rows the caller may write to.
+     */
+    protected function applyUpdate(ReviewRequest $request, $reviewId, $scope)
+    {
         $updateData = $request->get('review');
 		$updateData = wp_unslash($updateData);
         $wpsr_errors = $this->validateReviewTypedFields($updateData);
@@ -244,6 +375,10 @@ class RecommendationsController extends Controller
         if (!empty($wpsr_errors)) {
             return $this->sendError($wpsr_errors, 422);
         }
+
+        // Not wpsr_reviews columns — read before the allowlist below drops them.
+        $categoryIds = Arr::get($updateData, 'category_ids');
+        $newCategoryNames = Arr::get($updateData, 'new_category_names');
 
         $updateData = $this->sanitize($updateData);
         $updateData = Arr::only($updateData, [
@@ -259,10 +394,32 @@ class RecommendationsController extends Controller
             'category'
         ]);
 
-        $review = Review::findOrFail($reviewId);
+        // Scope clause = the authorisation boundary for the client-supplied `reviewId`,
+        // so one capability can't update (or re-categorise) the other screen's rows.
+        $query = Review::where('id', (int) $reviewId);
+        if ($scope === 'testimonial') {
+            $query = $query->where('platform_name', 'testimonial');
+        } else {
+            $query = $query->where('platform_name', '!=', 'testimonial');
+        }
+
+        $review = $query->first();
+        if (!$review) {
+            return $this->sendError([
+                'message' => __('Review not found', 'wp-social-reviews')
+            ], 404);
+        }
 
 		$review->fill($updateData);
 		$review->save();
+
+        // Either key being present means the client is stating the full category set,
+        // so an empty pair clears them. Both absent leaves existing categories alone.
+        if (is_array($categoryIds) || is_array($newCategoryNames)) {
+            $review->categories()->sync(
+                ReviewCategory::resolveIds($categoryIds, $newCategoryNames)
+            );
+        }
 
 		do_action('wpsocialreviews/custom_review_updated', $review);
 
@@ -270,12 +427,71 @@ class RecommendationsController extends Controller
 			'message' => __('Review has been successfully updated', 'wp-social-reviews'),
 			'review'  => $review
 		];
-	}
+    }
+
+    /**
+     * Narrows client-supplied ids to the rows the route's scope may act on, so one
+     * capability can't reach the other screen's rows via these shared bulk handlers.
+     *
+     * @param string $scope 'review' or 'testimonial'
+     * @return int[]
+     */
+    private function scopeReviewIds(array $ids, $scope)
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if (empty($ids)) {
+            return [];
+        }
+
+        $scoped = [];
+        foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+            $query = Review::whereIn('id', $chunk);
+            if ($scope === 'testimonial') {
+                $query = $query->where('platform_name', 'testimonial');
+            } else {
+                $query = $query->where('platform_name', '!=', 'testimonial');
+            }
+            $scoped = array_merge($scoped, array_map('intval', $query->pluck('id')->toArray()));
+        }
+
+        return $scoped;
+    }
+
+    /**
+     * Runs a chunked bulk mutation as one unit of work: every chunk (plus any
+     * relationship cleanup) commits together, or a failing chunk rolls all of
+     * them back. Returns null when the mutation was rolled back.
+     *
+     * @return mixed|null
+     */
+    private function runBulkMutation(Closure $callback)
+    {
+        try {
+            return Review::resolveConnection()->transaction($callback);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 
     public function delete(Request $request)
     {
-        $ids = (array) $request->get('ids', []);
-        $ids = array_map('intval', $ids);
+        return $this->applyDelete($request, 'review');
+    }
+
+    /**
+     * Testimonials side (wpsn_manage_testimonials) — the route fixes which rows apply.
+     */
+    public function deleteTestimonial(Request $request)
+    {
+        return $this->applyDelete($request, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which rows the caller may delete.
+     */
+    protected function applyDelete(Request $request, $scope)
+    {
+        $ids = $this->scopeReviewIds((array) $request->get('ids', []), $scope);
 
         if(empty($ids)) {
             return __('No reviews selected', 'wp-social-reviews');
@@ -283,10 +499,33 @@ class RecommendationsController extends Controller
 
         // Snapshot rows, DELETE, then fire actions. Listeners that recompute per-product stats
         // (handleUpdateBusinessInfo) re-query the table, so the action must fire after the DELETE
-        // or the recomputed total/avg will still include the rows being removed.
-        $reviewsToDelete = Review::whereIn('id', $ids)->get();
+        // or the recomputed total/avg will still include the rows being removed. Each stage is a
+        // separate pass so no listener sees a half-deleted table.
+        $reviewsToDelete = [];
+        foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+            foreach (Review::whereIn('id', $chunk)->get() as $review) {
+                $reviewsToDelete[] = $review;
+            }
+        }
 
-        $deletedCount = Review::whereIn('id', $ids)->delete();
+        // Every chunk and the pivot cleanup share one transaction, so a failing chunk
+        // can't leave part of the selection deleted or its category links orphaned.
+        $deletedCount = $this->runBulkMutation(function () use ($ids) {
+            $deleted = 0;
+            foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+                $deleted += (int) Review::whereIn('id', $chunk)->delete();
+            }
+
+            ReviewCategoryRelationship::deleteForReviews($ids);
+
+            return $deleted;
+        });
+
+        if ($deletedCount === null) {
+            return $this->sendError([
+                'message' => __('The reviews could not be deleted. Nothing was changed, please try again.', 'wp-social-reviews')
+            ], 500);
+        }
 
         foreach ($reviewsToDelete as $review) {
             do_action('wpsocialreviews/custom_review_deleted', $review);
@@ -306,10 +545,24 @@ class RecommendationsController extends Controller
 
     public function statusUpdate(Request $request)
     {
-        $ids = (array) $request->get('ids', []);
-        $ids = array_map('intval', $ids);
+        return $this->applyStatusUpdate($request, 'review');
+    }
+
+    /**
+     * Testimonials side (wpsn_manage_testimonials) — the route fixes the scope.
+     */
+    public function statusUpdateTestimonial(Request $request)
+    {
+        return $this->applyStatusUpdate($request, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which rows the caller may update.
+     */
+    protected function applyStatusUpdate(Request $request, $scope)
+    {
         $status = sanitize_text_field(wp_unslash((string) $request->get('status', 'enable')));
-        $type = sanitize_text_field(wp_unslash((string) $request->get('type', 'review')));
+        $ids = $this->scopeReviewIds((array) $request->get('ids', []), $scope);
 
         if (empty($ids)) {
             return __('No reviews selected', 'wp-social-reviews');
@@ -320,18 +573,34 @@ class RecommendationsController extends Controller
             return __('Invalid status value', 'wp-social-reviews');
         }
 
-        // Optimize: Use bulk update instead of N queries
+        // One statement per 500 ids rather than one per review: "select all" makes $ids as
+        // long as the site's review count, which would blow past max_allowed_packet.
+        // One transaction for all chunks, so a failure leaves nothing half-applied.
         $approvedValue = $status === 'enable' ? 1 : 0;
-        Review::whereIn('id', $ids)->update(['review_approved' => $approvedValue]);
+        $updated = $this->runBulkMutation(function () use ($ids, $approvedValue) {
+            foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+                Review::whereIn('id', $chunk)->update(['review_approved' => $approvedValue]);
+            }
 
-        // Trigger action for each review if needed (optional, can be removed if not required)
-        $reviews = Review::whereIn('id', $ids)->get();
-        foreach ($reviews as $review) {
-            do_action('wpsocialreviews/custom_review_updated', $review);
+            return true;
+        });
+
+        if ($updated === null) {
+            return $this->sendError([
+                'message' => __('The status could not be updated. Nothing was changed, please try again.', 'wp-social-reviews')
+            ], 500);
         }
 
-        // Dynamic message based on type
-        $message = $type === 'testimonial'
+        // Separate pass: listeners recompute aggregates by re-querying, so every row must
+        // already carry its new status before the first one runs.
+        foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+            foreach (Review::whereIn('id', $chunk)->get() as $review) {
+                do_action('wpsocialreviews/custom_review_updated', $review);
+            }
+        }
+
+        // Message derived from the route scope, not a client field.
+        $message = $scope === 'testimonial'
             ? __('Testimonials status has been successfully updated', 'wp-social-reviews')
             : __('Reviews status has been successfully updated', 'wp-social-reviews');
 
@@ -342,9 +611,24 @@ class RecommendationsController extends Controller
 
     public function spamReviews(Request $request)
     {
-        $ids = (array) $request->get('ids', []);
-        $ids = array_map('intval', $ids);
+        return $this->applySpam($request, 'review');
+    }
+
+    /**
+     * Testimonials side (wpsn_manage_testimonials) — the route fixes which rows apply.
+     */
+    public function spamTestimonialReviews(Request $request)
+    {
+        return $this->applySpam($request, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which rows the caller may flag.
+     */
+    protected function applySpam(Request $request, $scope)
+    {
         $action = sanitize_text_field(wp_unslash((string) $request->get('action', 'mark-spam')));
+        $ids = $this->scopeReviewIds((array) $request->get('ids', []), $scope);
 
         if (empty($ids)) {
             return [
@@ -359,9 +643,7 @@ class RecommendationsController extends Controller
 
         if ($action === 'mark-spam') {
             // Mark reviews as spam: set review_approved = 2, keep category unchanged
-            Review::whereIn('id', $ids)->update([
-                'review_approved' => 2
-            ]);
+            $approvedValue = 2;
 
             $message = sprintf(
                 _n(
@@ -374,9 +656,7 @@ class RecommendationsController extends Controller
             );
         } else {
             // Unmark as spam: set review_approved = 0 (pending), keep category unchanged
-            Review::whereIn('id', $ids)->update([
-                'review_approved' => 0
-            ]);
+            $approvedValue = 0;
 
             $message = sprintf(
                 _n(
@@ -389,11 +669,156 @@ class RecommendationsController extends Controller
             );
         }
 
-        // Trigger action for each review
-        $reviews = Review::whereIn('id', $ids)->get();
+        // Chunked for the same reason as applyStatusUpdate(): $ids is unbounded on "select
+        // all". One transaction for all chunks, so a failure leaves nothing half-applied.
+        $updated = $this->runBulkMutation(function () use ($ids, $approvedValue) {
+            foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+                Review::whereIn('id', $chunk)->update([
+                    'review_approved' => $approvedValue
+                ]);
+            }
 
-        foreach ($reviews as $review) {
-            do_action('wpsocialreviews/custom_review_updated', $review);
+            return true;
+        });
+
+        if ($updated === null) {
+            return $this->sendError([
+                'message' => __('The reviews could not be updated. Nothing was changed, please try again.', 'wp-social-reviews')
+            ], 500);
+        }
+
+        // Trigger action for each review, after every row carries its new status.
+        foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+            foreach (Review::whereIn('id', $chunk)->get() as $review) {
+                do_action('wpsocialreviews/custom_review_updated', $review);
+            }
+        }
+
+        return [
+            'message' => $message
+        ];
+    }
+
+    /**
+     * Bulk assign/remove a category — reviews side (wpsn_manage_reviews).
+     */
+    public function bulkCategory(Request $request)
+    {
+        return $this->applyBulkCategory($request, 'review');
+    }
+
+    /**
+     * Bulk assign/remove a category — testimonials side (wpsn_manage_testimonials).
+     * The route fixes the scope; a client-supplied type would cross the boundary.
+     */
+    public function bulkTestimonialCategory(Request $request)
+    {
+        return $this->applyBulkCategory($request, 'testimonial');
+    }
+
+    /**
+     * @param string $scope 'review' or 'testimonial' — which rows the caller may write to.
+     */
+    protected function applyBulkCategory(Request $request, $scope)
+    {
+        $ids = (array) $request->get('ids', []);
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        $action = sanitize_text_field(wp_unslash((string) $request->get('action', 'add')));
+        $categoryId = (int) $request->get('category_id', 0);
+        $newCategoryName = sanitize_text_field(wp_unslash((string) $request->get('new_category_name', '')));
+
+        if (empty($ids)) {
+            return $this->sendError([
+                'message' => __('No reviews selected', 'wp-social-reviews')
+            ], 422);
+        }
+
+        if (!in_array($action, ['add', 'remove'], true)) {
+            return $this->sendError([
+                'message' => __('Invalid action value', 'wp-social-reviews')
+            ], 422);
+        }
+
+        // Only 'add' may create: detaching a category that had to be invented first
+        // is a no-op, and would leave an empty category behind.
+        if ($action === 'remove' && trim($newCategoryName) !== '') {
+            return $this->sendError([
+                'message' => __('Select an existing category to remove', 'wp-social-reviews')
+            ], 422);
+        }
+
+        // Scope clause = the authorisation boundary for client-supplied `ids`;
+        // out-of-scope ids are dropped silently.
+        $reviewIds = [];
+        foreach (array_chunk($ids, ReviewCategoryRelationship::BATCH_SIZE) as $chunk) {
+            $scopedQuery = Review::whereIn('id', $chunk);
+
+            if ($scope === 'testimonial') {
+                $scopedQuery = $scopedQuery->where('platform_name', 'testimonial');
+            } else {
+                $scopedQuery = $scopedQuery->where('platform_name', '!=', 'testimonial');
+            }
+
+            $reviewIds = array_merge(
+                $reviewIds,
+                array_map('intval', $scopedQuery->pluck('id')->toArray())
+            );
+        }
+
+        if (empty($reviewIds)) {
+            return $this->sendError([
+                'message' => __('No matching reviews were found for this action', 'wp-social-reviews')
+            ], 422);
+        }
+
+        // A client-supplied id must resolve to a real category before it is written.
+        // The relationship table has no foreign key, so an arbitrary or stale id would
+        // otherwise persist orphaned pivot rows while still reporting success.
+        if ($categoryId && !ReviewCategory::find($categoryId)) {
+            return $this->sendError([
+                'message' => __('The selected category no longer exists', 'wp-social-reviews')
+            ], 422);
+        }
+
+        // Resolved only once there is something to apply it to, so a request that
+        // matches nothing cannot leave an empty category behind.
+        if (!$categoryId && trim($newCategoryName) !== '') {
+            $category = ReviewCategory::findOrCreateByName($newCategoryName);
+            $categoryId = $category ? (int) $category->id : 0;
+        }
+
+        if (!$categoryId) {
+            return $this->sendError([
+                'message' => $action === 'remove'
+                    ? __('Please select an existing category to remove', 'wp-social-reviews')
+                    : __('Please select an existing category or provide a new category name', 'wp-social-reviews')
+            ], 422);
+        }
+
+        if ($action === 'add') {
+            ReviewCategoryRelationship::bulkAttach($reviewIds, $categoryId);
+            $message = sprintf(
+                // translators: %d is the number of reviews the category was assigned to
+                _n(
+                    'Category assigned to %d review',
+                    'Category assigned to %d reviews',
+                    count($reviewIds),
+                    'wp-social-reviews'
+                ),
+                count($reviewIds)
+            );
+        } else {
+            ReviewCategoryRelationship::bulkDetach($reviewIds, $categoryId);
+            $message = sprintf(
+                // translators: %d is the number of reviews the category was removed from
+                _n(
+                    'Category removed from %d review',
+                    'Category removed from %d reviews',
+                    count($reviewIds),
+                    'wp-social-reviews'
+                ),
+                count($reviewIds)
+            );
         }
 
         return [
@@ -443,7 +868,11 @@ class RecommendationsController extends Controller
             'fields.author_company'         => 'sanitize_text_field',
             'fields.author_position'        => 'sanitize_text_field',
             'fields.author_website_logo'    => 'sanitize_url',
-            'fields.author_website_url'     => 'sanitize_url'
+            'fields.author_website_url'     => 'sanitize_url',
+            'fields.video_url'              => 'sanitize_url',
+            'fields.video_poster'           => 'sanitize_url',
+            'fields.review_images'          => 'sanitize_url',
+            'fields.product_thumbnail'      => 'sanitize_url'
         ];
 
         $sanitizedReview = [];
@@ -463,35 +892,111 @@ class RecommendationsController extends Controller
                     $sanitizeFunc = Arr::get($sanitizeRules, $dotKey, 'sanitize_text_field');
 
                     // Apply the function and store it in the new array
-                    $sanitizedReview[$key][$subKey] = $this->sanitizeFieldValue($sanitizeFunc, $subValue);
+                    $sanitizedReview[$key][$subKey] = $this->sanitizeFieldValue($sanitizeFunc, $subValue, $dotKey);
                 }
             } else {
                 // For simple, non-nested values
                 $sanitizeFunc = Arr::get($sanitizeRules, $key, 'sanitize_text_field');
-                $sanitizedReview[$key] = $this->sanitizeFieldValue($sanitizeFunc, $value);
+                $sanitizedReview[$key] = $this->sanitizeFieldValue($sanitizeFunc, $value, $key);
             }
         }
 
         return $sanitizedReview;
     }
 
-    private function sanitizeFieldValue($sanitizeFunc, $value)
+    /**
+     * Sanitize one `fields` value by its per-key rule
+     *
+     * An array on a scalar key collapses to '', or intval reads [1,2] as 1.
+     *
+     * @param string $sanitizeFunc
+     * @param mixed  $value
+     * @param string $fullKey dot-notation key, e.g. `fields.video_url`
+     *
+     * @return mixed
+     */
+    private function sanitizeFieldValue($sanitizeFunc, $value, $fullKey = '')
     {
-        if ($sanitizeFunc === 'intval') {
-            return intval($value);
+        if (in_array($fullKey, self::LIST_FIELD_KEYS, true)) {
+            return $this->sanitizeListField($sanitizeFunc, $value, $fullKey);
         }
 
         if ($value === null || is_array($value) || is_object($value)) {
             $value = '';
         }
 
-        return $sanitizeFunc((string) $value);
+        if ($sanitizeFunc === 'intval') {
+            return intval($value);
+        }
+
+        $value = (string) $value;
+
+        if ($sanitizeFunc === 'sanitize_url') {
+            $value = wpsr_trim_url($value);
+        }
+
+        return $sanitizeFunc($value);
     }
 
+    /**
+     * Sanitize a `fields` key that holds a list
+     *
+     * A list keeps its shape, or a re-save would wipe it.
+     *
+     * @param string $sanitizeFunc
+     * @param mixed  $value   the list, or one comma separated string
+     * @param string $fullKey dot-notation key, e.g. `fields.review_images`
+     *
+     * @return array|string an array in, an array out
+     */
+    private function sanitizeListField($sanitizeFunc, $value, $fullKey)
+    {
+        if (is_array($value)) {
+            // product_thumbnail holds [url, width, height, flag]; sanitize_url would
+            // turn 100 into "http://100", so its non-strings are kept as they are.
+            $keepsNonStrings = $fullKey === 'fields.product_thumbnail';
+
+            return array_values(array_map(function ($item) use ($sanitizeFunc, $keepsNonStrings) {
+                if (is_string($item)) {
+                    return $sanitizeFunc($item);
+                }
+
+                return ($keepsNonStrings && is_scalar($item)) ? $item : '';
+            }, $value));
+        }
+
+        if ($value === null || is_object($value)) {
+            $value = '';
+        }
+
+        // Each part alone: sanitizing the whole string would encode the separator
+        // space, or strip the %XX escapes a CDN URL needs.
+        return implode(',', array_map(function ($item) use ($sanitizeFunc) {
+            return $sanitizeFunc(wpsr_trim_url($item));
+        }, explode(',', (string) $value)));
+    }
+
+    /**
+     * Reject a shape the columns cannot hold
+     *
+     * An array on a scalar column reaches fill() and stores 0, reporting success.
+     *
+     * @param array $fields
+     *
+     * @return array
+     */
     private function validateReviewTypedFields($fields)
     {
         $wpsr_errors = [];
         $fields = is_array($fields) ? $fields : [];
+
+        foreach (self::SCALAR_COLUMNS as $wpsr_column) {
+            $wpsr_value = Arr::get($fields, $wpsr_column);
+
+            if ($wpsr_value !== null && !is_scalar($wpsr_value)) {
+                $wpsr_errors['review.' . $wpsr_column]['type'] = 'The ' . $wpsr_column . ' field must be a single value.';
+            }
+        }
 
         $wpsr_review_time = Arr::get($fields, 'review_time');
         if (!$this->isValidReviewTime($wpsr_review_time)) {
@@ -508,7 +1013,98 @@ class RecommendationsController extends Controller
             }
         }
 
+        // No destination check on the image URLs here on purpose. Deciding it at
+        // save time means a DNS lookup per field, which silently drops a good URL
+        // whenever the resolver is briefly unavailable. RemoteMediaFetcher settles
+        // the destination when the fetch actually happens, and that also covers
+        // rows written before this code or through a third-party hook.
+
+        return array_merge($wpsr_errors, $this->validateReviewFieldsShape(Arr::get($fields, 'fields')));
+    }
+
+    /**
+     * Reject a malformed `fields` payload before it reaches the JSON column
+     *
+     * Every key outside LIST_FIELD_KEYS is read as a scalar string.
+     *
+     * @param mixed $wpsr_fields
+     *
+     * @return array
+     */
+    private function validateReviewFieldsShape($wpsr_fields)
+    {
+        $wpsr_errors = [];
+
+        if ($wpsr_fields === null || $wpsr_fields === '') {
+            return $wpsr_errors;
+        }
+
+        if (!is_array($wpsr_fields)) {
+            $wpsr_errors['review.fields']['type'] = 'The fields value must be an object.';
+
+            return $wpsr_errors;
+        }
+
+        $wpsr_images = Arr::get($wpsr_fields, 'review_images');
+        if ($wpsr_images !== null && !is_scalar($wpsr_images)) {
+            if (!$this->isFlatList($wpsr_images)) {
+                $wpsr_errors['review.fields.review_images']['list'] = 'The review images field must be a flat list of URLs.';
+            } elseif (!$this->everyItemIsHttpUrl($wpsr_images)) {
+                $wpsr_errors['review.fields.review_images']['url'] =
+                    'Each review image must be a full URL starting with http:// or https://.';
+            }
+        }
+
+        foreach (self::URL_FIELD_LABELS as $wpsr_key => $wpsr_label) {
+            $wpsr_value = Arr::get($wpsr_fields, $wpsr_key);
+
+            if ($wpsr_value === null || $wpsr_value === '') {
+                continue;
+            }
+
+            if (!wpsr_is_http_url($wpsr_value)) {
+                $wpsr_errors['review.fields.' . $wpsr_key]['url'] =
+                    'The ' . $wpsr_label . ' must be a full URL starting with http:// or https://.';
+            }
+        }
+
         return $wpsr_errors;
+    }
+
+    /**
+     * @param mixed $wpsr_value
+     *
+     * @return bool true only for an array whose every item is a scalar
+     */
+    private function isFlatList($wpsr_value)
+    {
+        if (!is_array($wpsr_value)) {
+            return false;
+        }
+
+        foreach ($wpsr_value as $wpsr_item) {
+            if (!is_scalar($wpsr_item)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array $wpsr_list
+     *
+     * @return bool true when every filled item is a complete http(s) URL
+     */
+    private function everyItemIsHttpUrl($wpsr_list)
+    {
+        foreach ($wpsr_list as $wpsr_item) {
+            if ($wpsr_item !== '' && !wpsr_is_http_url($wpsr_item)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function isValidReviewTime($wpsr_review_time)

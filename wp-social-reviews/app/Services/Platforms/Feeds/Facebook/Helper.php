@@ -10,6 +10,26 @@ if (!defined('ABSPATH')) {
 
 class Helper
 {
+    /**
+     *
+     * Resolve the header layout CSS class from the feed settings.
+     * 'classic' keeps the original header, 'minimal' renders the flat header.
+     *
+     * @param $feed_settings
+     *
+     * @return string
+     *
+     **/
+    public static function getHeaderLayoutClass($feed_settings = [])
+    {
+        $layout = Arr::get($feed_settings, 'header_settings.header_layout', 'classic');
+        if (!in_array($layout, array('classic', 'minimal'), true)) {
+            $layout = 'classic';
+        }
+
+        return 'wpsr-fb-feed-header-layout-' . $layout;
+    }
+
     public static function getConncetedSourceList()
     {
         $configs = get_option('wpsr_facebook_feed_connected_sources_config', []);
@@ -43,6 +63,33 @@ class Helper
        $value .= "" . $seconds;
 
        return $value == '0:00' ? '0:01' : $value;
+    }
+
+    /**
+     * Facebook only reports this on the /videos edge, so a missing value means
+     * the post never carried the flag and the video may still be framed.
+     */
+    public static function isEmbeddable($feed = [])
+    {
+        return Arr::get($feed, 'embeddable') !== false;
+    }
+
+    /**
+     * Build a facebook social-plugin embed URL for a video permalink.
+     * The href must be encoded, otherwise a permalink carrying its own query
+     * string (/watch/?v=123) is truncated by the plugin endpoint.
+     */
+    public static function getVideoEmbedUrl($videoUrl, $args = [])
+    {
+        if (empty($videoUrl)) {
+            return '';
+        }
+
+        $args = wp_parse_args($args, ['autoplay' => 1, 'mute' => 0]);
+        // add_query_arg() does not encode values, so the href is encoded here.
+        $args = array_merge(['href' => rawurlencode($videoUrl)], $args);
+
+        return add_query_arg($args, 'https://www.facebook.com/plugins/video.php');
     }
 
     public static function getSiteUrl($attachment = [], $domain = false)
@@ -108,8 +155,11 @@ class Helper
 
         // the url must follow the pattern
         // https://www.facebook.com/watch/100091416590270/1336242490940769
+        // A non-URL parses without a host key, so read it defensively rather than
+        // emitting an undefined-index warning on every malformed input.
         $url = wp_parse_url($singleVideoPlayListURL);
-        if ($url['host'] === 'www.facebook.com' || $url['host'] === 'facebook.com') {
+        $host = is_array($url) ? ($url['host'] ?? '') : '';
+        if ($host === 'www.facebook.com' || $host === 'facebook.com') {
             $pattern = '/\/watch\/(\d+)\/(\d+)(?:\/)?$/';
             if (preg_match($pattern, $singleVideoPlayListURL, $matches)) {
             return $matches[2];
@@ -145,8 +195,9 @@ class Helper
         // example URL: https://www.facebook.com/media/set/?set=a.145555168501702&type=3
 
         $url = wp_parse_url($value);
+        $host = is_array($url) ? ($url['host'] ?? '') : '';
 
-        if($url['host'] === 'www.facebook.com' || $url['host'] === 'facebook.com'){
+        if($host === 'www.facebook.com' || $host === 'facebook.com'){
             $pattern = '/set=a\.(\d+)/';
             if (preg_match($pattern, $value, $matches)) {
                 return $matches[1];
@@ -171,9 +222,12 @@ class Helper
             return 'now';
         }
         
-        // If no time unit is specified, assume it's days (e.g., "-50" becomes "-50 days", "50" becomes "-50 days")
+        // If no time unit is specified, assume it's days (e.g., "-50" becomes "-50 days", "50" becomes "-50 days").
+        // A bare positive number is a past window everywhere except an end date, which may be a future event.
         if (preg_match('/^-?\d+$/', $dateString)) {
-            return $dateString . ' days';
+            $sign = ($context === 'end' || strpos($dateString, '-') === 0) ? '' : '-';
+
+            return $sign . $dateString . ' days';
         }
         
         // If input already has minus sign, return as is (already correct)
@@ -222,7 +276,7 @@ class Helper
         // If it's "now", round to nearest day to create consistent cache keys for 1 day
         if (stripos($dateString, 'now') !== false) {
             $currentTime = time();
-            return floor($currentTime / 86400) * 86400; // Round to nearest day
+            return (int) (floor($currentTime / 86400) * 86400); // Round to nearest day
         }
         
         // For relative dates, use current time as base and calculate relative to it
@@ -241,17 +295,17 @@ class Helper
             }
             
             if ($relativeTimestamp !== false) {
-                return floor($relativeTimestamp / 3600) * 3600; // Round to nearest hour
+                return (int) (floor($relativeTimestamp / 3600) * 3600); // Round to nearest hour
             }
         }
         
         // For other dates, convert to timestamp and round to hour
         $timestamp = strtotime($dateString);
         if ($timestamp !== false) {
-            return floor($timestamp / 3600) * 3600; // Round to nearest hour
+            return (int) (floor($timestamp / 3600) * 3600); // Round to nearest hour
         }
         
         // Fallback to current time rounded to day
-        return floor(time() / 86400) * 86400;
+        return (int) (floor(time() / 86400) * 86400);
     }
 }
